@@ -1,16 +1,53 @@
 ---
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Dashboard">
+  <div class="space-y-6">
+    <h2 class="text-2xl font-semibold text-gray-800">Dashboard Overview</h2>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <p class="text-sm font-medium text-gray-500">Total Saldo</p>
+        <p id="total-balance" class="text-2xl font-bold text-gray-900 mt-1">Rp 0</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <p class="text-sm font-medium text-gray-500">Total Pemasukan</p>
+        <p id="total-income" class="text-2xl font-bold text-emerald-600 mt-1">Rp 0</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <p class="text-sm font-medium text-gray-500">Total Pengeluaran</p>
+        <p id="total-expense" class="text-2xl font-bold text-rose-600 mt-1">Rp 0</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions / Info -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <h3 class="text-lg font-medium text-gray-800 mb-2">Selamat Datang, Bro!</h3>
+      <p class="text-gray-600 text-sm">
+        Backend IndexedDB udah aktif. Silakan atur <a href="/accounts" class="text-blue-600 underline">Accounts</a>, <a href="/categories" class="text-blue-600 underline">Categories</a>, lalu catat transaksi pertama lu di <a href="/transactions" class="text-blue-600 underline">Transactions</a>.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    import { getDashboardSummary } from '../lib/db/transactions';
+
+    async function loadDashboard() {
+      const summary = await getDashboardSummary();
+      
+      const formatIDR = (num: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+
+      const balanceEl = document.getElementById('total-balance');
+      const incomeEl = document.getElementById('total-income');
+      const expenseEl = document.getElementById('total-expense');
+
+      if (balanceEl) balanceEl.textContent = formatIDR(summary.totalBalance);
+      if (incomeEl) incomeEl.textContent = formatIDR(summary.totalIncome);
+      if (expenseEl) expenseEl.textContent = formatIDR(summary.totalExpense);
+    }
+
+    loadDashboard();
+  </script>
+</Layout>

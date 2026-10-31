@@ -1,0 +1,482 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import { 
+  Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAlert, 
+  ArrowLeftRight, Wallet, CreditCard, Landmark, PiggyBank, Coins, ChevronDown, ArrowDownLeft, ArrowUpRight 
+} from '@lucide/astro';
+---
+
+<Layout title="Form Transaksi" activeTab='transactions'>
+  <div class="max-w-xl mx-auto space-y-5 pb-12">
+    
+    <!-- 1. Header Ringkas (Tanpa Subtitle) -->
+    <Header 
+      title="Catat Transaksi" 
+      showBack={true} 
+      backHref="/history"
+    />
+
+    <!-- Form Container -->
+    <div class="bg-white p-6 rounded-3xl border border-brand-border/80 shadow-xs">
+      <form id="tx-form" class="space-y-4">
+        <input type="hidden" id="edit-id" value="" />
+        <input type="hidden" id="tx-type" value="expense" /> <!-- Default expense -->
+        <input type="hidden" id="tx-account" value="" />
+        <input type="hidden" id="tx-to-account" value="" />
+        <input type="hidden" id="tx-category" value="" />
+
+        <!-- 2. Tipe Transaksi Model Tabs -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-1.5">Tipe Transaksi</label>
+          <div class="p-1 rounded-2xl bg-brand-light flex items-center border border-brand-border/60">
+            <button 
+              type="button" 
+              class="type-tab-btn flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all bg-white text-brand-navy shadow-xs"
+              data-type="expense"
+            >
+              <ArrowDownLeft class="w-3.5 h-3.5 text-finance-red stroke-[2.5]" />
+              <span>Keluar</span>
+            </button>
+            <button 
+              type="button" 
+              class="type-tab-btn flex-1 py-2 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1 transition-all"
+              data-type="income"
+            >
+              <ArrowUpRight class="w-3.5 h-3.5 text-finance-green stroke-[2.5]" />
+              <span>Masuk</span>
+            </button>
+            <button 
+              type="button" 
+              class="type-tab-btn flex-1 py-2 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1 transition-all"
+              data-type="transfer"
+            >
+              <ArrowLeftRight class="w-3.5 h-3.5 text-blue-600 stroke-[2.5]" />
+              <span>Transfer</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Nominal (Tampil Gagah & Agak Besar) -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-1">Jumlah (Rp)</label>
+          <div class="relative flex items-center">
+            <span class="absolute left-4 text-xl font-extrabold text-text-secondary">Rp</span>
+            <input 
+              type="number" 
+              id="tx-amount" 
+              placeholder="0" 
+              required 
+              class="w-full pl-12 pr-4 py-3.5 border-2 border-brand-border rounded-2xl focus:outline-none focus:border-accent-yellow text-2xl font-black text-brand-navy bg-brand-light/30 tracking-tight" 
+            />
+          </div>
+        </div>
+
+        <!-- 4. Tanggal -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-1">Tanggal</label>
+          <input type="date" id="tx-date" required class="w-full px-3 py-2.5 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50 font-semibold text-brand-navy" />
+        </div>
+
+        <!-- 5. Akun (Asal / Tujuan Transfer) -->
+        <div class="grid grid-cols-1 gap-4" id="accounts-section">
+          <!-- Akun Asal -->
+          <div class="relative">
+            <label id="account-label" class="block text-xs font-semibold text-brand-navy mb-1">Akun / Dompet</label>
+            <button type="button" id="account-dropdown-btn" class="w-full flex items-center justify-between px-3 py-2.5 border border-brand-border rounded-xl bg-brand-light/50 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow">
+              <span id="selected-account-label" class="flex items-center gap-2 text-text-secondary">Pilih Akun...</span>
+              <ChevronDown class="w-4 h-4 text-text-secondary" />
+            </button>
+            <div id="account-dropdown-menu" class="hidden absolute z-20 mt-1 w-full bg-white border border-brand-border rounded-xl shadow-lg max-h-48 overflow-y-auto p-1 space-y-1"></div>
+          </div>
+
+          <!-- Akun Tujuan (Khusus Transfer) -->
+          <div id="to-account-container" class="relative hidden">
+            <label class="block text-xs font-semibold text-brand-navy mb-1">Ke Akun Tujuan</label>
+            <button type="button" id="to-account-dropdown-btn" class="w-full flex items-center justify-between px-3 py-2.5 border border-brand-border rounded-xl bg-brand-light/50 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow">
+              <span id="selected-to-account-label" class="flex items-center gap-2 text-text-secondary">Pilih Akun Tujuan...</span>
+              <ChevronDown class="w-4 h-4 text-text-secondary" />
+            </button>
+            <div id="to-account-dropdown-menu" class="hidden absolute z-20 mt-1 w-full bg-white border border-brand-border rounded-xl shadow-lg max-h-48 overflow-y-auto p-1 space-y-1"></div>
+          </div>
+        </div>
+
+        <!-- 6. Kategori (Disembunyikan jika Transfer) -->
+        <div id="category-container" class="relative">
+          <label class="block text-xs font-semibold text-brand-navy mb-1">Kategori</label>
+          <button type="button" id="category-dropdown-btn" class="w-full flex items-center justify-between px-3 py-2.5 border border-brand-border rounded-xl bg-brand-light/50 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow">
+            <span id="selected-category-label" class="flex items-center gap-2 text-text-secondary">Pilih Kategori...</span>
+            <ChevronDown class="w-4 h-4 text-text-secondary" />
+          </button>
+          <div id="category-dropdown-menu" class="hidden absolute z-20 mt-1 w-full bg-white border border-brand-border rounded-xl shadow-lg max-h-48 overflow-y-auto p-1 space-y-1"></div>
+        </div>
+
+        <!-- 7. Catatan (Opsional) -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-1">Catatan (Opsional)</label>
+          <input type="text" id="tx-note" placeholder="cth: Makan siang, bayar wifi, transfer tabungan..." class="w-full px-3 py-2.5 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50" />
+        </div>
+
+        <!-- Dynamic Action Buttons -->
+        <div id="form-actions-container" class="flex gap-2.5 pt-4 border-t border-brand-border/60">
+          <!-- Rendered dynamically via Script -->
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden Icon Templates -->
+  <div id="icon-templates" class="hidden">
+    <template data-icon-name="Utensils"><Utensils class="w-4 h-4" /></template>
+    <template data-icon-name="ShoppingBag"><ShoppingBag class="w-4 h-4" /></template>
+    <template data-icon-name="Car"><Car class="w-4 h-4" /></template>
+    <template data-icon-name="Zap"><Zap class="w-4 h-4" /></template>
+    <template data-icon-name="Banknote"><Banknote class="w-4 h-4" /></template>
+    <template data-icon-name="HeartPulse"><HeartPulse class="w-4 h-4" /></template>
+    <template data-icon-name="Film"><Film class="w-4 h-4" /></template>
+    <template data-icon-name="ShieldAlert"><ShieldAlert class="w-4 h-4" /></template>
+    <template data-icon-name="Wallet"><Wallet class="w-4 h-4" /></template>
+    <template data-icon-name="CreditCard"><CreditCard class="w-4 h-4" /></template>
+    <template data-icon-name="Landmark"><Landmark class="w-4 h-4" /></template>
+    <template data-icon-name="PiggyBank"><PiggyBank class="w-4 h-4" /></template>
+    <template data-icon-name="Coins"><Coins class="w-4 h-4" /></template>
+    <template data-icon-name="ArrowLeftRight"><ArrowLeftRight class="w-4 h-4" /></template>
+  </div>
+
+  <script>
+    import { getAllAccounts } from '../lib/db/accounts';
+    import { getAllCategories, addCategory } from '../lib/db/categories';
+    import { getAllTransactions, addTransaction, updateTransaction, deleteTransaction } from '../lib/db/transactions';
+    import type { TransactionType, Category, Account } from '../types/finance';
+
+    const form = document.getElementById('tx-form') as HTMLFormElement;
+    const editIdInput = document.getElementById('edit-id') as HTMLInputElement;
+    const typeInput = document.getElementById('tx-type') as HTMLInputElement;
+    const amountInput = document.getElementById('tx-amount') as HTMLInputElement;
+    const accountInput = document.getElementById('tx-account') as HTMLInputElement;
+    const toAccountInput = document.getElementById('tx-to-account') as HTMLInputElement;
+    const categoryInput = document.getElementById('tx-category') as HTMLInputElement;
+    const dateInput = document.getElementById('tx-date') as HTMLInputElement;
+    const noteInput = document.getElementById('tx-note') as HTMLInputElement;
+    const actionsContainer = document.getElementById('form-actions-container')!;
+
+    const accountLabel = document.getElementById('account-label')!;
+    const toAccountContainer = document.getElementById('to-account-container')!;
+    const categoryContainer = document.getElementById('category-container')!;
+
+    // Dropdown Elements
+    const accBtn = document.getElementById('account-dropdown-btn')!;
+    const accMenu = document.getElementById('account-dropdown-menu')!;
+    const accLabel = document.getElementById('selected-account-label')!;
+
+    const toAccBtn = document.getElementById('to-account-dropdown-btn')!;
+    const toAccMenu = document.getElementById('to-account-dropdown-menu')!;
+    const toAccLabel = document.getElementById('selected-to-account-label')!;
+
+    const catBtn = document.getElementById('category-dropdown-btn')!;
+    const catMenu = document.getElementById('category-dropdown-menu')!;
+    const catLabel = document.getElementById('selected-category-label')!;
+
+    dateInput.value = new Date().toISOString().split('T')[0];
+
+    function renderFormActions(isEdit: boolean, editId?: string) {
+      if (isEdit) {
+        actionsContainer.innerHTML = `
+          <button type="button" id="delete-tx-btn" class="flex-1 bg-rose-50 text-finance-red font-semibold py-2.5 rounded-xl hover:bg-rose-100 transition text-xs">Hapus</button>
+          <button type="submit" id="submit-btn" class="flex-1 bg-accent-yellow text-brand-navy font-bold py-2.5 rounded-xl hover:bg-accent-yellow-hover transition text-xs shadow-xs">Perbarui</button>
+        `;
+
+        document.getElementById('delete-tx-btn')?.addEventListener('click', async () => {
+          if (editId && confirm('Apakah lu yakin ingin menghapus transaksi ini?')) {
+            await deleteTransaction(editId);
+            window.location.href = '/history';
+          }
+        });
+      } else {
+        actionsContainer.innerHTML = `
+          <a href="/history" class="flex-1 text-center bg-brand-light text-text-primary font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs flex items-center justify-center">Batal</a>
+          <button type="submit" id="submit-btn" class="flex-1 bg-accent-yellow text-brand-navy font-bold py-2.5 rounded-xl hover:bg-accent-yellow-hover transition text-xs shadow-xs">Simpan Transaksi</button>
+        `;
+      }
+    }
+
+    function getLucideIconHtml(iconName: string) {
+      const template = document.querySelector(`#icon-templates template[data-icon-name="${iconName}"]`) as HTMLTemplateElement;
+      if (template) return template.innerHTML;
+      const defaultTemplate = document.querySelector(`#icon-templates template[data-icon-name="ArrowLeftRight"]`) as HTMLTemplateElement;
+      return defaultTemplate ? defaultTemplate.innerHTML : '';
+    }
+
+    // Close Dropdowns on Click Outside
+    document.addEventListener('click', (e) => {
+      if (!accBtn.contains(e.target as Node) && !accMenu.contains(e.target as Node)) accMenu.classList.add('hidden');
+      if (!toAccBtn.contains(e.target as Node) && !toAccMenu.contains(e.target as Node)) toAccMenu.classList.add('hidden');
+      if (!catBtn.contains(e.target as Node) && !catMenu.contains(e.target as Node)) catMenu.classList.add('hidden');
+    });
+
+    accBtn.addEventListener('click', () => {
+      accMenu.classList.toggle('hidden');
+      toAccMenu.classList.add('hidden');
+      catMenu.classList.add('hidden');
+    });
+
+    toAccBtn.addEventListener('click', () => {
+      toAccMenu.classList.toggle('hidden');
+      accMenu.classList.add('hidden');
+      catMenu.classList.add('hidden');
+    });
+
+    catBtn.addEventListener('click', () => {
+      catMenu.classList.toggle('hidden');
+      accMenu.classList.add('hidden');
+      toAccMenu.classList.add('hidden');
+    });
+
+    function setSelectedAccount(acc?: Account) {
+      if (!acc) {
+        accountInput.value = '';
+        accLabel.className = 'flex items-center gap-2 text-text-secondary';
+        accLabel.innerHTML = 'Pilih Akun...';
+        return;
+      }
+      accountInput.value = acc.id;
+      const [textColor, bgColor] = (acc.color || 'text-brand-navy bg-amber-50').split(' ');
+      accLabel.className = 'flex items-center gap-2 text-brand-navy font-bold';
+      accLabel.innerHTML = `
+        <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">
+          ${getLucideIconHtml(acc.icon || 'Wallet')}
+        </div>
+        <span>${acc.name}</span>
+      `;
+    }
+
+    function setSelectedToAccount(acc?: Account) {
+      if (!acc) {
+        toAccountInput.value = '';
+        toAccLabel.className = 'flex items-center gap-2 text-text-secondary';
+        toAccLabel.innerHTML = 'Pilih Akun Tujuan...';
+        return;
+      }
+      toAccountInput.value = acc.id;
+      const [textColor, bgColor] = (acc.color || 'text-brand-navy bg-amber-50').split(' ');
+      toAccLabel.className = 'flex items-center gap-2 text-brand-navy font-bold';
+      toAccLabel.innerHTML = `
+        <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">
+          ${getLucideIconHtml(acc.icon || 'Wallet')}
+        </div>
+        <span>${acc.name}</span>
+      `;
+    }
+
+    function setSelectedCategory(cat?: Category) {
+      if (!cat) {
+        categoryInput.value = '';
+        catLabel.className = 'flex items-center gap-2 text-text-secondary';
+        catLabel.innerHTML = 'Pilih Kategori...';
+        return;
+      }
+      categoryInput.value = cat.id;
+      const [textColor, bgColor] = (cat.color || 'text-brand-navy bg-amber-50').split(' ');
+      catLabel.className = 'flex items-center gap-2 text-brand-navy font-bold';
+      catLabel.innerHTML = `
+        <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">
+          ${getLucideIconHtml(cat.icon || 'Utensils')}
+        </div>
+        <span>${cat.name}</span>
+      `;
+    }
+
+    function handleTypeChange(type: TransactionType) {
+      typeInput.value = type;
+      if (type === 'transfer') {
+        accountLabel.textContent = 'Dari Akun';
+        toAccountContainer.classList.remove('hidden');
+        categoryContainer.classList.add('hidden');
+      } else {
+        accountLabel.textContent = 'Akun / Dompet';
+        toAccountContainer.classList.add('hidden');
+        categoryContainer.classList.remove('hidden');
+      }
+    }
+
+    // Tabs Type Switching Logic
+    const typeTabBtns = document.querySelectorAll('.type-tab-btn');
+    typeTabBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const type = target.getAttribute('data-type') as TransactionType;
+
+        typeTabBtns.forEach(b => {
+          b.className = "type-tab-btn flex-1 py-2 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1 transition-all";
+        });
+        target.className = "type-tab-btn flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all bg-white text-brand-navy shadow-xs";
+
+        handleTypeChange(type);
+      });
+    });
+
+    async function getOrCreateTransferCategory(): Promise<string> {
+      const categories = await getAllCategories();
+      const existing = categories.find(c => c.name.toLowerCase() === 'transfer');
+      if (existing) return existing.id;
+
+      const newId = await addCategory({
+        name: 'Transfer',
+        type: 'transfer',
+        icon: 'ArrowLeftRight',
+        color: 'text-brand-navy bg-amber-50'
+      });
+      return newId || '';
+    }
+
+    async function initForm() {
+      const accounts = await getAllAccounts();
+      const allCategories = await getAllCategories();
+      const categories = allCategories.filter(c => c.name.toLowerCase() !== 'koreksi saldo');
+
+      const renderAccountOptions = () => {
+        return accounts.map(acc => {
+          const [textColor, bgColor] = (acc.color || 'text-brand-navy bg-amber-50').split(' ');
+          return `
+            <button type="button" data-id="${acc.id}" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-brand-light rounded-xl transition text-sm text-left font-bold text-brand-navy">
+              <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">${getLucideIconHtml(acc.icon || 'Wallet')}</div>
+              <span>${acc.name}</span>
+            </button>
+          `;
+        }).join('');
+      };
+
+      accMenu.innerHTML = renderAccountOptions();
+      accMenu.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+          setSelectedAccount(accounts.find(a => a.id === id));
+          accMenu.classList.add('hidden');
+        });
+      });
+
+      toAccMenu.innerHTML = renderAccountOptions();
+      toAccMenu.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+          setSelectedToAccount(accounts.find(a => a.id === id));
+          toAccMenu.classList.add('hidden');
+        });
+      });
+
+      catMenu.innerHTML = categories.map(cat => {
+        const [textColor, bgColor] = (cat.color || 'text-brand-navy bg-amber-50').split(' ');
+        return `
+          <button type="button" data-id="${cat.id}" class="cat-option w-full flex items-center gap-2 px-3 py-2 hover:bg-brand-light rounded-xl transition text-sm text-left">
+            <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">${getLucideIconHtml(cat.icon || 'Utensils')}</div>
+            <span class="font-bold text-brand-navy">${cat.name}</span>
+            <span class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full ${cat.type === 'income' ? 'bg-finance-green/10 text-finance-green' : 'bg-rose-50 text-finance-red'}">${cat.type}</span>
+          </button>
+        `;
+      }).join('');
+
+      catMenu.querySelectorAll('.cat-option').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+          setSelectedCategory(categories.find(c => c.id === id));
+          catMenu.classList.add('hidden');
+        });
+      });
+
+      // Mode Edit Check (?id=xxx)
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('id');
+
+      if (editId) {
+        const transactions = await getAllTransactions();
+        const txToEdit = transactions.find(t => t.id === editId);
+        if (txToEdit) {
+          editIdInput.value = txToEdit.id;
+          
+          // Set Active Tab UI berdasarkan tipe transaksi
+          typeInput.value = txToEdit.type;
+          typeTabBtns.forEach(btn => {
+            if (btn.getAttribute('data-type') === txToEdit.type) {
+              btn.className = "type-tab-btn flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all bg-white text-brand-navy shadow-xs";
+            } else {
+              btn.className = "type-tab-btn flex-1 py-2 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1 transition-all";
+            }
+          });
+
+          handleTypeChange(txToEdit.type);
+
+          amountInput.value = txToEdit.amount.toString();
+          dateInput.value = txToEdit.date;
+          noteInput.value = txToEdit.note || '';
+
+          setSelectedAccount(accounts.find(a => a.id === txToEdit.accountId));
+          if (txToEdit.toAccountId) {
+            setSelectedToAccount(accounts.find(a => a.id === txToEdit.toAccountId));
+          }
+          if (txToEdit.categoryId) {
+            setSelectedCategory(categories.find(c => c.id === txToEdit.categoryId));
+          }
+
+          renderFormActions(true, editId);
+        } else {
+          renderFormActions(false);
+        }
+      } else {
+        renderFormActions(false);
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editId = editIdInput.value;
+      const type = typeInput.value as TransactionType;
+      const amount = parseFloat(amountInput.value) || 0;
+      const accountId = accountInput.value;
+      const toAccountId = toAccountInput.value;
+      let categoryId = categoryInput.value;
+      const date = dateInput.value;
+      const note = noteInput.value;
+
+      if (!accountId) {
+        alert('Pilih akun terlebih dahulu!');
+        return;
+      }
+
+      if (type === 'transfer') {
+        if (!toAccountId) {
+          alert('Pilih akun tujuan transfer!');
+          return;
+        }
+        if (accountId === toAccountId) {
+          alert('Akun asal dan akun tujuan tidak boleh sama!');
+          return;
+        }
+        categoryId = await getOrCreateTransferCategory();
+      } else if (!categoryId) {
+        alert('Pilih kategori terlebih dahulu!');
+        return;
+      }
+
+      const txPayload = {
+        amount,
+        type,
+        accountId,
+        ...(type === 'transfer' ? { toAccountId } : {}),
+        categoryId,
+        date,
+        note
+      };
+
+      if (editId) {
+        const res = await updateTransaction(editId, txPayload);
+        alert(res.message);
+      } else {
+        await addTransaction(txPayload);
+      }
+
+      window.location.href = '/history';
+    });
+
+    initForm();
+  </script>
+</Layout>

@@ -1,0 +1,425 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAlert, Plus, X, ArrowUpRight, ArrowDownLeft } from '@lucide/astro';
+---
+
+<Layout title="Categories" activeTab='categories'>
+  <div class="space-y-5 relative pb-16">
+    
+    <!-- 1. Header Bersih -->
+    <Header 
+      title="Daftar Kategori" 
+      subtitle="Kelompokkan pemasukan dan pengeluaran lu di sini."
+    />
+
+    <!-- 2. Segmented Control Tabs (Pengeluaran vs Pemasukan) -->
+    <div class="p-1.5 rounded-2xl bg-slate-200/70 backdrop-blur-md flex items-center border border-brand-border/40">
+      <button 
+        id="tab-expense" 
+        class="tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs"
+        data-type="expense"
+      >
+        <ArrowDownLeft class="w-4 h-4 text-finance-red stroke-[2.5]" />
+        <span>Pengeluaran</span>
+      </button>
+      <button 
+        id="tab-income" 
+        class="tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200"
+        data-type="income"
+      >
+        <ArrowUpRight class="w-4 h-4 text-finance-green stroke-[2.5]" />
+        <span>Pemasukan</span>
+      </button>
+    </div>
+
+    <!-- 3. List Kategori (Grid 2 Kolom) -->
+    <div class="space-y-3">
+      <div class="flex justify-between items-center px-1">
+        <h3 id="category-section-title" class="text-xs font-bold text-text-secondary uppercase tracking-wider">Kategori Pengeluaran</h3>
+        <span id="category-count-badge" class="text-[11px] font-semibold text-brand-navy bg-brand-light border border-brand-border/60 px-2.5 py-0.5 rounded-full">0 Kategori</span>
+      </div>
+
+      <div id="categories-list" class="grid grid-cols-2 gap-3">
+        <p class="text-text-secondary text-sm text-center col-span-2 py-8">Memuat data...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Extended Floating Action Button (FAB) Kanan Bawah -->
+  <button 
+    id="open-add-modal" 
+    class="fixed bottom-20 right-6 z-40 flex items-center gap-2.5 px-5 py-3.5 bg-accent-yellow text-brand-navy rounded-full shadow-xl shadow-accent-yellow/30 hover:bg-accent-yellow-hover hover:scale-105 active:scale-95 transition-all font-bold text-sm border-2 border-white/20 group"
+    aria-label="Tambah Kategori Baru"
+  >
+    <div class="w-6 h-6 rounded-full bg-brand-navy text-accent-yellow flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
+      <Plus class="w-4 h-4 stroke-[3]" />
+    </div>
+    <span class="tracking-wide">Tambah Kategori</span>
+  </button>
+
+  <!-- Modal Box Form (Create / Edit) -->
+  <div id="category-modal" class="hidden fixed inset-0 z-50 bg-brand-navy/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-brand-border">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-brand-border/60">
+        <h3 id="modal-title" class="text-base font-bold text-brand-navy">Tambah Kategori Baru</h3>
+        <button id="close-modal" class="text-text-secondary hover:text-brand-navy transition">
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <form id="category-form" class="p-6 space-y-4">
+        <input type="hidden" id="edit-id" value="" />
+        <input type="hidden" id="icon" value="Utensils" />
+        <input type="hidden" id="color" value="text-brand-navy bg-amber-50" />
+
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-1">Nama Kategori</label>
+          <input type="text" id="name" required placeholder="cth: Makanan, Gaji, Transport" class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-1">Tipe Transaksi</label>
+          <select id="type" class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50 font-medium">
+            <option value="expense">Pengeluaran (Expense)</option>
+            <option value="income">Pemasukan (Income)</option>
+          </select>
+        </div>
+
+        <!-- Custom Icon Picker Grid -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Icon</label>
+          <div id="icon-picker" class="grid grid-cols-4 gap-2">
+            <button type="button" data-icon-val="Utensils" class="icon-opt p-2.5 rounded-xl border-2 border-accent-yellow bg-accent-yellow/10 transition text-brand-navy flex justify-center">
+              <Utensils class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="ShoppingBag" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+              <ShoppingBag class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="Car" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+              <Car class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="Zap" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+              <Zap class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="Banknote" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+              <Banknote class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="HeartPulse" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+              <HeartPulse class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="Film" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+              <Film class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="ShieldAlert" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+              <ShieldAlert class="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Color Picker Grid -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Warna Tema</label>
+          <div id="color-picker" class="flex gap-3 items-center">
+            <button type="button" data-color-val="text-brand-navy bg-amber-50" class="color-opt w-7 h-7 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-amber-500 transition"></button>
+            <button type="button" data-color-val="text-emerald-700 bg-emerald-50" class="color-opt w-7 h-7 rounded-full bg-finance-green transition"></button>
+            <button type="button" data-color-val="text-violet-700 bg-violet-50" class="color-opt w-7 h-7 rounded-full bg-violet-500 transition"></button>
+            <button type="button" data-color-val="text-blue-700 bg-blue-50" class="color-opt w-7 h-7 rounded-full bg-blue-500 transition"></button>
+            <button type="button" data-color-val="text-rose-700 bg-rose-50" class="color-opt w-7 h-7 rounded-full bg-finance-red transition"></button>
+          </div>
+        </div>
+
+        <div class="flex gap-2 pt-4 border-t border-brand-border/60">
+          <button type="button" id="cancel-modal" class="flex-1 bg-brand-light text-text-primary font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs">Batal</button>
+          <button type="submit" id="submit-btn" class="flex-1 bg-accent-yellow text-brand-navy font-bold py-2.5 rounded-xl hover:bg-accent-yellow-hover transition text-xs shadow-xs">Simpan Kategori</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Detail & Aksi Kategori (Pop-up saat List Item Diklik) -->
+  <div id="category-detail-modal" class="hidden fixed inset-0 z-50 bg-brand-navy/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-brand-border p-6 text-center relative animate-in fade-in zoom-in-95 duration-150">
+      <button id="close-detail-modal" class="absolute top-4 right-4 text-text-secondary hover:text-brand-navy transition">
+        <X class="w-5 h-5" />
+      </button>
+
+      <div id="detail-modal-icon-wrapper" class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-xs border border-brand-border/50 mb-3"></div>
+
+      <h3 id="detail-modal-name" class="text-base font-bold text-brand-navy">Nama Kategori</h3>
+      <div class="mt-2">
+        <span id="detail-modal-type-badge" class="text-xs font-semibold px-3 py-1 rounded-full">Tipe</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 mt-6 pt-4 border-t border-brand-border/60">
+        <button type="button" id="detail-edit-btn" class="w-full bg-brand-light text-brand-navy font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs flex items-center justify-center gap-1.5">
+          Edit Kategori
+        </button>
+        <button type="button" id="detail-delete-btn" class="w-full bg-rose-50 text-finance-red font-semibold py-2.5 rounded-xl hover:bg-rose-100 transition text-xs flex items-center justify-center gap-1.5">
+          Hapus Kategori
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Icon Templates -->
+  <div id="icon-templates" class="hidden">
+    <template data-icon-name="Utensils"><Utensils class="w-5 h-5" /></template>
+    <template data-icon-name="ShoppingBag"><ShoppingBag class="w-5 h-5" /></template>
+    <template data-icon-name="Car"><Car class="w-5 h-5" /></template>
+    <template data-icon-name="Zap"><Zap class="w-5 h-5" /></template>
+    <template data-icon-name="Banknote"><Banknote class="w-5 h-5" /></template>
+    <template data-icon-name="HeartPulse"><HeartPulse class="w-5 h-5" /></template>
+    <template data-icon-name="Film"><Film class="w-5 h-5" /></template>
+    <template data-icon-name="ShieldAlert"><ShieldAlert class="w-5 h-5" /></template>
+  </div>
+
+  <script>
+    import { getAllCategories, addCategory, deleteCategory, updateCategory } from '../lib/db/categories';
+    import type { TransactionType } from '../types/finance';
+
+    let currentTab: TransactionType = 'expense';
+
+    const modal = document.getElementById('category-modal')!;
+    const openModalBtn = document.getElementById('open-add-modal')!;
+    const closeModalBtn = document.getElementById('close-modal')!;
+    const cancelModalBtn = document.getElementById('cancel-modal')!;
+
+    const form = document.getElementById('category-form') as HTMLFormElement;
+    const modalTitle = document.getElementById('modal-title')!;
+    const editIdInput = document.getElementById('edit-id') as HTMLInputElement;
+    const nameInput = document.getElementById('name') as HTMLInputElement;
+    const typeInput = document.getElementById('type') as HTMLSelectElement;
+    const iconInput = document.getElementById('icon') as HTMLInputElement;
+    const colorInput = document.getElementById('color') as HTMLInputElement;
+    const submitBtn = document.getElementById('submit-btn')!;
+    const listContainer = document.getElementById('categories-list')!;
+
+    const tabExpenseBtn = document.getElementById('tab-expense')!;
+    const tabIncomeBtn = document.getElementById('tab-income')!;
+    const categorySectionTitle = document.getElementById('category-section-title')!;
+    const categoryCountBadge = document.getElementById('category-count-badge')!;
+
+    function openModal(isEdit = false) {
+      modal.classList.remove('hidden');
+      modalTitle.textContent = isEdit ? 'Edit Kategori' : 'Tambah Kategori Baru';
+      submitBtn.textContent = isEdit ? 'Perbarui Kategori' : 'Simpan Kategori';
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      form.reset();
+      editIdInput.value = '';
+      typeInput.value = currentTab;
+      setSelectedIconInPicker('Utensils');
+      setSelectedColorInPicker('text-brand-navy bg-amber-50');
+    }
+
+    openModalBtn.addEventListener('click', () => openModal(false));
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+
+    // Tab Switching Logic
+    tabExpenseBtn.addEventListener('click', () => switchTab('expense'));
+    tabIncomeBtn.addEventListener('click', () => switchTab('income'));
+
+    function switchTab(tab: TransactionType) {
+      currentTab = tab;
+      typeInput.value = tab;
+
+      if (tab === 'expense') {
+        tabExpenseBtn.className = "tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs";
+        tabIncomeBtn.className = "tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200";
+        categorySectionTitle.textContent = "Kategori Pengeluaran";
+      } else {
+        tabIncomeBtn.className = "tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs";
+        tabExpenseBtn.className = "tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200";
+        categorySectionTitle.textContent = "Kategori Pemasukan";
+      }
+
+      renderCategories();
+    }
+
+    // Icon Picker Logic
+    const iconBtns = document.querySelectorAll('.icon-opt');
+    iconBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const selectedVal = (e.currentTarget as HTMLElement).getAttribute('data-icon-val') || 'Utensils';
+        iconInput.value = selectedVal;
+
+        iconBtns.forEach(b => {
+          b.classList.remove('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+          b.classList.add('border-brand-border', 'text-text-secondary');
+        });
+
+        (e.currentTarget as HTMLElement).classList.remove('border-brand-border', 'text-text-secondary');
+        (e.currentTarget as HTMLElement).classList.add('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+      });
+    });
+
+    // Color Picker Logic
+    const colorBtns = document.querySelectorAll('.color-opt');
+    colorBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const selectedVal = (e.currentTarget as HTMLElement).getAttribute('data-color-val') || 'text-brand-navy bg-amber-50';
+        colorInput.value = selectedVal;
+
+        colorBtns.forEach(b => b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500'));
+        (e.currentTarget as HTMLElement).classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+      });
+    });
+
+    function setSelectedIconInPicker(val: string) {
+      iconInput.value = val;
+      iconBtns.forEach(b => {
+        const iconVal = b.getAttribute('data-icon-val');
+        if (iconVal === val) {
+          b.classList.remove('border-brand-border', 'text-text-secondary');
+          b.classList.add('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+        } else {
+          b.classList.remove('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+          b.classList.add('border-brand-border', 'text-text-secondary');
+        }
+      });
+    }
+
+    function setSelectedColorInPicker(val: string) {
+      colorInput.value = val;
+      colorBtns.forEach(b => {
+        const colorVal = b.getAttribute('data-color-val');
+        if (colorVal === val) {
+          b.classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+        } else {
+          b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500');
+        }
+      });
+    }
+
+    function getLucideIconHtml(iconName: string) {
+      const template = document.querySelector(`#icon-templates template[data-icon-name="${iconName}"]`) as HTMLTemplateElement;
+      if (template) return template.innerHTML;
+      const defaultTemplate = document.querySelector(`#icon-templates template[data-icon-name="Utensils"]`) as HTMLTemplateElement;
+      return defaultTemplate ? defaultTemplate.innerHTML : '';
+    }
+
+    async function renderCategories() {
+      const allCategories = await getAllCategories();
+      const filteredCategories = allCategories.filter(cat => 
+        cat.name.toLowerCase() !== 'koreksi saldo' && cat.type === currentTab
+      );
+
+      categoryCountBadge.textContent = `${filteredCategories.length} Kategori`;
+
+      if (filteredCategories.length === 0) {
+        listContainer.innerHTML = `<p class="text-text-secondary text-sm col-span-2 text-center py-8">Belum ada kategori ${currentTab === 'income' ? 'pemasukan' : 'pengeluaran'}.</p>`;
+        return;
+      }
+
+      listContainer.innerHTML = filteredCategories.map(cat => {
+        const iconName = cat.icon || 'Utensils';
+        const colorClass = cat.color || 'text-brand-navy bg-amber-50';
+        const [textColor, bgColor] = colorClass.split(' ');
+
+        return `
+          <div 
+            class="category-card p-3.5 border border-brand-border/80 rounded-2xl bg-white shadow-xs hover:border-accent-yellow hover:shadow-md transition cursor-pointer flex items-center gap-3"
+            data-id="${cat.id}" 
+            data-name="${cat.name}" 
+            data-type="${cat.type}"
+            data-icon="${iconName}"
+            data-color="${colorClass}"
+          >
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${bgColor || 'bg-amber-50'} ${textColor || 'text-brand-navy'} shadow-xs border border-brand-border/50">
+              ${getLucideIconHtml(iconName)}
+            </div>
+            <div class="min-w-0">
+              <p class="font-bold text-brand-navy text-sm truncate">${cat.name}</p>
+              <p class="text-[11px] text-text-secondary font-medium mt-0.5">${cat.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Modal Detail Handlers
+      const detailModal = document.getElementById('category-detail-modal')!;
+      const closeDetailModalBtn = document.getElementById('close-detail-modal')!;
+      const detailIconWrapper = document.getElementById('detail-modal-icon-wrapper')!;
+      const detailName = document.getElementById('detail-modal-name')!;
+      const detailTypeBadge = document.getElementById('detail-modal-type-badge')!;
+      const detailEditBtn = document.getElementById('detail-edit-btn')!;
+      const detailDeleteBtn = document.getElementById('detail-delete-btn')!;
+
+      closeDetailModalBtn.onclick = () => detailModal.classList.add('hidden');
+
+      document.querySelectorAll('.category-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          const el = e.currentTarget as HTMLElement;
+          const id = el.getAttribute('data-id') || '';
+          const name = el.getAttribute('data-name') || '';
+          const type = el.getAttribute('data-type') || 'expense';
+          const iconName = el.getAttribute('data-icon') || 'Utensils';
+          const colorClass = el.getAttribute('data-color') || 'text-brand-navy bg-amber-50';
+
+          const [textColor, bgColor] = colorClass.split(' ');
+
+          detailIconWrapper.className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-xs border border-brand-border/50 mb-3 ${bgColor} ${textColor}`;
+          detailIconWrapper.innerHTML = getLucideIconHtml(iconName);
+          detailName.textContent = name;
+          
+          if (type === 'income') {
+            detailTypeBadge.textContent = 'Pemasukan';
+            detailTypeBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-finance-green/10 text-finance-green';
+          } else {
+            detailTypeBadge.textContent = 'Pengeluaran';
+            detailTypeBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-rose-50 text-finance-red';
+          }
+
+          detailEditBtn.onclick = () => {
+            detailModal.classList.add('hidden');
+            editIdInput.value = id;
+            nameInput.value = name;
+            typeInput.value = type;
+            setSelectedIconInPicker(iconName);
+            setSelectedColorInPicker(colorClass);
+            openModal(true);
+          };
+
+          detailDeleteBtn.onclick = async () => {
+            if (confirm(`Yakin ingin menghapus kategori ${name}?`)) {
+              const res = await deleteCategory(id);
+              detailModal.classList.add('hidden');
+              if (!res.success) {
+                alert(res.message);
+              } else {
+                renderCategories();
+              }
+            }
+          };
+
+          detailModal.classList.remove('hidden');
+        });
+      });
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editId = editIdInput.value;
+      const name = nameInput.value;
+      const type = typeInput.value as TransactionType;
+      const icon = iconInput.value;
+      const color = colorInput.value;
+
+      if (editId) {
+        const res = await updateCategory(editId, { name, type, icon, color });
+        alert(res.message);
+      } else {
+        await addCategory({ name, type, icon, color });
+      }
+
+      closeModal();
+      renderCategories();
+    });
+
+    renderCategories();
+  </script>
+</Layout>

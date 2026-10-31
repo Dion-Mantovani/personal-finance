@@ -1,0 +1,443 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import { Wallet, CreditCard, Landmark, PiggyBank, Coins, Plus, X, ArrowUpRight, Activity } from '@lucide/astro';
+---
+
+<Layout title="Accounts" activeTab='accounts'>
+  <div class="space-y-6">
+    
+    <!-- 1. Header yang baru -->
+    <Header 
+      title="Daftar Akun" 
+      subtitle="Kelola dompet dan rekening bank di sini."
+    />
+
+    <!-- 2. Main Card & Micro Info Grid -->
+    <section class="relative overflow-hidden rounded-3xl bg-brand-navy text-white p-6 shadow-xl border border-white/10">
+
+      <!-- Konten Utama: Total Saldo -->
+      <div class="relative z-10">
+        <p class="text-xs font-semibold text-accent-yellow uppercase tracking-wider">Total Saldo Seluruh Akun</p>
+        <div class="flex items-baseline gap-2 mt-1.5">
+          <h2 id="total-combined-balance" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">Rp 0</h2>
+          <span class="text-xs font-medium text-finance-green flex items-center bg-finance-green/10 px-2 py-0.5 rounded-full">
+            <ArrowUpRight class="w-3.5 h-3.5 inline mr-0.5" /> Live
+          </span>
+        </div>
+      </div>
+
+      <!-- Garis Pemisah (Divider) -->
+      <div class="relative z-10 my-5 border-t border-white/10"></div>
+
+      <!-- 3 Micro Info di Dalam Card Wrapper (Dipisah Kolom/Garis Tipis) -->
+      <div class="relative z-10 grid grid-cols-3 gap-3 divide-x divide-white/10">
+        <!-- Info 1: Jumlah Wallet -->
+        <div class="flex flex-col justify-between pr-2">
+          <span class="text-[11px] font-medium text-slate-300">Dompet</span>
+          <div class="flex items-center gap-1.5 mt-1.5">
+            <Wallet class="w-4 h-4 text-accent-yellow shrink-0" />
+            <span id="micro-wallet-count" class="text-xs sm:text-sm font-bold text-white">0 Akun</span>
+          </div>
+        </div>
+
+        <!-- Info 2: Top Wallet -->
+        <div class="flex flex-col justify-between px-2">
+          <span class="text-[11px] font-medium text-slate-300">Teratas</span>
+          <div class="flex items-center gap-1.5 mt-1.5 overflow-hidden">
+            <Landmark class="w-4 h-4 text-finance-green shrink-0" />
+            <span id="micro-top-wallet" class="text-xs sm:text-sm font-bold text-white truncate">--</span>
+          </div>
+        </div>
+
+        <!-- Info 3: Total Aktivitas -->
+        <div class="flex flex-col justify-between pl-2">
+          <span class="text-[11px] font-medium text-slate-300">Aktivitas</span>
+          <div class="flex items-center gap-1.5 mt-1.5">
+            <Activity class="w-4 h-4 text-amber-400 shrink-0" />
+            <span id="micro-monthly-activity" class="text-xs sm:text-sm font-bold text-white">0 Tx</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. List Akun (Clean Vertical Stack) -->
+    <div class="space-y-3">
+      <h3 class="text-xs font-bold text-text-secondary uppercase tracking-wider px-1">Daftar Dompet Tersedia</h3>
+      <div id="accounts-list" class="space-y-2.5">
+        <p class="text-text-secondary text-sm text-center py-6">Memuat data...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button (FAB) Extended: Icon + Teks yang Kontras -->
+  <button 
+    id="open-add-modal" 
+    class="fixed bottom-20 right-6 z-40 flex items-center gap-2.5 px-5 py-3.5 bg-accent-yellow text-brand-navy rounded-full shadow-xl shadow-accent-yellow/30 hover:bg-accent-yellow-hover hover:scale-105 active:scale-95 transition-all font-bold text-sm border-2 border-white/20 group"
+    aria-label="Tambah Akun Baru"
+  >
+    <div class="w-6 h-6 rounded-full bg-brand-navy text-accent-yellow flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
+      <Plus class="w-4 h-4 stroke-[3]" />
+    </div>
+    <span class="tracking-wide">Tambah Akun</span>
+  </button>
+  
+  <!-- Modal Detail & Aksi Akun (Trigger by Click Item) -->
+  <div id="account-detail-modal" class="hidden fixed inset-0 z-50 bg-brand-navy/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-brand-border p-6 text-center relative animate-in fade-in zoom-in-95 duration-150">
+      <button id="close-detail-modal" class="absolute top-4 right-4 text-text-secondary hover:text-brand-navy transition">
+        <X class="w-5 h-5" />
+      </button>
+
+      <!-- Icon Akun Terpilih -->
+      <div id="detail-modal-icon-wrapper" class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-xs border border-brand-border/50 mb-3">
+        <!-- Rendered via JS -->
+      </div>
+
+      <h3 id="detail-modal-name" class="text-base font-bold text-brand-navy">Nama Akun</h3>
+      <p class="text-xs text-text-secondary mt-0.5">Saldo Saat Ini</p>
+      <p id="detail-modal-balance" class="text-xl font-extrabold text-brand-navy mt-1">Rp 0</p>
+      <p id="detail-modal-activity" class="text-xs font-medium text-text-secondary mt-2 bg-brand-light py-1.5 px-3 rounded-xl inline-block">Aktivitas: 0 transaksi</p>
+
+      <!-- Action Buttons (Edit & Hapus) -->
+      <div class="grid grid-cols-2 gap-2.5 mt-6 pt-4 border-t border-brand-border/60">
+        <button type="button" id="detail-edit-btn" class="w-full bg-brand-light text-brand-navy font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs flex items-center justify-center gap-1.5">
+          Edit Akun
+        </button>
+        <button type="button" id="detail-delete-btn" class="w-full bg-rose-50 text-finance-red font-semibold py-2.5 rounded-xl hover:bg-rose-100 transition text-xs flex items-center justify-center gap-1.5">
+          Hapus Akun
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Box Form (Create / Edit) -->
+  <div id="account-modal" class="hidden fixed inset-0 z-50 bg-brand-navy/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-brand-border">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-brand-border/60">
+        <h3 id="modal-title" class="text-base font-bold text-brand-navy">Tambah Akun Baru</h3>
+        <button id="close-modal" class="text-text-secondary hover:text-brand-navy transition">
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <form id="account-form" class="p-6 space-y-4">
+        <input type="hidden" id="edit-id" value="" />
+        <input type="hidden" id="icon" value="Wallet" />
+        <input type="hidden" id="color" value="text-brand-navy bg-amber-50" />
+        
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-1">Nama Akun (cth: BCA, Dompet Saku)</label>
+          <input type="text" id="name" required class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-1">Saldo Saat Ini (Rp)</label>
+          <input type="number" id="balance" value="0" required class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50" />
+          <p class="text-[11px] text-text-secondary mt-1">*Selisih dari saldo saat ini akan otomatis dicatat sebagai "Koreksi Saldo".</p>
+        </div>
+
+        <!-- Custom Icon Picker Grid -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Icon</label>
+          <div id="icon-picker" class="flex gap-2">
+            <button type="button" data-icon-val="Wallet" class="icon-opt p-2.5 rounded-xl border-2 border-accent-yellow bg-accent-yellow/10 transition text-brand-navy">
+              <Wallet class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="CreditCard" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary">
+              <CreditCard class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="Landmark" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary">
+              <Landmark class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="PiggyBank" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary">
+              <PiggyBank class="w-5 h-5" />
+            </button>
+            <button type="button" data-icon-val="Coins" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary">
+              <Coins class="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Color Picker Grid -->
+        <div>
+          <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Warna Tema</label>
+          <div id="color-picker" class="flex gap-3 items-center">
+            <button type="button" data-color-val="text-amber-500 bg-amber-50" class="color-opt w-7 h-7 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-amber-500 transition"></button>
+            <button type="button" data-color-val="text-emerald-700 bg-emerald-50" class="color-opt w-7 h-7 rounded-full bg-finance-green transition"></button>
+            <button type="button" data-color-val="text-violet-700 bg-violet-50" class="color-opt w-7 h-7 rounded-full bg-violet-500 transition"></button>
+            <button type="button" data-color-val="text-blue-700 bg-blue-50" class="color-opt w-7 h-7 rounded-full bg-blue-500 transition"></button>
+            <button type="button" data-color-val="text-rose-700 bg-rose-50" class="color-opt w-7 h-7 rounded-full bg-finance-red transition"></button>
+          </div>
+        </div>
+
+        <div class="flex gap-2 pt-4 border-t border-brand-border/60">
+          <button type="button" id="cancel-modal" class="flex-1 bg-brand-light text-text-primary font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs">Batal</button>
+          <button type="submit" id="submit-btn" class="flex-1 bg-accent-yellow text-brand-navy font-bold py-2.5 rounded-xl hover:bg-accent-yellow-hover transition text-xs shadow-xs">Simpan Akun</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden Icon Templates -->
+  <div id="icon-templates" class="hidden">
+    <template data-icon-name="Wallet"><Wallet class="w-5 h-5" /></template>
+    <template data-icon-name="CreditCard"><CreditCard class="w-5 h-5" /></template>
+    <template data-icon-name="Landmark"><Landmark class="w-5 h-5" /></template>
+    <template data-icon-name="PiggyBank"><PiggyBank class="w-5 h-5" /></template>
+    <template data-icon-name="Coins"><Coins class="w-5 h-5" /></template>
+  </div>
+
+  <script>
+    import { getAllAccounts, addAccount, deleteAccount, getAccountCurrentBalance, updateAccount } from '../lib/db/accounts';
+
+    const modal = document.getElementById('account-modal')!;
+    const openModalBtn = document.getElementById('open-add-modal')!;
+    const closeModalBtn = document.getElementById('close-modal')!;
+    const cancelModalBtn = document.getElementById('cancel-modal')!;
+    
+    const form = document.getElementById('account-form') as HTMLFormElement;
+    const modalTitle = document.getElementById('modal-title')!;
+    const editIdInput = document.getElementById('edit-id') as HTMLInputElement;
+    const nameInput = document.getElementById('name') as HTMLInputElement;
+    const balanceInput = document.getElementById('balance') as HTMLInputElement;
+    const iconInput = document.getElementById('icon') as HTMLInputElement;
+    const colorInput = document.getElementById('color') as HTMLInputElement;
+    const submitBtn = document.getElementById('submit-btn')!;
+    const listContainer = document.getElementById('accounts-list')!;
+
+    function openModal(isEdit = false) {
+      modal.classList.remove('hidden');
+      modalTitle.textContent = isEdit ? 'Edit Akun' : 'Tambah Akun Baru';
+      submitBtn.textContent = isEdit ? 'Perbarui Akun' : 'Simpan Akun';
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      form.reset();
+      editIdInput.value = '';
+      setSelectedIconInPicker('Wallet');
+      setSelectedColorInPicker('text-brand-navy bg-amber-50');
+    }
+
+    openModalBtn.addEventListener('click', () => openModal(false));
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+
+    // Visual Icon Picker Logic
+    const iconBtns = document.querySelectorAll('.icon-opt');
+    iconBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const selectedVal = (e.currentTarget as HTMLElement).getAttribute('data-icon-val') || 'Wallet';
+        iconInput.value = selectedVal;
+        
+        iconBtns.forEach(b => {
+          b.classList.remove('border-accent-yellow', 'bg-accent-yellow/10');
+          b.classList.add('border-brand-border');
+        });
+
+        (e.currentTarget as HTMLElement).classList.remove('border-brand-border');
+        (e.currentTarget as HTMLElement).classList.add('border-accent-yellow', 'bg-accent-yellow/10');
+      });
+    });
+
+    // Visual Color Picker Logic
+    const colorBtns = document.querySelectorAll('.color-opt');
+    colorBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const selectedVal = (e.currentTarget as HTMLElement).getAttribute('data-color-val') || 'text-brand-navy bg-amber-50';
+        colorInput.value = selectedVal;
+
+        colorBtns.forEach(b => b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500'));
+        (e.currentTarget as HTMLElement).classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+      });
+    });
+
+    function setSelectedIconInPicker(val: string) {
+      iconInput.value = val;
+      iconBtns.forEach(b => {
+        const iconVal = b.getAttribute('data-icon-val');
+        if (iconVal === val) {
+          b.classList.remove('border-brand-border');
+          b.classList.add('border-accent-yellow', 'bg-accent-yellow/10');
+        } else {
+          b.classList.remove('border-accent-yellow', 'bg-accent-yellow/10');
+          b.classList.add('border-brand-border');
+        }
+      });
+    }
+
+    function setSelectedColorInPicker(val: string) {
+      colorInput.value = val;
+      colorBtns.forEach(b => {
+        const colorVal = b.getAttribute('data-color-val');
+        if (colorVal === val) {
+          b.classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+        } else {
+          b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500');
+        }
+      });
+    }
+
+    function getLucideIconHtml(iconName: string) {
+      const template = document.querySelector(`#icon-templates template[data-icon-name="${iconName}"]`) as HTMLTemplateElement;
+      if (template) return template.innerHTML;
+      const defaultTemplate = document.querySelector(`#icon-templates template[data-icon-name="Wallet"]`) as HTMLTemplateElement;
+      return defaultTemplate ? defaultTemplate.innerHTML : '';
+    }
+
+    async function renderAccounts() {
+      const accounts = await getAllAccounts();
+      
+      const walletCountEl = document.getElementById('micro-wallet-count');
+      if (walletCountEl) walletCountEl.textContent = `${accounts.length} Akun`;
+
+      if (accounts.length === 0) {
+        listContainer.innerHTML = `<p class="text-text-secondary text-sm text-center py-6">Belum ada akun yang terdaftar.</p>`;
+        const totalBalEl = document.getElementById('total-combined-balance');
+        if (totalBalEl) totalBalEl.textContent = `Rp 0`;
+        const topWalletEl = document.getElementById('micro-top-wallet');
+        if (topWalletEl) topWalletEl.textContent = `-`;
+        return;
+      }
+
+      let totalBalanceAll = 0;
+      let highestBalance = -Infinity;
+      let topWalletName = '-';
+
+      const accountCards = await Promise.all(
+        accounts.map(async (acc) => {
+          const currentBalance = await getAccountCurrentBalance(acc.id);
+          totalBalanceAll += currentBalance;
+
+          if (currentBalance > highestBalance) {
+            highestBalance = currentBalance;
+            topWalletName = acc.name;
+          }
+
+          const iconName = acc.icon || 'Wallet';
+          const colorClass = acc.color || 'text-brand-navy bg-amber-50';
+          const [textColor, bgColor] = colorClass.split(' ');
+
+          // Placeholder total aktivitas per akun (bisa di-link dengan data transaksi nanti)
+          const activityCount = 0; 
+
+          return `
+            <div 
+              class="account-card flex justify-between items-center p-4 border border-brand-border/80 rounded-2xl bg-white shadow-xs hover:border-accent-yellow hover:shadow-md transition cursor-pointer"
+              data-id="${acc.id}" 
+              data-name="${acc.name}" 
+              data-balance="${currentBalance}" 
+              data-icon="${iconName}"
+              data-color="${colorClass}"
+              data-activity="${activityCount}"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bgColor || 'bg-amber-50'} ${textColor || 'text-brand-navy'} shadow-xs border border-brand-border/50">
+                  ${getLucideIconHtml(iconName)}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-bold text-brand-navy text-sm truncate">${acc.name}</p>
+                  <p class="text-xs text-text-secondary mt-0.5">${activityCount} aktivitas bulan ini</p>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-sm font-extrabold text-brand-navy">Rp ${currentBalance.toLocaleString('id-ID')}</p>
+              </div>
+            </div>
+          `;
+        })
+      );
+
+      const totalBalEl = document.getElementById('total-combined-balance');
+      if (totalBalEl) totalBalEl.textContent = `Rp ${totalBalanceAll.toLocaleString('id-ID')}`;
+
+      const topWalletEl = document.getElementById('micro-top-wallet');
+      if (topWalletEl) topWalletEl.textContent = topWalletName;
+
+      listContainer.innerHTML = accountCards.join('');
+
+      // Event Listener Klik Card untuk Buka Modal Detail
+      const detailModal = document.getElementById('account-detail-modal')!;
+      const closeDetailModalBtn = document.getElementById('close-detail-modal')!;
+      const detailIconWrapper = document.getElementById('detail-modal-icon-wrapper')!;
+      const detailName = document.getElementById('detail-modal-name')!;
+      const detailBalance = document.getElementById('detail-modal-balance')!;
+      const detailActivity = document.getElementById('detail-modal-activity')!;
+      const detailEditBtn = document.getElementById('detail-edit-btn')!;
+      const detailDeleteBtn = document.getElementById('detail-delete-btn')!;
+
+      closeDetailModalBtn.addEventListener('click', () => {
+        detailModal.classList.add('hidden');
+      });
+
+      document.querySelectorAll('.account-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          const el = e.currentTarget as HTMLElement;
+          const id = el.getAttribute('data-id') || '';
+          const name = el.getAttribute('data-name') || '';
+          const balance = parseFloat(el.getAttribute('data-balance') || '0');
+          const iconName = el.getAttribute('data-icon') || 'Wallet';
+          const colorClass = el.getAttribute('data-color') || 'text-brand-navy bg-amber-50';
+          const activity = el.getAttribute('data-activity') || '0';
+
+          const [textColor, bgColor] = colorClass.split(' ');
+
+          // Set isi modal detail
+          detailIconWrapper.className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-xs border border-brand-border/50 mb-3 ${bgColor} ${textColor}`;
+          detailIconWrapper.innerHTML = getLucideIconHtml(iconName);
+          detailName.textContent = name;
+          detailBalance.textContent = `Rp ${balance.toLocaleString('id-ID')}`;
+          detailActivity.textContent = `Aktivitas: ${activity} transaksi`;
+
+          // Assign action ke tombol edit di dalam modal detail
+          detailEditBtn.onclick = () => {
+            detailModal.classList.add('hidden');
+            editIdInput.value = id;
+            nameInput.value = name;
+            balanceInput.value = balance.toString();
+            setSelectedIconInPicker(iconName);
+            setSelectedColorInPicker(colorClass);
+            openModal(true);
+          };
+
+          // Assign action ke tombol hapus di dalam modal detail
+          detailDeleteBtn.onclick = async () => {
+            if (confirm(`Yakin ingin menghapus akun ${name}?`)) {
+              const res = await deleteAccount(id);
+              detailModal.classList.add('hidden');
+              if (!res.success) {
+                alert(res.message);
+              } else {
+                renderAccounts();
+              }
+            }
+          };
+
+          detailModal.classList.remove('hidden');
+        });
+      });
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editId = editIdInput.value;
+      const name = nameInput.value;
+      const targetBalance = parseFloat(balanceInput.value) || 0;
+      const icon = iconInput.value;
+      const color = colorInput.value;
+
+      if (editId) {
+        const res = await updateAccount(editId, { name, targetBalance, icon, color });
+        alert(res.message);
+      } else {
+        await addAccount({ name, balance: targetBalance, icon, color });
+      }
+
+      closeModal();
+      renderAccounts();
+    });
+
+    renderAccounts();
+  </script>
+</Layout>

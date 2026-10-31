@@ -1,0 +1,37 @@
+---
+import { ArrowLeft } from '@lucide/astro';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  showBack?: boolean;
+  backHref?: string;
+}
+
+const { title, subtitle, showBack = false, backHref = '/' } = Astro.props;
+---
+
+<header class="sticky top-0 z-40 w-full bg-brand-light/80 backdrop-blur-md border-b border-brand-border/60 px-4 py-3.5 transition-all">
+  <div class="flex items-center gap-3">
+    {showBack && (
+      <a 
+        href={backHref}
+        class="flex items-center justify-center w-9 h-9 rounded-xl bg-white/80 border border-brand-border/80 text-brand-navy shadow-xs hover:bg-slate-100 active:scale-95 transition-all shrink-0"
+        aria-label="Kembali"
+      >
+        <ArrowLeft class="w-5 h-5 stroke-[2.2]" />
+      </a>
+    )}
+
+    <div class="min-w-0">
+      <h1 class="text-lg font-bold text-brand-navy tracking-tight truncate leading-snug">
+        {title}
+      </h1>
+      {subtitle && (
+        <p class="text-xs text-text-secondary truncate mt-0.5 font-medium">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  </div>
+</header>

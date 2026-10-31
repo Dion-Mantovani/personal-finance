@@ -1,0 +1,49 @@
+/* src/styles/global.css */
+@import "tailwindcss";
+
+@theme {
+  /* Font Families */
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Color Palette: Light Mode (Clean Slate & Navy Base) */
+  --color-brand-light: #F8FAFC;       /* Background utama aplikasi (Slate-50) */
+  --color-brand-surface: #FFFFFF;     /* Card & Bottom Nav background (White solid/translucent) */
+  --color-brand-border: #E2E8F0;      /* Border halus pemisah card (Slate-200) */
+
+  /* Navy untuk teks utama / elemen utama yang solid */
+  --color-brand-navy: #0B132B;
+
+  /* Accents & Signals */
+  --color-accent-yellow: #F59E0B;     /* Kuning yang lebih kontras untuk light mode (Amber-500) */
+  --color-accent-yellow-hover: #D97706;
+
+  --color-finance-green: #10B981;     /* Income / Success (Emerald-500) */
+  --color-finance-red: #EF4444;       /* Expense / Alert (Red-500) */
+
+  /* Neutral Texts */
+  --color-text-primary: #0F172A;      /* Text utama yang tajam (Slate-900) */
+  --color-text-secondary: #64748B;    /* Subtitle / muted text (Slate-500) */
+}
+
+/* Base Body & Reset Styling */
+html, body {
+  height: 100%;
+  background-color: #E2E8F0; /* Background luar mobile frame */
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar tipis ala app mobile */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-border);
+  border-radius: 9999px;
+}

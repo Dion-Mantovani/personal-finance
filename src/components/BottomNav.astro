@@ -1,0 +1,49 @@
+---
+import { 
+  LayoutDashboard, 
+  Wallet, 
+  FolderKanban, 
+  History, 
+  ArrowLeftRight 
+} from '@lucide/astro';
+
+interface Props {
+  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history' | 'transactions';
+}
+
+const { activeTab = 'dashboard' } = Astro.props;
+
+const navItems = [
+  { id: 'dashboard', label: 'Home', href: '/', icon: LayoutDashboard },
+  { id: 'accounts', label: 'Dompet', href: '/accounts', icon: Wallet },
+  { id: 'categories', label: 'Kategori', href: '/categories', icon: FolderKanban },
+  { id: 'history', label: 'Riwayat', href: '/history', icon: History },
+  { id: 'transactions', label: 'Trans', href: '/transactions', icon: ArrowLeftRight },
+];
+---
+
+<!-- Bottom Navigation Container (Glassmorphism Style) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 w-full max-w-md mx-auto bg-brand-surface/80 backdrop-blur-xl border-t border-white/10 px-2 py-2">
+  <ul class="grid grid-cols-5 items-center">
+    {navItems.map((item) => {
+      const Icon = item.icon;
+      const isActive = activeTab === item.id;
+      
+      return (
+        <li>
+          <a
+            href={item.href}
+            class={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all duration-200 ${
+              isActive
+                ? 'text-accent-yellow font-semibold scale-105'
+                : 'text-text-secondary hover:text-text-primary hover:bg-white/5 active:scale-95'
+            }`}
+          >
+            <Icon class={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+            <span class="text-[10px] tracking-tight">{item.label}</span>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</nav>

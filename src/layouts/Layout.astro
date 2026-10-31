@@ -1,0 +1,45 @@
+---
+import '../styles/global.css';
+import BottomNav from '../components/BottomNav.astro';
+
+interface Props {
+  title?: string;
+  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history' | 'transactions';
+}
+
+const { title = 'Finance App', activeTab = 'dashboard' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-200 text-text-primary antialiased selection:bg-accent-yellow selection:text-white">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>{title}</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body class="min-h-full flex flex-col bg-brand-light text-text-primary font-sans relative overflow-x-hidden items-center justify-center">
+
+    <!-- Soft Ambient Background Glow (Light Vibe) -->
+    <div class="fixed top-[-10%] left-[-10%] w-[350px] h-[350px] bg-accent-yellow/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[350px] h-[350px] bg-finance-green/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <!-- Wrapper Utama Mobile-First (Light Glassmorphism Container) -->
+    <div class="w-full max-w-md min-h-screen flex flex-col bg-brand-light/90 backdrop-blur-xl border-x border-brand-border/60 relative shadow-2xl shadow-slate-300/50">
+      
+      <!-- Area Content Utama -->
+      <main class="flex-1 px-4 pt-6 pb-28 w-full overflow-y-auto">
+        <slot />
+      </main>
+
+      <!-- Bottom Navigation Component -->
+      <BottomNav activeTab={activeTab} />
+
+    </div>
+
+  </body>
+</html>
