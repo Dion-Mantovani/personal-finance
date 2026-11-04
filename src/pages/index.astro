@@ -1,53 +1,931 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  ArrowLeftRight,
+  Plus,
+  Wallet,
+  FolderKanban,
+  History,
+  CreditCard,
+  Landmark,
+  PiggyBank,
+  Coins,
+  Utensils,
+  ShoppingBag,
+  Car,
+  Zap,
+  Banknote,
+  HeartPulse,
+  Film,
+  ShieldAlert,
+  Receipt,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Sparkles,
+  ChevronDown,
+  TrendingUp,
+  TrendingDown,
+} from '@lucide/astro';
 ---
 
-<Layout title="Dashboard">
-  <div class="space-y-6">
-    <h2 class="text-2xl font-semibold text-gray-800">Dashboard Overview</h2>
+<Layout title="Dashboard" activeTab="dashboard">
+  <div class="space-y-5 relative pb-20">
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <p class="text-sm font-medium text-gray-500">Total Saldo</p>
-        <p id="total-balance" class="text-2xl font-bold text-gray-900 mt-1">Rp 0</p>
+    <!-- 1. Greeting + Top Actions -->
+    <header class="flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <h1 id="dash-greeting" class="text-xl font-extrabold text-brand-navy tracking-tight">
+          Selamat malam
+        </h1>
+        <p id="dash-date" class="mt-0.5 text-xs font-medium text-text-secondary">—</p>
       </div>
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <p class="text-sm font-medium text-gray-500">Total Pemasukan</p>
-        <p id="total-income" class="text-2xl font-bold text-emerald-600 mt-1">Rp 0</p>
-      </div>
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <p class="text-sm font-medium text-gray-500">Total Pengeluaran</p>
-        <p id="total-expense" class="text-2xl font-bold text-rose-600 mt-1">Rp 0</p>
-      </div>
-    </div>
 
-    <!-- Quick Actions / Info -->
-    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-      <h3 class="text-lg font-medium text-gray-800 mb-2">Selamat Datang, Bro!</h3>
-      <p class="text-gray-600 text-sm">
-        Backend IndexedDB udah aktif. Silakan atur <a href="/accounts" class="text-blue-600 underline">Accounts</a>, <a href="/categories" class="text-blue-600 underline">Categories</a>, lalu catat transaksi pertama lu di <a href="/transactions" class="text-blue-600 underline">Transactions</a>.
-      </p>
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          id="refresh-btn"
+          type="button"
+          class="w-10 h-10 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy hover:border-accent-yellow hover:text-accent-yellow-hover active:scale-95 transition disabled:opacity-60 disabled:pointer-events-none"
+          aria-label="Muat ulang dashboard"
+          title="Muat ulang"
+        >
+          <RefreshCw id="refresh-icon" class="w-4 h-4" />
+        </button>
+        <a
+          href="/history"
+          class="w-10 h-10 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy hover:border-accent-yellow hover:text-accent-yellow-hover active:scale-95 transition"
+          aria-label="Buka riwayat transaksi"
+          title="Riwayat"
+        >
+          <History class="w-4 h-4" />
+        </a>
+      </div>
+    </header>
+
+    <!-- 2. Hero Total Saldo -->
+    <section class="relative overflow-hidden rounded-[28px] bg-brand-navy text-white p-5 shadow-xl border border-white/10">
+      <div class="absolute -right-12 -top-16 w-48 h-48 rounded-full bg-accent-yellow/15 blur-3xl pointer-events-none"></div>
+      <div class="absolute right-[-40px] bottom-[-70px] w-44 h-44 rounded-full bg-white/5 pointer-events-none"></div>
+      <div class="absolute left-[-60px] bottom-[-90px] w-52 h-52 rounded-full bg-white/5 pointer-events-none"></div>
+
+      <div class="relative z-10">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+              <Wallet class="w-4 h-4 text-accent-yellow" />
+            </span>
+            <span class="text-[11px] font-semibold text-slate-200">Total Saldo</span>
+          </div>
+
+          <button
+            id="toggle-amounts"
+            type="button"
+            class="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-slate-200 hover:bg-white/15 active:scale-95 transition"
+            aria-label="Sembunyikan nominal"
+            title="Sembunyikan nominal"
+          >
+            <Eye id="eye-open-icon" class="w-4 h-4" />
+            <EyeOff id="eye-closed-icon" class="w-4 h-4 hidden" />
+          </button>
+        </div>
+
+        <h2 id="dash-total-balance" data-amount="0" class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight tabular-nums">
+          <span class="inline-block h-9 w-48 rounded-lg bg-white/15 animate-pulse align-middle"></span>
+        </h2>
+
+        <div
+          id="cashflow-pill"
+          class="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/10 px-2.5 py-1 text-[11px] font-semibold text-finance-green"
+        >
+          <TrendingUp id="cashflow-up" class="w-3.5 h-3.5" />
+          <TrendingDown id="cashflow-down" class="w-3.5 h-3.5 hidden" />
+          <span id="cashflow-amount" data-amount="0">Rp 0</span>
+          <span class="font-medium text-slate-300">arus kas bulan ini</span>
+        </div>
+
+        <button
+          id="detail-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="hero-detail"
+          class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-slate-100 hover:bg-white/15 active:scale-95 transition"
+        >
+          <Sparkles class="w-3.5 h-3.5 text-accent-yellow" />
+          <span id="detail-toggle-label">Buka Detail</span>
+          <ChevronDown id="detail-chevron" class="w-3.5 h-3.5 transition-transform" />
+        </button>
+
+        <div id="hero-detail" class="mt-4 hidden">
+          <div class="border-t border-white/10 pt-4">
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-[11px] font-medium text-slate-300">
+                Periode <span id="dash-period">Bulan Ini</span>
+              </p>
+              <span class="inline-flex items-center gap-1 rounded-full bg-white/10 border border-white/10 px-2.5 py-1 text-[10px] font-semibold text-slate-100">
+                <span class="w-1.5 h-1.5 rounded-full bg-finance-green"></span>
+                Aktif
+              </span>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-2.5">
+              <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                    <ArrowDownLeft class="w-3.5 h-3.5 text-finance-green stroke-[2.5]" />
+                  </span>
+                  <span class="text-[10px] font-medium text-slate-300">Pemasukan</span>
+                </div>
+                <p id="dash-month-income" data-amount="0" class="mt-2 text-sm font-bold text-white tabular-nums truncate">
+                  Rp 0
+                </p>
+              </div>
+
+              <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                    <ArrowUpRight class="w-3.5 h-3.5 text-finance-red stroke-[2.5]" />
+                  </span>
+                  <span class="text-[10px] font-medium text-slate-300">Pengeluaran</span>
+                </div>
+                <p id="dash-month-expense" data-amount="0" class="mt-2 text-sm font-bold text-white tabular-nums truncate">
+                  Rp 0
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Shortcut Row -->
+    <nav class="grid grid-cols-4 gap-2" aria-label="Aksi cepat">
+      <a href="/accounts" class="group flex flex-col items-center gap-2">
+        <span class="w-12 h-12 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy group-hover:border-accent-yellow group-hover:text-accent-yellow-hover group-active:scale-95 transition">
+          <Wallet class="w-5 h-5" />
+        </span>
+        <span class="text-[10px] font-semibold text-text-secondary">Dompet</span>
+      </a>
+
+      <a href="/categories" class="group flex flex-col items-center gap-2">
+        <span class="w-12 h-12 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy group-hover:border-accent-yellow group-hover:text-accent-yellow-hover group-active:scale-95 transition">
+          <FolderKanban class="w-5 h-5" />
+        </span>
+        <span class="text-[10px] font-semibold text-text-secondary">Kategori</span>
+      </a>
+
+      <a href="/history" class="group flex flex-col items-center gap-2">
+        <span class="w-12 h-12 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy group-hover:border-accent-yellow group-hover:text-accent-yellow-hover group-active:scale-95 transition">
+          <History class="w-5 h-5" />
+        </span>
+        <span class="text-[10px] font-semibold text-text-secondary">Riwayat</span>
+      </a>
+
+      <a href="/transactions" class="group flex flex-col items-center gap-2">
+        <span class="w-12 h-12 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy group-hover:border-accent-yellow group-hover:text-accent-yellow-hover group-active:scale-95 transition">
+          <ArrowLeftRight class="w-5 h-5" />
+        </span>
+        <span class="text-[10px] font-semibold text-text-secondary">Transaksi</span>
+      </a>
+    </nav>
+
+    <!-- 4. Catat Cepat (One-tap Create) -->
+    <section id="quick-section" class="hidden space-y-3">
+      <div class="flex items-center justify-between gap-2 px-1">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <Zap class="w-4 h-4 text-accent-yellow shrink-0" />
+          <h3 class="text-xs font-bold text-brand-navy truncate">Catat Cepat</h3>
+          <span class="rounded-full bg-brand-light border border-brand-border/60 px-2 py-0.5 text-[9px] font-semibold text-text-secondary shrink-0">
+            1 tap
+          </span>
+        </div>
+        <a
+          href="/transactions"
+          class="text-[11px] font-semibold text-accent-yellow-hover hover:text-brand-navy transition shrink-0"
+        >
+          + Custom
+        </a>
+      </div>
+
+      <div
+        id="quick-status"
+        class="hidden items-center gap-2 rounded-xl border px-3 py-2 text-[11px] font-semibold"
+      >
+        <span id="quick-status-text"></span>
+        <button
+          type="button"
+          id="quick-undo"
+          class="ml-auto shrink-0 text-text-secondary underline underline-offset-2 hover:text-brand-navy"
+        >
+          Urungkan
+        </button>
+      </div>
+
+      <div
+        id="quick-list"
+        class="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-px-4 -mx-4 px-4 pb-2"
+      ></div>
+    </section>
+
+    <!-- 5. Pengeluaran Mingguan (Placeholder) -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <h3 class="text-sm font-bold text-brand-navy">Pengeluaran Mingguan</h3>
+        <a
+          href="/history"
+          class="text-[11px] font-semibold text-accent-yellow-hover hover:text-brand-navy transition"
+        >
+          Riwayat &gt;
+        </a>
+      </div>
+
+      <div class="rounded-3xl bg-white border border-brand-border/70 p-4 shadow-xs">
+        <div class="flex items-center justify-between gap-3">
+          <span class="text-[11px] font-semibold text-text-secondary">Minggu Ini</span>
+          <span class="rounded-full bg-brand-light border border-brand-border/60 px-3 py-1 text-[10px] font-bold text-text-secondary">
+            Segera
+          </span>
+        </div>
+
+        <div
+          class="mt-4 flex items-end justify-between gap-2 h-28"
+          role="img"
+          aria-label="Grafik pengeluaran mingguan, masih placeholder"
+        >
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="h-24 w-full flex items-end justify-center">
+              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 36%"></div>
+            </div>
+            <span class="week-label text-[10px] font-medium text-text-secondary">Sen</span>
+          </div>
+
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="h-24 w-full flex items-end justify-center">
+              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 68%"></div>
+            </div>
+            <span class="week-label text-[10px] font-medium text-text-secondary">Sel</span>
+          </div>
+
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="h-24 w-full flex items-end justify-center">
+              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 28%"></div>
+            </div>
+            <span class="week-label text-[10px] font-medium text-text-secondary">Rab</span>
+          </div>
+
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="h-24 w-full flex items-end justify-center">
+              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 52%"></div>
+            </div>
+            <span class="week-label text-[10px] font-medium text-text-secondary">Kam</span>
+          </div>
+
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="h-24 w-full flex items-end justify-center">
+              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 82%"></div>
+            </div>
+            <span class="week-label text-[10px] font-medium text-text-secondary">Jum</span>
+          </div>
+
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="h-24 w-full flex items-end justify-center">
+              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 20%"></div>
+            </div>
+            <span class="week-label text-[10px] font-medium text-text-secondary">Sab</span>
+          </div>
+
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="h-24 w-full flex items-end justify-center">
+              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 44%"></div>
+            </div>
+            <span class="week-label text-[10px] font-medium text-text-secondary">Min</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Aktivitas Terakhir -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <h3 class="text-sm font-bold text-brand-navy">Aktivitas Terakhir</h3>
+        <a
+          href="/history"
+          class="text-[11px] font-semibold text-accent-yellow-hover hover:text-brand-navy transition"
+        >
+          Lihat Semua &gt;
+        </a>
+      </div>
+
+      <div id="dash-recent-list" class="space-y-2">
+        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-brand-border/60 animate-pulse">
+          <div class="w-11 h-11 rounded-full bg-slate-200/80 shrink-0"></div>
+          <div class="flex-1 space-y-2 min-w-0">
+            <div class="h-3 w-2/3 rounded bg-slate-200/80"></div>
+            <div class="h-2.5 w-1/2 rounded bg-slate-200/70"></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-brand-border/60 animate-pulse">
+          <div class="w-11 h-11 rounded-full bg-slate-200/80 shrink-0"></div>
+          <div class="flex-1 space-y-2 min-w-0">
+            <div class="h-3 w-3/5 rounded bg-slate-200/80"></div>
+            <div class="h-2.5 w-2/5 rounded bg-slate-200/70"></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-brand-border/60 animate-pulse">
+          <div class="w-11 h-11 rounded-full bg-slate-200/80 shrink-0"></div>
+          <div class="flex-1 space-y-2 min-w-0">
+            <div class="h-3 w-1/2 rounded bg-slate-200/80"></div>
+            <div class="h-2.5 w-1/3 rounded bg-slate-200/70"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Extended FAB -->
+  <a
+    href="/transactions"
+    class="fixed bottom-20 right-6 z-40 flex items-center gap-2.5 px-5 py-3.5 bg-accent-yellow text-brand-navy rounded-full shadow-xl shadow-accent-yellow/30 hover:bg-accent-yellow-hover hover:scale-105 active:scale-95 transition-all font-bold text-sm border-2 border-white/20 group"
+    aria-label="Catat Transaksi Baru"
+  >
+    <div class="w-6 h-6 rounded-full bg-brand-navy text-accent-yellow flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
+      <Plus class="w-4 h-4 stroke-[3]" />
     </div>
+    <span class="tracking-wide">Catat Transaksi</span>
+  </a>
+
+  <!-- Hidden Icon Templates -->
+  <div id="icon-templates" class="hidden">
+    <template data-icon-name="Utensils"><Utensils class="w-5 h-5" /></template>
+    <template data-icon-name="ShoppingBag"><ShoppingBag class="w-5 h-5" /></template>
+    <template data-icon-name="Car"><Car class="w-5 h-5" /></template>
+    <template data-icon-name="Zap"><Zap class="w-5 h-5" /></template>
+    <template data-icon-name="Banknote"><Banknote class="w-5 h-5" /></template>
+    <template data-icon-name="HeartPulse"><HeartPulse class="w-5 h-5" /></template>
+    <template data-icon-name="Film"><Film class="w-5 h-5" /></template>
+    <template data-icon-name="ShieldAlert"><ShieldAlert class="w-5 h-5" /></template>
+    <template data-icon-name="Wallet"><Wallet class="w-5 h-5" /></template>
+    <template data-icon-name="CreditCard"><CreditCard class="w-5 h-5" /></template>
+    <template data-icon-name="Landmark"><Landmark class="w-5 h-5" /></template>
+    <template data-icon-name="PiggyBank"><PiggyBank class="w-5 h-5" /></template>
+    <template data-icon-name="Coins"><Coins class="w-5 h-5" /></template>
+    <template data-icon-name="ArrowLeftRight"><ArrowLeftRight class="w-5 h-5" /></template>
+    <template data-icon-name="Receipt"><Receipt class="w-5 h-5" /></template>
   </div>
 
   <script>
-    import { getDashboardSummary } from '../lib/db/transactions';
+    import { getAllAccounts } from '../lib/db/accounts';
+    import { getAllCategories } from '../lib/db/categories';
+    import { addTransaction, deleteTransaction, getAllTransactions } from '../lib/db/transactions';
+    import type { Account, Category, Transaction, TransactionType } from '../types/finance';
+    import { emptyStateHtml } from '../lib/ui/empty-state';
+    import { toast } from '../lib/ui/toast';
 
-    async function loadDashboard() {
-      const summary = await getDashboardSummary();
-      
-      const formatIDR = (num: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
-
-      const balanceEl = document.getElementById('total-balance');
-      const incomeEl = document.getElementById('total-income');
-      const expenseEl = document.getElementById('total-expense');
-
-      if (balanceEl) balanceEl.textContent = formatIDR(summary.totalBalance);
-      if (incomeEl) incomeEl.textContent = formatIDR(summary.totalIncome);
-      if (expenseEl) expenseEl.textContent = formatIDR(summary.totalExpense);
+    interface QuickPattern {
+      type: TransactionType;
+      accountId: string;
+      toAccountId?: string;
+      categoryId: string;
+      amount: number;
+      note: string;
+      count: number;
+      lastDate: string;
+      lastCreatedAt: number;
     }
 
+    const greetingEl = document.getElementById('dash-greeting')!;
+    const dateEl = document.getElementById('dash-date')!;
+    const refreshBtn = document.getElementById('refresh-btn') as HTMLButtonElement;
+    const refreshIcon = document.getElementById('refresh-icon')!;
+    const toggleAmountsBtn = document.getElementById('toggle-amounts') as HTMLButtonElement;
+    const eyeOpenIcon = document.getElementById('eye-open-icon')!;
+    const eyeClosedIcon = document.getElementById('eye-closed-icon')!;
+    const totalBalanceEl = document.getElementById('dash-total-balance')!;
+    const cashflowPill = document.getElementById('cashflow-pill')!;
+    const cashflowAmountEl = document.getElementById('cashflow-amount')!;
+    const cashflowUpIcon = document.getElementById('cashflow-up')!;
+    const cashflowDownIcon = document.getElementById('cashflow-down')!;
+    const detailToggle = document.getElementById('detail-toggle') as HTMLButtonElement;
+    const detailToggleLabel = document.getElementById('detail-toggle-label')!;
+    const detailChevron = document.getElementById('detail-chevron')!;
+    const heroDetail = document.getElementById('hero-detail')!;
+    const periodEl = document.getElementById('dash-period')!;
+    const monthIncomeEl = document.getElementById('dash-month-income')!;
+    const monthExpenseEl = document.getElementById('dash-month-expense')!;
+    const quickSection = document.getElementById('quick-section')!;
+    const quickList = document.getElementById('quick-list')!;
+    const quickStatus = document.getElementById('quick-status')!;
+    const quickStatusText = document.getElementById('quick-status-text')!;
+    const quickUndoBtn = document.getElementById('quick-undo') as HTMLButtonElement;
+    const recentList = document.getElementById('dash-recent-list')!;
+
+    let accounts: Account[] = [];
+    let categories: Category[] = [];
+    let transactions: Transaction[] = [];
+    let accountsById = new Map<string, Account>();
+    let categoriesById = new Map<string, Category>();
+    let lastCreatedId: string | null = null;
+    let statusTimer: number | null = null;
+    let amountsHidden = false;
+
+    const formatIDR = (num: number) =>
+      new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+      }).format(num);
+
+    function toLocalDateKey(date = new Date()): string {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function escapeHtml(value: string): string {
+      return value.replace(/[&<>"']/g, (char) => {
+        const map: Record<string, string> = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        };
+        return map[char] ?? char;
+      });
+    }
+
+    function getLucideIconHtml(iconName: string): string {
+      const template = document.querySelector(
+        `#icon-templates template[data-icon-name="${iconName}"]`
+      ) as HTMLTemplateElement | null;
+      if (template) return template.innerHTML;
+
+      const fallback = document.querySelector(
+        `#icon-templates template[data-icon-name="ArrowLeftRight"]`
+      ) as HTMLTemplateElement | null;
+      return fallback ? fallback.innerHTML : '';
+    }
+
+    function setAmount(el: HTMLElement, value: number) {
+      el.dataset.amount = String(value);
+      el.textContent = amountsHidden ? '••••••' : formatIDR(value);
+    }
+
+    function applyAmountVisibility() {
+      document.querySelectorAll<HTMLElement>('[data-amount]').forEach((el) => {
+        const value = Number(el.dataset.amount || '0');
+        el.textContent = amountsHidden ? '••••••' : formatIDR(value);
+      });
+
+      eyeOpenIcon.classList.toggle('hidden', amountsHidden);
+      eyeClosedIcon.classList.toggle('hidden', !amountsHidden);
+      toggleAmountsBtn.setAttribute('aria-label', amountsHidden ? 'Tampilkan nominal' : 'Sembunyikan nominal');
+      toggleAmountsBtn.setAttribute('title', amountsHidden ? 'Tampilkan nominal' : 'Sembunyikan nominal');
+    }
+
+    function renderGreeting(now: Date) {
+      const hour = now.getHours();
+      greetingEl.textContent =
+        hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 19 ? 'Selamat sore' : 'Selamat malam';
+
+      dateEl.textContent = new Intl.DateTimeFormat('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(now);
+
+      periodEl.textContent = new Intl.DateTimeFormat('id-ID', {
+        month: 'long',
+        year: 'numeric',
+      }).format(now);
+    }
+
+    function highlightCurrentDay() {
+      const todayIndex = (new Date().getDay() + 6) % 7;
+      const tallestIndex = 1;
+      const bars = Array.from(document.querySelectorAll<HTMLElement>('.week-bar'));
+      const labels = Array.from(document.querySelectorAll<HTMLElement>('.week-label'));
+
+      bars.forEach((bar, index) => {
+        bar.classList.remove('bg-brand-navy', 'bg-accent-yellow');
+        bar.classList.add('bg-brand-border');
+
+        if (index === todayIndex) {
+          bar.classList.replace('bg-brand-border', 'bg-accent-yellow');
+        } else if (index === tallestIndex) {
+          bar.classList.replace('bg-brand-border', 'bg-brand-navy');
+        }
+      });
+
+      const todayLabel = labels[todayIndex];
+      if (todayLabel) {
+        todayLabel.classList.remove('text-text-secondary', 'font-medium');
+        todayLabel.classList.add('text-brand-navy', 'font-bold');
+      }
+    }
+
+    function getQuickPalette(pattern: QuickPattern) {
+      const category = categoriesById.get(pattern.categoryId);
+      const colorClass = category?.color || 'text-brand-navy bg-amber-50';
+      const [textColor, bgColor] = colorClass.split(' ');
+
+      return {
+        textColor: textColor || 'text-brand-navy',
+        bgColor: bgColor || 'bg-amber-50',
+        iconName: category?.icon || (pattern.type === 'transfer' ? 'ArrowLeftRight' : 'Wallet'),
+      };
+    }
+
+    function getQuickDescription(pattern: QuickPattern): string {
+      if (pattern.type === 'transfer') {
+        const fromName = accountsById.get(pattern.accountId)?.name || 'Akun';
+        const toName = pattern.toAccountId
+          ? accountsById.get(pattern.toAccountId)?.name || 'Akun'
+          : 'Akun';
+        return `${fromName} → ${toName}`;
+      }
+
+      const categoryName = categoriesById.get(pattern.categoryId)?.name || 'Transaksi';
+      return pattern.note.trim() || categoryName;
+    }
+
+    function buildQuickPatterns(): QuickPattern[] {
+      const correctionCategoryIds = new Set(
+        categories
+          .filter((category) => category.name.toLowerCase() === 'koreksi saldo')
+          .map((category) => category.id)
+      );
+
+      const patterns = new Map<string, QuickPattern>();
+
+      for (const tx of transactions) {
+        if (tx.amount <= 0) continue;
+        if (!accountsById.has(tx.accountId)) continue;
+        if (!categoriesById.has(tx.categoryId)) continue;
+        if (correctionCategoryIds.has(tx.categoryId)) continue;
+
+        if (tx.type === 'transfer') {
+          if (!tx.toAccountId) continue;
+          if (tx.toAccountId === tx.accountId) continue;
+          if (!accountsById.has(tx.toAccountId)) continue;
+        } else {
+          const category = categoriesById.get(tx.categoryId);
+          if (!category || category.type !== tx.type) continue;
+        }
+
+        const normalizedNote = (tx.note ?? '').trim().toLowerCase();
+        const key = [
+          tx.type,
+          tx.accountId,
+          tx.toAccountId ?? '',
+          tx.categoryId,
+          tx.amount,
+          normalizedNote,
+        ].join('|');
+
+        const existing = patterns.get(key);
+        if (existing) {
+          existing.count += 1;
+          const isNewer =
+            tx.date > existing.lastDate ||
+            (tx.date === existing.lastDate && tx.createdAt >= existing.lastCreatedAt);
+          if (isNewer) {
+            existing.lastDate = tx.date;
+            existing.lastCreatedAt = tx.createdAt;
+            existing.note = tx.note ?? '';
+          }
+        } else {
+          patterns.set(key, {
+            type: tx.type,
+            accountId: tx.accountId,
+            ...(tx.toAccountId ? { toAccountId: tx.toAccountId } : {}),
+            categoryId: tx.categoryId,
+            amount: tx.amount,
+            note: tx.note ?? '',
+            count: 1,
+            lastDate: tx.date,
+            lastCreatedAt: tx.createdAt,
+          });
+        }
+      }
+
+      return [...patterns.values()]
+        .sort(
+          (a, b) =>
+            b.count - a.count ||
+            b.lastDate.localeCompare(a.lastDate) ||
+            b.lastCreatedAt - a.lastCreatedAt
+        )
+        .slice(0, 5);
+    }
+
+    function showQuickStatus(success: boolean, message: string, undoable = false) {
+      if (statusTimer !== null) {
+        window.clearTimeout(statusTimer);
+        statusTimer = null;
+      }
+
+      quickStatus.className = success
+        ? 'flex items-center gap-2 rounded-xl border border-finance-green/20 bg-finance-green/5 px-3 py-2 text-[11px] font-semibold text-finance-green'
+        : 'flex items-center gap-2 rounded-xl border border-finance-red/20 bg-finance-red/5 px-3 py-2 text-[11px] font-semibold text-finance-red';
+
+      quickStatusText.textContent = success ? `✓ ${message}` : message;
+      quickUndoBtn.classList.toggle('hidden', !undoable);
+
+      statusTimer = window.setTimeout(() => {
+        quickStatus.className = 'hidden';
+        quickUndoBtn.classList.add('hidden');
+        lastCreatedId = null;
+        statusTimer = null;
+      }, 5000);
+    }
+
+    async function handleQuickAdd(
+      btn: HTMLButtonElement,
+      pattern: QuickPattern,
+      description: string
+    ) {
+      if (btn.dataset.busy === '1') return;
+      btn.dataset.busy = '1';
+      btn.setAttribute('aria-busy', 'true');
+      btn.classList.add('opacity-60', 'pointer-events-none');
+
+      const payload: Omit<Transaction, 'id' | 'createdAt'> = {
+        amount: pattern.amount,
+        type: pattern.type,
+        accountId: pattern.accountId,
+        categoryId: pattern.categoryId,
+        date: toLocalDateKey(),
+        note: pattern.note.trim() || undefined,
+        ...(pattern.toAccountId ? { toAccountId: pattern.toAccountId } : {}),
+      };
+
+      let newId: string | null = null;
+      try {
+        newId = await addTransaction(payload);
+      } catch {
+        newId = null;
+      }
+
+      if (!newId) {
+        btn.dataset.busy = '0';
+        btn.removeAttribute('aria-busy');
+        btn.classList.remove('opacity-60', 'pointer-events-none');
+        showQuickStatus(false, 'Gagal mencatat transaksi. Coba lagi.');
+        return;
+      }
+
+      lastCreatedId = newId;
+
+      // Transaksi sudah tersimpan. Kegagalan refresh tidak boleh terlihat
+      // seperti kegagalan pencatatan (bisa memicu input ganda).
+      try {
+        await loadDashboard();
+      } catch {
+        // Diamkan: data lokal akan termuat lagi pada interaksi berikutnya.
+      }
+
+      btn.dataset.busy = '0';
+      btn.removeAttribute('aria-busy');
+      btn.classList.remove('opacity-60', 'pointer-events-none');
+
+      showQuickStatus(true, `${description} tercatat`, true);
+    }
+
+    function renderQuickActions() {
+      const patterns = buildQuickPatterns();
+
+      if (patterns.length === 0) {
+        quickSection.classList.add('hidden');
+        quickList.innerHTML = '';
+        return;
+      }
+
+      quickSection.classList.remove('hidden');
+      quickList.innerHTML = '';
+
+      for (const pattern of patterns) {
+        const { textColor, bgColor, iconName } = getQuickPalette(pattern);
+        const description = getQuickDescription(pattern);
+        const amountPrefix =
+          pattern.type === 'income' ? '+ ' : pattern.type === 'expense' ? '- ' : '';
+        const amountColor =
+          pattern.type === 'income'
+            ? 'text-finance-green'
+            : pattern.type === 'expense'
+              ? 'text-finance-red'
+              : 'text-brand-navy';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className =
+          'snap-start shrink-0 w-[160px] text-left rounded-2xl bg-white border border-brand-border/70 p-3 shadow-xs hover:border-accent-yellow hover:shadow-md active:scale-95 transition touch-manipulation flex items-center gap-2.5';
+        button.setAttribute(
+          'aria-label',
+          `Catat cepat ${description}, ${formatIDR(pattern.amount)}`
+        );
+        button.innerHTML = `
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-brand-border/40 ${bgColor} ${textColor}">
+            ${getLucideIconHtml(iconName)}
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] font-bold text-brand-navy truncate">${escapeHtml(description)}</p>
+            <p class="mt-0.5 text-xs font-extrabold tabular-nums truncate ${amountColor}">${amountPrefix}${escapeHtml(formatIDR(pattern.amount))}</p>
+          </div>
+        `;
+        button.addEventListener('click', () => {
+          void handleQuickAdd(button, pattern, description);
+        });
+
+        quickList.appendChild(button);
+      }
+    }
+
+    function renderRecentTransactions() {
+      const recent = [...transactions]
+        .sort((a, b) =>
+          a.date === b.date ? b.createdAt - a.createdAt : b.date.localeCompare(a.date)
+        )
+        .slice(0, 5);
+
+      if (recent.length === 0) {
+        recentList.innerHTML = emptyStateHtml({
+          iconHtml: getLucideIconHtml('Receipt'),
+          title: 'Belum ada transaksi',
+          description: 'Mulai catat pemasukan atau pengeluaran pertamamu.',
+          actionHtml: `
+            <a
+              href="/transactions"
+              class="inline-flex items-center gap-1.5 rounded-xl bg-accent-yellow px-4 py-2 text-[11px] font-bold text-brand-navy shadow-xs transition hover:bg-accent-yellow-hover active:scale-95"
+            >
+              Catat transaksi pertama <span aria-hidden="true">→</span>
+            </a>
+          `,
+        });
+        return;
+      }
+
+      recentList.innerHTML = recent
+        .map((tx) => {
+          const category = categoriesById.get(tx.categoryId);
+          const account = accountsById.get(tx.accountId);
+          const toAccount = tx.toAccountId ? accountsById.get(tx.toAccountId) : null;
+
+          const iconName =
+            category?.icon || (tx.type === 'transfer' ? 'ArrowLeftRight' : 'Wallet');
+          const colorClass = category?.color || 'text-brand-navy bg-amber-50';
+          const [textColor, bgColor] = colorClass.split(' ');
+
+          const categoryName =
+            category?.name || (tx.type === 'transfer' ? 'Transfer' : 'Tanpa Kategori');
+
+          const subText =
+            tx.type === 'transfer'
+              ? `${categoryName} • ${account?.name || 'Akun'} → ${toAccount?.name || 'Akun'}`
+              : `${categoryName} • ${account?.name || 'Akun'}`;
+
+          const headline =
+            tx.note && tx.note.trim() !== '' ? tx.note : categoryName;
+
+          let amountColor = 'text-brand-navy';
+          let amountPrefix = '';
+          if (tx.type === 'income') {
+            amountColor = 'text-finance-green';
+            amountPrefix = '+ ';
+          } else if (tx.type === 'expense') {
+            amountColor = 'text-finance-red';
+            amountPrefix = '- ';
+          }
+
+          return `
+            <a href="/transactions?id=${tx.id}" class="flex justify-between items-center p-3.5 border border-brand-border/60 rounded-2xl bg-white hover:border-accent-yellow hover:shadow-xs transition">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 border border-brand-border/40 ${bgColor || 'bg-amber-50'} ${textColor || 'text-brand-navy'}">
+                  ${getLucideIconHtml(iconName)}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-bold text-brand-navy text-sm truncate">${escapeHtml(headline)}</p>
+                  <p class="text-[11px] text-text-secondary mt-0.5 truncate">${escapeHtml(subText)}</p>
+                </div>
+              </div>
+              <div class="text-right shrink-0 pl-2">
+                <p class="text-sm font-extrabold ${amountColor}">${amountPrefix}${escapeHtml(formatIDR(tx.amount))}</p>
+              </div>
+            </a>
+          `;
+        })
+        .join('');
+    }
+
+    function renderSummary() {
+      const now = new Date();
+      const monthKey = toLocalDateKey(now).slice(0, 7);
+
+      const initialBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
+      const totalIncome = transactions
+        .filter((tx) => tx.type === 'income')
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      const totalExpense = transactions
+        .filter((tx) => tx.type === 'expense')
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      const totalBalance = initialBalance + totalIncome - totalExpense;
+
+      const monthlyTransactions = transactions.filter((tx) => tx.date.startsWith(monthKey));
+      const monthIncome = monthlyTransactions
+        .filter((tx) => tx.type === 'income')
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      const monthExpense = monthlyTransactions
+        .filter((tx) => tx.type === 'expense')
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      const netCashflow = monthIncome - monthExpense;
+
+      renderGreeting(now);
+
+      setAmount(totalBalanceEl, totalBalance);
+      setAmount(monthIncomeEl, monthIncome);
+      setAmount(monthExpenseEl, monthExpense);
+      setAmount(cashflowAmountEl, netCashflow);
+
+      cashflowPill.classList.toggle('text-finance-green', netCashflow >= 0);
+      cashflowPill.classList.toggle('text-finance-red', netCashflow < 0);
+      cashflowUpIcon.classList.toggle('hidden', netCashflow < 0);
+      cashflowDownIcon.classList.toggle('hidden', netCashflow >= 0);
+    }
+
+    async function loadDashboard() {
+      const [nextAccounts, nextCategories, nextTransactions] = await Promise.all([
+        getAllAccounts(),
+        getAllCategories(),
+        getAllTransactions(),
+      ]);
+
+      accounts = nextAccounts;
+      categories = nextCategories;
+      transactions = nextTransactions;
+      accountsById = new Map(accounts.map((account) => [account.id, account]));
+      categoriesById = new Map(categories.map((category) => [category.id, category]));
+
+      renderSummary();
+      renderQuickActions();
+      renderRecentTransactions();
+    }
+
+    toggleAmountsBtn.addEventListener('click', () => {
+      amountsHidden = !amountsHidden;
+      applyAmountVisibility();
+    });
+
+    detailToggle.addEventListener('click', () => {
+      const expanded = detailToggle.getAttribute('aria-expanded') === 'true';
+      const nextExpanded = !expanded;
+
+      detailToggle.setAttribute('aria-expanded', String(nextExpanded));
+      heroDetail.classList.toggle('hidden', !nextExpanded);
+      detailToggleLabel.textContent = nextExpanded ? 'Tutup Detail' : 'Buka Detail';
+      detailChevron.classList.toggle('rotate-180', nextExpanded);
+    });
+
+    refreshBtn.addEventListener('click', async () => {
+      if (refreshBtn.disabled) return;
+
+      refreshBtn.disabled = true;
+      refreshIcon.classList.add('animate-spin');
+
+      try {
+        await loadDashboard();
+      } finally {
+        refreshIcon.classList.remove('animate-spin');
+        refreshBtn.disabled = false;
+      }
+    });
+
+    quickUndoBtn.addEventListener('click', async () => {
+      if (!lastCreatedId) return;
+
+      const idToUndo = lastCreatedId;
+      lastCreatedId = null;
+
+      if (statusTimer !== null) {
+        window.clearTimeout(statusTimer);
+        statusTimer = null;
+      }
+      quickStatus.className = 'hidden';
+      quickUndoBtn.classList.add('hidden');
+
+      try {
+        await deleteTransaction(idToUndo);
+        await loadDashboard();
+        toast.info('Transaksi dibatalkan.');
+      } catch {
+        showQuickStatus(false, 'Gagal mengurungkan transaksi.');
+      }
+    });
+
+    highlightCurrentDay();
     loadDashboard();
   </script>
 </Layout>

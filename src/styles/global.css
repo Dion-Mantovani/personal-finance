@@ -47,3 +47,68 @@ html, body {
   background: var(--color-brand-border);
   border-radius: 9999px;
 }
+
+/* Di mobile, scrollbar visual disembunyikan; scroll tetap berfungsi. */
+@media (max-width: 768px) {
+  html,
+  body,
+  main {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  main::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared UI primitives: toast, dialog, dan state invalid form field   */
+/* ------------------------------------------------------------------ */
+
+/* Toast: masuk dari bawah, keluar dengan fade halus */
+.toast-item {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.toast-item-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.toast-item-leaving {
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+}
+
+/* Native dialog dipakai untuk semua modal & konfirmasi */
+dialog.app-dialog {
+  width: calc(100% - 2rem);
+  max-width: 28rem;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+html.overflow-hidden,
+body.overflow-hidden {
+  overflow: hidden;
+}
+
+dialog.app-dialog::backdrop {
+  background: rgb(11 19 43 / 0.45);
+  backdrop-filter: blur(4px);
+}
+
+/* Field error state dari src/lib/ui/validation.ts */
+[data-invalid="true"] {
+  border-color: var(--color-finance-red) !important;
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.12) !important;
+}

@@ -10,7 +10,7 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
     <!-- 1. Header Bersih -->
     <Header 
       title="Daftar Kategori" 
-      subtitle="Kelompokkan pemasukan dan pengeluaran lu di sini."
+      centerTitle
     />
 
     <!-- 2. Segmented Control Tabs (Pengeluaran vs Pemasukan) -->
@@ -59,27 +59,40 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
   </button>
 
   <!-- Modal Box Form (Create / Edit) -->
-  <div id="category-modal" class="hidden fixed inset-0 z-50 bg-brand-navy/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-brand-border">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-brand-border/60">
+  <dialog id="category-modal" class="app-dialog" aria-labelledby="modal-title">
+    <div class="max-h-[90vh] overflow-y-auto rounded-2xl border border-brand-border bg-white shadow-xl">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-brand-border/60 sticky top-0 z-10 bg-white">
         <h3 id="modal-title" class="text-base font-bold text-brand-navy">Tambah Kategori Baru</h3>
-        <button id="close-modal" class="text-text-secondary hover:text-brand-navy transition">
+        <button
+          type="button"
+          id="close-modal"
+          class="text-text-secondary hover:text-brand-navy transition"
+          aria-label="Tutup form kategori"
+        >
           <X class="w-5 h-5" />
         </button>
       </div>
 
-      <form id="category-form" class="p-6 space-y-4">
+      <form id="category-form" class="p-6 space-y-4" novalidate>
         <input type="hidden" id="edit-id" value="" />
         <input type="hidden" id="icon" value="Utensils" />
         <input type="hidden" id="color" value="text-brand-navy bg-amber-50" />
 
-        <div>
-          <label class="block text-xs font-semibold text-brand-navy mb-1">Nama Kategori</label>
-          <input type="text" id="name" required placeholder="cth: Makanan, Gaji, Transport" class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50" />
+        <div data-field>
+          <label class="block text-xs font-semibold text-brand-navy mb-1" for="name">Nama Kategori</label>
+          <input
+            type="text"
+            id="name"
+            required
+            maxlength="30"
+            placeholder="cth: Makanan, Gaji, Transport"
+            data-autofocus
+            class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50"
+          />
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-brand-navy mb-1">Tipe Transaksi</label>
+        <div data-field>
+          <label class="block text-xs font-semibold text-brand-navy mb-1" for="type">Tipe Transaksi</label>
           <select id="type" class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50 font-medium">
             <option value="expense">Pengeluaran (Expense)</option>
             <option value="income">Pemasukan (Income)</option>
@@ -90,28 +103,28 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
         <div>
           <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Icon</label>
           <div id="icon-picker" class="grid grid-cols-4 gap-2">
-            <button type="button" data-icon-val="Utensils" class="icon-opt p-2.5 rounded-xl border-2 border-accent-yellow bg-accent-yellow/10 transition text-brand-navy flex justify-center">
+            <button type="button" data-icon-val="Utensils" class="icon-opt p-2.5 rounded-xl border-2 border-accent-yellow bg-accent-yellow/10 transition text-brand-navy flex justify-center" aria-label="Ikon makanan">
               <Utensils class="w-5 h-5" />
             </button>
-            <button type="button" data-icon-val="ShoppingBag" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+            <button type="button" data-icon-val="ShoppingBag" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center" aria-label="Ikon belanja">
               <ShoppingBag class="w-5 h-5" />
             </button>
-            <button type="button" data-icon-val="Car" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+            <button type="button" data-icon-val="Car" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center" aria-label="Ikon transportasi">
               <Car class="w-5 h-5" />
             </button>
-            <button type="button" data-icon-val="Zap" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+            <button type="button" data-icon-val="Zap" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center" aria-label="Ikon listrik">
               <Zap class="w-5 h-5" />
             </button>
-            <button type="button" data-icon-val="Banknote" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+            <button type="button" data-icon-val="Banknote" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center" aria-label="Ikon uang">
               <Banknote class="w-5 h-5" />
             </button>
-            <button type="button" data-icon-val="HeartPulse" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+            <button type="button" data-icon-val="HeartPulse" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center" aria-label="Ikon kesehatan">
               <HeartPulse class="w-5 h-5" />
             </button>
-            <button type="button" data-icon-val="Film" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+            <button type="button" data-icon-val="Film" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center" aria-label="Ikon hiburan">
               <Film class="w-5 h-5" />
             </button>
-            <button type="button" data-icon-val="ShieldAlert" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center">
+            <button type="button" data-icon-val="ShieldAlert" class="icon-opt p-2.5 rounded-xl border-2 border-brand-border hover:border-accent-yellow transition text-text-secondary flex justify-center" aria-label="Ikon darurat">
               <ShieldAlert class="w-5 h-5" />
             </button>
           </div>
@@ -121,11 +134,11 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
         <div>
           <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Warna Tema</label>
           <div id="color-picker" class="flex gap-3 items-center">
-            <button type="button" data-color-val="text-brand-navy bg-amber-50" class="color-opt w-7 h-7 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-amber-500 transition"></button>
-            <button type="button" data-color-val="text-emerald-700 bg-emerald-50" class="color-opt w-7 h-7 rounded-full bg-finance-green transition"></button>
-            <button type="button" data-color-val="text-violet-700 bg-violet-50" class="color-opt w-7 h-7 rounded-full bg-violet-500 transition"></button>
-            <button type="button" data-color-val="text-blue-700 bg-blue-50" class="color-opt w-7 h-7 rounded-full bg-blue-500 transition"></button>
-            <button type="button" data-color-val="text-rose-700 bg-rose-50" class="color-opt w-7 h-7 rounded-full bg-finance-red transition"></button>
+            <button type="button" data-color-val="text-brand-navy bg-amber-50" class="color-opt w-7 h-7 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-amber-500 transition" aria-label="Warna amber"></button>
+            <button type="button" data-color-val="text-emerald-700 bg-emerald-50" class="color-opt w-7 h-7 rounded-full bg-finance-green transition" aria-label="Warna hijau"></button>
+            <button type="button" data-color-val="text-violet-700 bg-violet-50" class="color-opt w-7 h-7 rounded-full bg-violet-500 transition" aria-label="Warna violet"></button>
+            <button type="button" data-color-val="text-blue-700 bg-blue-50" class="color-opt w-7 h-7 rounded-full bg-blue-500 transition" aria-label="Warna biru"></button>
+            <button type="button" data-color-val="text-rose-700 bg-rose-50" class="color-opt w-7 h-7 rounded-full bg-finance-red transition" aria-label="Warna merah"></button>
           </div>
         </div>
 
@@ -135,12 +148,17 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
         </div>
       </form>
     </div>
-  </div>
+  </dialog>
 
   <!-- Modal Detail & Aksi Kategori (Pop-up saat List Item Diklik) -->
-  <div id="category-detail-modal" class="hidden fixed inset-0 z-50 bg-brand-navy/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-brand-border p-6 text-center relative animate-in fade-in zoom-in-95 duration-150">
-      <button id="close-detail-modal" class="absolute top-4 right-4 text-text-secondary hover:text-brand-navy transition">
+  <dialog id="category-detail-modal" class="app-dialog" aria-labelledby="detail-modal-name">
+    <div class="relative rounded-2xl border border-brand-border bg-white p-6 text-center shadow-xl">
+      <button
+        type="button"
+        id="close-detail-modal"
+        class="absolute top-4 right-4 text-text-secondary hover:text-brand-navy transition"
+        aria-label="Tutup detail kategori"
+      >
         <X class="w-5 h-5" />
       </button>
 
@@ -160,7 +178,7 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
         </button>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- Hidden Icon Templates -->
   <div id="icon-templates" class="hidden">
@@ -177,13 +195,26 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
   <script>
     import { getAllCategories, addCategory, deleteCategory, updateCategory } from '../lib/db/categories';
     import type { TransactionType } from '../types/finance';
+    import { closeDialog, initDialog, openDialog } from '../lib/ui/dialog';
+    import { toast } from '../lib/ui/toast';
+    import { confirmAction } from '../lib/ui/confirm';
+    import {
+      clearAllErrors,
+      clearOnInput,
+      showFieldErrors,
+      type FieldError,
+    } from '../lib/ui/validation';
+    import { emptyStateHtml } from '../lib/ui/empty-state';
+    import { escapeHtml } from '../lib/ui/html';
 
     let currentTab: TransactionType = 'expense';
 
-    const modal = document.getElementById('category-modal')!;
+    const modal = document.getElementById('category-modal') as HTMLDialogElement;
+    const detailModal = document.getElementById('category-detail-modal') as HTMLDialogElement;
     const openModalBtn = document.getElementById('open-add-modal')!;
     const closeModalBtn = document.getElementById('close-modal')!;
     const cancelModalBtn = document.getElementById('cancel-modal')!;
+    const closeDetailModalBtn = document.getElementById('close-detail-modal')!;
 
     const form = document.getElementById('category-form') as HTMLFormElement;
     const modalTitle = document.getElementById('modal-title')!;
@@ -192,7 +223,7 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
     const typeInput = document.getElementById('type') as HTMLSelectElement;
     const iconInput = document.getElementById('icon') as HTMLInputElement;
     const colorInput = document.getElementById('color') as HTMLInputElement;
-    const submitBtn = document.getElementById('submit-btn')!;
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
     const listContainer = document.getElementById('categories-list')!;
 
     const tabExpenseBtn = document.getElementById('tab-expense')!;
@@ -200,26 +231,47 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
     const categorySectionTitle = document.getElementById('category-section-title')!;
     const categoryCountBadge = document.getElementById('category-count-badge')!;
 
-    function openModal(isEdit = false) {
-      modal.classList.remove('hidden');
-      modalTitle.textContent = isEdit ? 'Edit Kategori' : 'Tambah Kategori Baru';
-      submitBtn.textContent = isEdit ? 'Perbarui Kategori' : 'Simpan Kategori';
-    }
+    const detailIconWrapper = document.getElementById('detail-modal-icon-wrapper')!;
+    const detailName = document.getElementById('detail-modal-name')!;
+    const detailTypeBadge = document.getElementById('detail-modal-type-badge')!;
+    const detailEditBtn = document.getElementById('detail-edit-btn') as HTMLButtonElement;
+    const detailDeleteBtn = document.getElementById('detail-delete-btn') as HTMLButtonElement;
 
-    function closeModal() {
-      modal.classList.add('hidden');
+    const iconBtns = document.querySelectorAll<HTMLElement>('.icon-opt');
+    const colorBtns = document.querySelectorAll<HTMLElement>('.color-opt');
+
+    // ---------------------------------------------------------------
+    // Modal lifecycle
+    // ---------------------------------------------------------------
+
+    function resetForm() {
       form.reset();
       editIdInput.value = '';
       typeInput.value = currentTab;
+      clearAllErrors(form);
       setSelectedIconInPicker('Utensils');
       setSelectedColorInPicker('text-brand-navy bg-amber-50');
     }
 
-    openModalBtn.addEventListener('click', () => openModal(false));
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelModalBtn.addEventListener('click', closeModal);
+    function openModal(isEdit = false) {
+      if (!isEdit) typeInput.value = currentTab;
+      modalTitle.textContent = isEdit ? 'Edit Kategori' : 'Tambah Kategori Baru';
+      submitBtn.textContent = isEdit ? 'Perbarui Kategori' : 'Simpan Kategori';
+      openDialog(modal, '#name');
+    }
 
-    // Tab Switching Logic
+    initDialog(detailModal);
+    initDialog(modal, resetForm);
+
+    openModalBtn.addEventListener('click', () => openModal(false));
+    closeModalBtn.addEventListener('click', () => closeDialog(modal));
+    cancelModalBtn.addEventListener('click', () => closeDialog(modal));
+    closeDetailModalBtn.addEventListener('click', () => closeDialog(detailModal));
+
+    // ---------------------------------------------------------------
+    // Tabs
+    // ---------------------------------------------------------------
+
     tabExpenseBtn.addEventListener('click', () => switchTab('expense'));
     tabIncomeBtn.addEventListener('click', () => switchTab('income'));
 
@@ -228,69 +280,67 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
       typeInput.value = tab;
 
       if (tab === 'expense') {
-        tabExpenseBtn.className = "tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs";
-        tabIncomeBtn.className = "tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200";
-        categorySectionTitle.textContent = "Kategori Pengeluaran";
+        tabExpenseBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs';
+        tabIncomeBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200';
+        categorySectionTitle.textContent = 'Kategori Pengeluaran';
       } else {
-        tabIncomeBtn.className = "tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs";
-        tabExpenseBtn.className = "tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200";
-        categorySectionTitle.textContent = "Kategori Pemasukan";
+        tabIncomeBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs';
+        tabExpenseBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200';
+        categorySectionTitle.textContent = 'Kategori Pemasukan';
       }
 
       renderCategories();
     }
 
-    // Icon Picker Logic
-    const iconBtns = document.querySelectorAll('.icon-opt');
-    iconBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const selectedVal = (e.currentTarget as HTMLElement).getAttribute('data-icon-val') || 'Utensils';
+    // ---------------------------------------------------------------
+    // Icon & color pickers
+    // ---------------------------------------------------------------
+
+    iconBtns.forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+        const selectedVal = (event.currentTarget as HTMLElement).getAttribute('data-icon-val') || 'Utensils';
         iconInput.value = selectedVal;
 
-        iconBtns.forEach(b => {
+        iconBtns.forEach((b) => {
           b.classList.remove('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
           b.classList.add('border-brand-border', 'text-text-secondary');
         });
 
-        (e.currentTarget as HTMLElement).classList.remove('border-brand-border', 'text-text-secondary');
-        (e.currentTarget as HTMLElement).classList.add('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+        (event.currentTarget as HTMLElement).classList.remove('border-brand-border', 'text-text-secondary');
+        (event.currentTarget as HTMLElement).classList.add('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
       });
     });
 
-    // Color Picker Logic
-    const colorBtns = document.querySelectorAll('.color-opt');
-    colorBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const selectedVal = (e.currentTarget as HTMLElement).getAttribute('data-color-val') || 'text-brand-navy bg-amber-50';
+    colorBtns.forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+        const selectedVal = (event.currentTarget as HTMLElement).getAttribute('data-color-val') || 'text-brand-navy bg-amber-50';
         colorInput.value = selectedVal;
 
-        colorBtns.forEach(b => b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500'));
-        (e.currentTarget as HTMLElement).classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+        colorBtns.forEach((b) => b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500'));
+        (event.currentTarget as HTMLElement).classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
       });
     });
 
     function setSelectedIconInPicker(val: string) {
       iconInput.value = val;
-      iconBtns.forEach(b => {
-        const iconVal = b.getAttribute('data-icon-val');
-        if (iconVal === val) {
-          b.classList.remove('border-brand-border', 'text-text-secondary');
-          b.classList.add('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+      iconBtns.forEach((btn) => {
+        if (btn.getAttribute('data-icon-val') === val) {
+          btn.classList.remove('border-brand-border', 'text-text-secondary');
+          btn.classList.add('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
         } else {
-          b.classList.remove('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
-          b.classList.add('border-brand-border', 'text-text-secondary');
+          btn.classList.remove('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+          btn.classList.add('border-brand-border', 'text-text-secondary');
         }
       });
     }
 
     function setSelectedColorInPicker(val: string) {
       colorInput.value = val;
-      colorBtns.forEach(b => {
-        const colorVal = b.getAttribute('data-color-val');
-        if (colorVal === val) {
-          b.classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+      colorBtns.forEach((btn) => {
+        if (btn.getAttribute('data-color-val') === val) {
+          btn.classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
         } else {
-          b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500');
+          btn.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500');
         }
       });
     }
@@ -302,20 +352,44 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
       return defaultTemplate ? defaultTemplate.innerHTML : '';
     }
 
+    // ---------------------------------------------------------------
+    // List rendering
+    // ---------------------------------------------------------------
+
+    listContainer.addEventListener('click', (event) => {
+      const trigger = (event.target as HTMLElement).closest('[data-empty-action="add-category"]');
+      if (trigger) openModal(false);
+    });
+
     async function renderCategories() {
       const allCategories = await getAllCategories();
-      const filteredCategories = allCategories.filter(cat => 
-        cat.name.toLowerCase() !== 'koreksi saldo' && cat.type === currentTab
+      const filteredCategories = allCategories.filter(
+        (cat) => cat.name.toLowerCase() !== 'koreksi saldo' && cat.type === currentTab
       );
 
       categoryCountBadge.textContent = `${filteredCategories.length} Kategori`;
 
       if (filteredCategories.length === 0) {
-        listContainer.innerHTML = `<p class="text-text-secondary text-sm col-span-2 text-center py-8">Belum ada kategori ${currentTab === 'income' ? 'pemasukan' : 'pengeluaran'}.</p>`;
+        const label = currentTab === 'income' ? 'pemasukan' : 'pengeluaran';
+        listContainer.innerHTML = emptyStateHtml({
+          iconHtml: getLucideIconHtml('Utensils'),
+          title: `Belum ada kategori ${label}`,
+          description: 'Buat kategori agar transaksi lebih rapi dan mudah dicari kembali.',
+          actionHtml: `
+            <button
+              type="button"
+              data-empty-action="add-category"
+              class="inline-flex items-center gap-1.5 rounded-xl bg-accent-yellow px-4 py-2 text-[11px] font-bold text-brand-navy shadow-xs transition hover:bg-accent-yellow-hover active:scale-95"
+            >
+              Tambah Kategori
+            </button>
+          `,
+          className: 'col-span-2',
+        });
         return;
       }
 
-      listContainer.innerHTML = filteredCategories.map(cat => {
+      listContainer.innerHTML = filteredCategories.map((cat) => {
         const iconName = cat.icon || 'Utensils';
         const colorClass = cat.color || 'text-brand-navy bg-amber-50';
         const [textColor, bgColor] = colorClass.split(' ');
@@ -323,37 +397,26 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
         return `
           <div 
             class="category-card p-3.5 border border-brand-border/80 rounded-2xl bg-white shadow-xs hover:border-accent-yellow hover:shadow-md transition cursor-pointer flex items-center gap-3"
-            data-id="${cat.id}" 
-            data-name="${cat.name}" 
-            data-type="${cat.type}"
-            data-icon="${iconName}"
-            data-color="${colorClass}"
+            data-id="${escapeHtml(cat.id)}"
+            data-name="${escapeHtml(cat.name)}"
+            data-type="${escapeHtml(cat.type)}"
+            data-icon="${escapeHtml(iconName)}"
+            data-color="${escapeHtml(colorClass)}"
           >
             <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${bgColor || 'bg-amber-50'} ${textColor || 'text-brand-navy'} shadow-xs border border-brand-border/50">
               ${getLucideIconHtml(iconName)}
             </div>
             <div class="min-w-0">
-              <p class="font-bold text-brand-navy text-sm truncate">${cat.name}</p>
+              <p class="font-bold text-brand-navy text-sm truncate">${escapeHtml(cat.name)}</p>
               <p class="text-[11px] text-text-secondary font-medium mt-0.5">${cat.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}</p>
             </div>
           </div>
         `;
       }).join('');
 
-      // Modal Detail Handlers
-      const detailModal = document.getElementById('category-detail-modal')!;
-      const closeDetailModalBtn = document.getElementById('close-detail-modal')!;
-      const detailIconWrapper = document.getElementById('detail-modal-icon-wrapper')!;
-      const detailName = document.getElementById('detail-modal-name')!;
-      const detailTypeBadge = document.getElementById('detail-modal-type-badge')!;
-      const detailEditBtn = document.getElementById('detail-edit-btn')!;
-      const detailDeleteBtn = document.getElementById('detail-delete-btn')!;
-
-      closeDetailModalBtn.onclick = () => detailModal.classList.add('hidden');
-
-      document.querySelectorAll('.category-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-          const el = e.currentTarget as HTMLElement;
+      document.querySelectorAll<HTMLElement>('.category-card').forEach((card) => {
+        card.addEventListener('click', (event) => {
+          const el = event.currentTarget as HTMLElement;
           const id = el.getAttribute('data-id') || '';
           const name = el.getAttribute('data-name') || '';
           const type = el.getAttribute('data-type') || 'expense';
@@ -375,49 +438,130 @@ import { Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAler
           }
 
           detailEditBtn.onclick = () => {
-            detailModal.classList.add('hidden');
+            closeDialog(detailModal);
             editIdInput.value = id;
             nameInput.value = name;
             typeInput.value = type;
             setSelectedIconInPicker(iconName);
             setSelectedColorInPicker(colorClass);
+            clearAllErrors(form);
             openModal(true);
           };
 
           detailDeleteBtn.onclick = async () => {
-            if (confirm(`Yakin ingin menghapus kategori ${name}?`)) {
+            if (detailDeleteBtn.dataset.busy === '1') return;
+
+            const confirmed = await confirmAction({
+              title: 'Hapus kategori?',
+              message: `"${name}" akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`,
+              confirmLabel: 'Hapus Kategori',
+              variant: 'danger',
+            });
+            if (!confirmed) return;
+
+            detailDeleteBtn.dataset.busy = '1';
+            detailDeleteBtn.disabled = true;
+
+            try {
               const res = await deleteCategory(id);
-              detailModal.classList.add('hidden');
+
               if (!res.success) {
-                alert(res.message);
-              } else {
-                renderCategories();
+                toast.error(res.message);
+                return;
               }
+
+              closeDialog(detailModal);
+              toast.success(res.message || 'Kategori berhasil dihapus.');
+              await renderCategories();
+            } catch {
+              toast.error('Gagal menghapus kategori. Coba lagi.');
+            } finally {
+              detailDeleteBtn.dataset.busy = '0';
+              detailDeleteBtn.disabled = false;
             }
           };
 
-          detailModal.classList.remove('hidden');
+          openDialog(detailModal, '#close-detail-modal');
         });
       });
     }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // ---------------------------------------------------------------
+    // Validation + submit
+    // ---------------------------------------------------------------
+
+    clearOnInput([nameInput, typeInput]);
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (submitBtn.dataset.busy === '1') return;
+
       const editId = editIdInput.value;
-      const name = nameInput.value;
+      const name = nameInput.value.trim();
       const type = typeInput.value as TransactionType;
       const icon = iconInput.value;
       const color = colorInput.value;
 
-      if (editId) {
-        const res = await updateCategory(editId, { name, type, icon, color });
-        alert(res.message);
+      const errors: FieldError[] = [];
+
+      if (!name) {
+        errors.push({ field: nameInput, message: 'Nama kategori wajib diisi.' });
+      } else if (name.length > 30) {
+        errors.push({ field: nameInput, message: 'Nama kategori maksimal 30 karakter.' });
+      } else if (name.toLowerCase() === 'koreksi saldo') {
+        errors.push({ field: nameInput, message: 'Nama ini dipakai sistem untuk penyesuaian saldo.' });
       } else {
-        await addCategory({ name, type, icon, color });
+        const existingCategories = await getAllCategories();
+        const duplicate = existingCategories.some(
+          (cat) =>
+            cat.id !== editId &&
+            cat.type === type &&
+            cat.name.trim().toLowerCase() === name.toLowerCase()
+        );
+        if (duplicate) {
+          errors.push({
+            field: nameInput,
+            message: `Kategori ${type === 'income' ? 'pemasukan' : 'pengeluaran'} dengan nama ini sudah ada.`,
+          });
+        }
       }
 
-      closeModal();
-      renderCategories();
+      clearAllErrors(form);
+      if (showFieldErrors(errors)) {
+        toast.error('Periksa kembali field yang ditandai.');
+        return;
+      }
+
+      submitBtn.dataset.busy = '1';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Menyimpan...';
+
+      try {
+        if (editId) {
+          const res = await updateCategory(editId, { name, type, icon, color });
+          if (!res.success) {
+            toast.error(res.message);
+            return;
+          }
+          toast.success(res.message);
+        } else {
+          const newId = await addCategory({ name, type, icon, color });
+          if (!newId) {
+            toast.error('Gagal menyimpan kategori.');
+            return;
+          }
+          toast.success('Kategori berhasil ditambahkan.');
+        }
+
+        closeDialog(modal);
+        switchTab(type);
+      } catch {
+        toast.error('Terjadi kesalahan saat menyimpan kategori. Coba lagi.');
+      } finally {
+        submitBtn.dataset.busy = '0';
+        submitBtn.disabled = false;
+        submitBtn.textContent = editId ? 'Perbarui Kategori' : 'Simpan Kategori';
+      }
     });
 
     renderCategories();

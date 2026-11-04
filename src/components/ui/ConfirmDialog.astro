@@ -1,0 +1,61 @@
+<!-- Dialog konfirmasi global (dipasang sekali di Layout) -->
+<dialog
+  id="app-confirm-dialog"
+  class="app-dialog"
+  aria-labelledby="app-confirm-title"
+>
+  <div class="w-full rounded-2xl border border-brand-border bg-white p-5 shadow-2xl">
+    <div class="flex items-start gap-3">
+      <span
+        id="app-confirm-icon"
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-finance-red/10 text-finance-red"
+        aria-hidden="true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-5 w-5"
+        >
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
+        </svg>
+      </span>
+
+      <div class="min-w-0">
+        <h2 id="app-confirm-title" class="text-base font-bold text-brand-navy">
+          Konfirmasi
+        </h2>
+        <p
+          id="app-confirm-message"
+          class="mt-1 text-xs leading-relaxed text-text-secondary"
+        >
+          Lanjutkan tindakan ini?
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-5 flex gap-2">
+      <button
+        type="button"
+        id="app-confirm-cancel"
+        data-autofocus
+        class="flex-1 rounded-xl bg-brand-light px-4 py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200 active:scale-95"
+      >
+        Batal
+      </button>
+      <button
+        type="button"
+        id="app-confirm-ok"
+        class="flex-1 rounded-xl bg-finance-red px-4 py-2.5 text-xs font-bold text-white transition hover:bg-red-600 active:scale-95"
+      >
+        Hapus
+      </button>
+    </div>
+  </div>
+</dialog>

@@ -6,13 +6,25 @@ interface Props {
   subtitle?: string;
   showBack?: boolean;
   backHref?: string;
+  centerTitle?: boolean;
 }
 
-const { title, subtitle, showBack = false, backHref = '/' } = Astro.props;
+const {
+  title,
+  subtitle,
+  showBack = false,
+  backHref = '/',
+  centerTitle = false,
+} = Astro.props;
 ---
 
-<header class="sticky top-0 z-40 w-full bg-brand-light/80 backdrop-blur-md border-b border-brand-border/60 px-4 py-3.5 transition-all">
-  <div class="flex items-center gap-3">
+<header
+  class:list={[
+    'sticky top-0 z-40 w-full bg-brand-light/80 backdrop-blur-md border-b border-brand-border/60 px-4 transition-all',
+    subtitle ? 'py-3.5' : 'py-3',
+  ]}
+>
+  <div class:list={['flex items-center gap-3', centerTitle && 'justify-center']}>
     {showBack && (
       <a 
         href={backHref}
@@ -23,12 +35,12 @@ const { title, subtitle, showBack = false, backHref = '/' } = Astro.props;
       </a>
     )}
 
-    <div class="min-w-0">
+    <div class:list={['min-w-0', centerTitle && 'text-center']}>
       <h1 class="text-lg font-bold text-brand-navy tracking-tight truncate leading-snug">
         {title}
       </h1>
       {subtitle && (
-        <p class="text-xs text-text-secondary truncate mt-0.5 font-medium">
+        <p class="text-xs text-text-secondary line-clamp-2 mt-0.5 font-medium">
           {subtitle}
         </p>
       )}

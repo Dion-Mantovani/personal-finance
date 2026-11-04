@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css';
 import BottomNav from '../components/BottomNav.astro';
+import ToastHost from '../components/ui/ToastHost.astro';
+import ConfirmDialog from '../components/ui/ConfirmDialog.astro';
 
 interface Props {
   title?: string;
@@ -32,7 +34,7 @@ const { title = 'Finance App', activeTab = 'dashboard' } = Astro.props;
     <div class="w-full max-w-md min-h-screen flex flex-col bg-brand-light/90 backdrop-blur-xl border-x border-brand-border/60 relative shadow-2xl shadow-slate-300/50">
       
       <!-- Area Content Utama -->
-      <main class="flex-1 px-4 pt-6 pb-28 w-full overflow-y-auto">
+      <main class="flex-1 px-4 pt-6 pb-28 w-full overflow-y-auto overflow-x-hidden">
         <slot />
       </main>
 
@@ -40,6 +42,10 @@ const { title = 'Finance App', activeTab = 'dashboard' } = Astro.props;
       <BottomNav activeTab={activeTab} />
 
     </div>
+
+    <!-- Shared UI primitives -->
+    <ToastHost />
+    <ConfirmDialog />
 
   </body>
 </html>
