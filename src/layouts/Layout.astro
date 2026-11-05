@@ -3,21 +3,40 @@ import '../styles/global.css';
 import BottomNav from '../components/BottomNav.astro';
 import ToastHost from '../components/ui/ToastHost.astro';
 import ConfirmDialog from '../components/ui/ConfirmDialog.astro';
+import IconTemplates from '../components/ui/IconTemplates.astro';
 
 interface Props {
   title?: string;
-  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history' | 'transactions';
+  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history';
+  hideNav?: boolean;
+  fitScreen?: boolean;
 }
 
-const { title = 'Finance App', activeTab = 'dashboard' } = Astro.props;
+const {
+  title = 'Finance App',
+  activeTab = 'dashboard',
+  hideNav = false,
+  fitScreen = false,
+} = Astro.props;
 ---
 
 <!DOCTYPE html>
 <html lang="id" class="h-full bg-slate-200 text-text-primary antialiased selection:bg-accent-yellow selection:text-white">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="Catatan keuangan pribadi yang offline-first." />
     <title>{title}</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0B132B" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Finance" />
     
     <!-- Google Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,21 +50,41 @@ const { title = 'Finance App', activeTab = 'dashboard' } = Astro.props;
     <div class="fixed bottom-[-10%] right-[-10%] w-[350px] h-[350px] bg-finance-green/10 rounded-full blur-[120px] pointer-events-none"></div>
 
     <!-- Wrapper Utama Mobile-First (Light Glassmorphism Container) -->
-    <div class="w-full max-w-md min-h-screen flex flex-col bg-brand-light/90 backdrop-blur-xl border-x border-brand-border/60 relative shadow-2xl shadow-slate-300/50">
+    <div
+      class="w-full max-w-md h-dvh flex flex-col overflow-hidden bg-brand-light/90 backdrop-blur-xl border-x border-brand-border/60 relative shadow-2xl shadow-slate-300/50"
+      style="padding-top: env(safe-area-inset-top);"
+    >
       
       <!-- Area Content Utama -->
-      <main class="flex-1 px-4 pt-6 pb-28 w-full overflow-y-auto overflow-x-hidden">
+      <main
+        class:list={[
+          'flex-1 min-h-0 px-4 w-full overflow-y-auto overflow-x-hidden',
+          fitScreen ? 'pt-5' : 'pt-7',
+        ]}
+        style={fitScreen
+          ? 'padding-bottom: calc(1rem + env(safe-area-inset-bottom));'
+          : 'padding-bottom: calc(7rem + env(safe-area-inset-bottom));'}
+      >
         <slot />
       </main>
 
       <!-- Bottom Navigation Component -->
-      <BottomNav activeTab={activeTab} />
+      {!hideNav && <BottomNav activeTab={activeTab} />}
 
     </div>
 
     <!-- Shared UI primitives -->
     <ToastHost />
     <ConfirmDialog />
+    <IconTemplates />
+
+    <script>
+      if ('serviceWorker' in navigator && import.meta.env.PROD) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
 
   </body>
 </html>

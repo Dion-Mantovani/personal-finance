@@ -112,3 +112,43 @@ dialog.app-dialog::backdrop {
   border-color: var(--color-finance-red) !important;
   box-shadow: 0 0 0 3px rgb(239 68 68 / 0.12) !important;
 }
+
+/* Utility: scroll tetap berfungsi tanpa scrollbar visual */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hero nominal transaksi */
+#tx-amount::-webkit-inner-spin-button,
+#tx-amount::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#tx-amount {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  caret-color: white;
+}
+
+.tx-amount-field [data-field-error] {
+  margin-top: 4px;
+  text-align: center;
+  color: #fecaca;
+}
+
+.tx-amount-field:has([data-invalid="true"]) .tx-amount-row {
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px rgb(254 202 202 / 0.55);
+}
+
+.tx-amount-field [data-invalid="true"] {
+  border-color: transparent !important;
+  border-radius: 10px;
+  box-shadow: none !important;
+}

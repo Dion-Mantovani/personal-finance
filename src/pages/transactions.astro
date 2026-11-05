@@ -1,668 +1,223 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
 import { 
   Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAlert, 
-  ArrowLeftRight, Wallet, CreditCard, Landmark, PiggyBank, Coins, ChevronDown, ArrowDownLeft, ArrowUpRight 
+  ArrowLeftRight, Wallet, CreditCard, Landmark, PiggyBank, Coins, ChevronDown,
+  ArrowDownLeft, ArrowUpRight, X, Sparkles, History, Calendar, LayoutGrid, StickyNote
 } from '@lucide/astro';
 ---
 
-<Layout title="Form Transaksi" activeTab='transactions'>
-  <div class="max-w-xl mx-auto space-y-5 pb-12">
-    
-    <!-- 1. Header Ringkas (Tanpa Subtitle) -->
-    <Header 
-      title="Catat Transaksi" 
-      showBack={true} 
-      backHref="/history"
-    />
+<Layout title="Form Transaksi" activeTab='history' hideNav fitScreen>
+  <form id="tx-form" class="flex flex-col gap-3" novalidate>
+    <input type="hidden" id="edit-id" value="" />
+    <input type="hidden" id="tx-type" value="expense" />
+    <input type="hidden" id="tx-account" value="" />
+    <input type="hidden" id="tx-to-account" value="" />
+    <input type="hidden" id="tx-category" value="" />
 
-    <!-- Form Container -->
-    <div class="bg-white p-6 rounded-3xl border border-brand-border/80 shadow-xs">
-      <form id="tx-form" class="space-y-4" novalidate>
-        <input type="hidden" id="edit-id" value="" />
-        <input type="hidden" id="tx-type" value="expense" /> <!-- Default expense -->
-        <input type="hidden" id="tx-account" value="" />
-        <input type="hidden" id="tx-to-account" value="" />
-        <input type="hidden" id="tx-category" value="" />
+    <!-- Hero: judul + nominal -->
+    <section class="relative shrink-0 overflow-hidden rounded-[26px] border border-white/10 bg-brand-navy p-4 text-white shadow-xl">
+      <div class="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-accent-yellow/15 blur-3xl"></div>
+      <div class="pointer-events-none absolute -left-12 bottom-[-60px] h-40 w-40 rounded-full bg-white/5"></div>
 
-        <!-- Peringatan bila data master belum ada -->
-        <div id="tx-warning" class="hidden space-y-2"></div>
-
-        <!-- 2. Tipe Transaksi Model Tabs -->
-        <div>
-          <label class="block text-xs font-semibold text-brand-navy mb-1.5">Tipe Transaksi</label>
-          <div class="p-1 rounded-2xl bg-brand-light flex items-center border border-brand-border/60">
-            <button 
-              type="button" 
-              class="type-tab-btn flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all bg-white text-brand-navy shadow-xs"
-              data-type="expense"
-            >
-              <ArrowDownLeft class="w-3.5 h-3.5 text-finance-red stroke-[2.5]" />
-              <span>Keluar</span>
-            </button>
-            <button 
-              type="button" 
-              class="type-tab-btn flex-1 py-2 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1 transition-all"
-              data-type="income"
-            >
-              <ArrowUpRight class="w-3.5 h-3.5 text-finance-green stroke-[2.5]" />
-              <span>Masuk</span>
-            </button>
-            <button 
-              type="button" 
-              class="type-tab-btn flex-1 py-2 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1 transition-all"
-              data-type="transfer"
-            >
-              <ArrowLeftRight class="w-3.5 h-3.5 text-brand-navy stroke-[2.5]" />
-              <span>Transfer</span>
-            </button>
+      <div class="relative z-10 flex flex-col gap-3">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-2.5">
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/10">
+              <Sparkles class="w-3.5 h-3.5 text-accent-yellow" />
+            </span>
+            <h1 id="tx-page-title" class="truncate text-sm font-bold tracking-tight text-white">Tambah Transaksi</h1>
           </div>
+
+          <a
+            href="/history"
+            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:bg-white/15 active:scale-95"
+            aria-label="Tutup form transaksi"
+          >
+            <X class="w-3.5 h-3.5" />
+          </a>
         </div>
 
-        <!-- 3. Nominal (Tampil Gagah & Agak Besar) -->
-        <div data-field>
-          <label class="block text-xs font-semibold text-brand-navy mb-1" for="tx-amount">Jumlah (Rp)</label>
-          <div class="relative flex items-center">
-            <span class="absolute left-4 text-xl font-extrabold text-text-secondary">Rp</span>
-            <input 
-              type="number" 
-              id="tx-amount" 
-              placeholder="0" 
+        <div data-field class="tx-amount-field">
+          <p class="text-center text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300">Nominal Transaksi</p>
+          <div class="tx-amount-row mt-1.5 flex items-baseline gap-2">
+            <span class="text-sm font-bold text-white/70">Rp</span>
+            <input
+              type="number"
+              id="tx-amount"
+              placeholder="0"
               min="1"
               step="1"
-              required 
-              class="w-full pl-12 pr-4 py-3.5 border-2 border-brand-border rounded-2xl focus:outline-none focus:border-accent-yellow text-2xl font-black text-brand-navy bg-brand-light/30 tracking-tight" 
+              required
+              enterkeyhint="next"
+              aria-label="Nominal transaksi"
+              class="min-w-0 flex-1 border-0 bg-transparent text-3xl font-extrabold tracking-tight text-white placeholder:text-white/30 focus:outline-none"
             />
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- 4. Tanggal -->
+    <!-- Peringatan bila data master belum ada -->
+    <div id="tx-warning" class="hidden shrink-0 space-y-2"></div>
+
+    <!-- Sering Digunakan (Isi Cepat) -->
+    <section id="autofill-section" class="hidden shrink-0">
+      <div class="mb-1.5 flex items-center gap-1.5 px-1">
+        <History class="h-3.5 w-3.5 text-accent-yellow-hover" />
+        <span class="text-[11px] font-bold text-brand-navy">Sering Digunakan</span>
+        <span class="text-[10px] italic text-text-secondary">(Auto-fill)</span>
+      </div>
+      <div id="autofill-list" class="no-scrollbar flex gap-2 overflow-x-auto pb-0.5"></div>
+    </section>
+
+    <!-- Tipe Transaksi -->
+    <div class="shrink-0 rounded-2xl border border-brand-border/70 bg-white p-1 shadow-xs">
+      <div class="grid grid-cols-3 gap-1">
+        <button
+          type="button"
+          class="type-tab-btn flex items-center justify-center gap-1 rounded-xl bg-brand-navy py-2 text-xs font-bold text-white shadow-xs transition-all"
+          data-type="expense"
+        >
+          <ArrowDownLeft class="w-3.5 h-3.5" />
+          <span>Keluar</span>
+        </button>
+        <button
+          type="button"
+          class="type-tab-btn flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-medium text-text-secondary transition-all hover:bg-brand-light hover:text-brand-navy"
+          data-type="income"
+        >
+          <ArrowUpRight class="w-3.5 h-3.5" />
+          <span>Masuk</span>
+        </button>
+        <button
+          type="button"
+          class="type-tab-btn flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-medium text-text-secondary transition-all hover:bg-brand-light hover:text-brand-navy"
+          data-type="transfer"
+        >
+          <ArrowLeftRight class="w-3.5 h-3.5" />
+          <span>Transfer</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card field -->
+    <div class="flex flex-col rounded-[24px] border border-brand-border/60 bg-white p-4 shadow-lg shadow-slate-200/60">
+      <div class="flex flex-col gap-3">
         <div data-field>
-          <label class="block text-xs font-semibold text-brand-navy mb-1" for="tx-date">Tanggal</label>
-          <input type="date" id="tx-date" required class="w-full px-3 py-2.5 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50 font-semibold text-brand-navy" />
+          <label class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy" for="tx-date">
+            <Calendar class="w-3.5 h-3.5 text-accent-yellow-hover" />
+            Tanggal
+          </label>
+          <input
+            type="date"
+            id="tx-date"
+            required
+            class="w-full rounded-xl border border-brand-border/70 bg-brand-light/60 px-3 py-3 text-[13px] font-semibold text-brand-navy focus:outline-none focus:ring-2 focus:ring-accent-yellow"
+          />
         </div>
 
-        <!-- 5. Akun (Asal / Tujuan Transfer) -->
-        <div class="grid grid-cols-1 gap-4" id="accounts-section">
-          <!-- Akun Asal -->
-          <div class="relative" data-field>
-            <label id="account-label" class="block text-xs font-semibold text-brand-navy mb-1">Akun / Dompet</label>
-            <button type="button" id="account-dropdown-btn" class="w-full flex items-center justify-between px-3 py-2.5 border border-brand-border rounded-xl bg-brand-light/50 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow">
-              <span id="selected-account-label" class="flex items-center gap-2 text-text-secondary">Pilih Akun...</span>
-              <ChevronDown class="w-4 h-4 text-text-secondary" />
-            </button>
-            <div id="account-dropdown-menu" class="hidden absolute z-20 mt-1 w-full bg-white border border-brand-border rounded-xl shadow-lg max-h-48 overflow-y-auto p-1 space-y-1"></div>
-          </div>
-
-          <!-- Akun Tujuan (Khusus Transfer) -->
-          <div id="to-account-container" class="relative hidden" data-field>
-            <label class="block text-xs font-semibold text-brand-navy mb-1">Ke Akun Tujuan</label>
-            <button type="button" id="to-account-dropdown-btn" class="w-full flex items-center justify-between px-3 py-2.5 border border-brand-border rounded-xl bg-brand-light/50 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow">
-              <span id="selected-to-account-label" class="flex items-center gap-2 text-text-secondary">Pilih Akun Tujuan...</span>
-              <ChevronDown class="w-4 h-4 text-text-secondary" />
-            </button>
-            <div id="to-account-dropdown-menu" class="hidden absolute z-20 mt-1 w-full bg-white border border-brand-border rounded-xl shadow-lg max-h-48 overflow-y-auto p-1 space-y-1"></div>
-          </div>
+        <div data-field>
+          <label id="account-label" class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy">
+            <Wallet class="w-3.5 h-3.5 text-accent-yellow-hover" />
+            <span id="account-label-text">Akun</span>
+          </label>
+          <button
+            type="button"
+            id="account-summary-btn"
+            class="flex w-full items-center justify-between gap-2 rounded-xl border border-brand-border/70 bg-brand-light/60 px-3 py-3 text-left text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow"
+          >
+            <span id="account-summary-text" class="truncate text-text-secondary">Pilih akun...</span>
+            <ChevronDown class="w-4 h-4 shrink-0 text-text-secondary" />
+          </button>
         </div>
 
-        <!-- 6. Kategori (Disembunyikan jika Transfer) -->
         <div id="category-container" class="relative" data-field>
-          <label class="block text-xs font-semibold text-brand-navy mb-1">Kategori</label>
-          <button type="button" id="category-dropdown-btn" class="w-full flex items-center justify-between px-3 py-2.5 border border-brand-border rounded-xl bg-brand-light/50 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow">
+          <label class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy">
+            <LayoutGrid class="w-3.5 h-3.5 text-accent-yellow-hover" />
+            Kategori
+          </label>
+          <button
+            type="button"
+            id="category-dropdown-btn"
+            class="flex w-full items-center justify-between rounded-xl border border-brand-border/70 bg-brand-light/60 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow"
+          >
             <span id="selected-category-label" class="flex items-center gap-2 text-text-secondary">Pilih Kategori...</span>
             <ChevronDown class="w-4 h-4 text-text-secondary" />
           </button>
-          <div id="category-dropdown-menu" class="hidden absolute z-20 mt-1 w-full bg-white border border-brand-border rounded-xl shadow-lg max-h-48 overflow-y-auto p-1 space-y-1"></div>
+          <div id="category-dropdown-menu" class="hidden absolute bottom-full z-30 mb-1 w-full space-y-1 rounded-xl border border-brand-border bg-white p-1 shadow-lg max-h-48 overflow-y-auto"></div>
         </div>
 
-        <!-- 7. Catatan (Opsional) -->
         <div>
-          <label class="block text-xs font-semibold text-brand-navy mb-1" for="tx-note">Catatan (Opsional)</label>
-          <input type="text" id="tx-note" placeholder="cth: Makan siang, bayar wifi, transfer tabungan..." class="w-full px-3 py-2.5 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50" />
+          <label class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy" for="tx-note">
+            <StickyNote class="w-3.5 h-3.5 text-accent-yellow-hover" />
+            Deskripsi (Opsional)
+          </label>
+          <input
+            type="text"
+            id="tx-note"
+            enterkeyhint="done"
+            placeholder="Tulis detail transaksi di sini..."
+            class="w-full rounded-xl border border-brand-border/70 bg-brand-light/60 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow"
+          />
         </div>
-
-        <!-- Dynamic Action Buttons -->
-        <div id="form-actions-container" class="flex gap-2.5 pt-4 border-t border-brand-border/60">
-          <!-- Rendered dynamically via Script -->
-        </div>
-      </form>
+      </div>
     </div>
-  </div>
 
-  <!-- Hidden Icon Templates -->
-  <div id="icon-templates" class="hidden">
-    <template data-icon-name="Utensils"><Utensils class="w-4 h-4" /></template>
-    <template data-icon-name="ShoppingBag"><ShoppingBag class="w-4 h-4" /></template>
-    <template data-icon-name="Car"><Car class="w-4 h-4" /></template>
-    <template data-icon-name="Zap"><Zap class="w-4 h-4" /></template>
-    <template data-icon-name="Banknote"><Banknote class="w-4 h-4" /></template>
-    <template data-icon-name="HeartPulse"><HeartPulse class="w-4 h-4" /></template>
-    <template data-icon-name="Film"><Film class="w-4 h-4" /></template>
-    <template data-icon-name="ShieldAlert"><ShieldAlert class="w-4 h-4" /></template>
-    <template data-icon-name="Wallet"><Wallet class="w-4 h-4" /></template>
-    <template data-icon-name="CreditCard"><CreditCard class="w-4 h-4" /></template>
-    <template data-icon-name="Landmark"><Landmark class="w-4 h-4" /></template>
-    <template data-icon-name="PiggyBank"><PiggyBank class="w-4 h-4" /></template>
-    <template data-icon-name="Coins"><Coins class="w-4 h-4" /></template>
-    <template data-icon-name="ArrowLeftRight"><ArrowLeftRight class="w-4 h-4" /></template>
-  </div>
+    <!-- Actions -->
+    <div id="form-actions-container" class="mt-1 flex gap-2"></div>
+  </form>
+
+  <!-- Modal Pilih Akun (sumber / transfer) -->
+  <dialog id="tx-account-modal" class="app-dialog" aria-labelledby="tx-account-modal-title">
+    <div class="flex max-h-[85vh] flex-col overflow-hidden rounded-2xl border border-brand-border bg-white shadow-xl">
+      <div class="flex items-center justify-between border-b border-brand-border/60 px-5 py-4">
+        <h2 id="tx-account-modal-title" class="text-base font-bold text-brand-navy">Pilih Akun</h2>
+        <button
+          type="button"
+          id="close-account-modal"
+          class="text-text-secondary transition hover:text-brand-navy"
+          aria-label="Tutup pilihan akun"
+        >
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <div class="min-h-0 flex-1 overflow-y-auto p-5">
+        <section>
+          <p id="source-account-heading" class="mb-2 text-xs font-semibold text-brand-navy">Akun Sumber</p>
+          <div id="source-account-list" class="space-y-2"></div>
+        </section>
+
+        <section id="destination-account-section" class="mt-4 hidden">
+          <p class="mb-2 text-xs font-semibold text-brand-navy">Ke Akun Tujuan</p>
+          <div id="destination-account-list" class="space-y-2"></div>
+        </section>
+
+        <p id="account-modal-hint" class="mt-3 hidden rounded-xl bg-rose-50 px-3 py-2 text-[11px] font-semibold text-finance-red"></p>
+      </div>
+
+      <div class="flex gap-2 border-t border-brand-border/60 px-5 py-4">
+        <button
+          type="button"
+          id="account-modal-cancel"
+          class="flex-1 rounded-xl bg-brand-light py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200 active:scale-95"
+        >
+          Batal
+        </button>
+        <button
+          type="button"
+          id="account-modal-confirm"
+          class="hidden flex-1 rounded-xl bg-accent-yellow py-2.5 text-xs font-bold text-brand-navy transition hover:bg-accent-yellow-hover active:scale-95"
+        >
+          Lanjut
+        </button>
+      </div>
+    </div>
+  </dialog>
 
   <script>
-    import { getAllAccounts } from '../lib/db/accounts';
-    import { getAllCategories, addCategory } from '../lib/db/categories';
-    import { getAllTransactions, addTransaction, updateTransaction, deleteTransaction } from '../lib/db/transactions';
-    import type { TransactionType, Category, Account } from '../types/finance';
-    import { setFlash, toast } from '../lib/ui/toast';
-    import { confirmAction } from '../lib/ui/confirm';
-    import {
-      clearAllErrors,
-      clearFieldError,
-      clearOnInput,
-      showFieldErrors,
-      type FieldError,
-    } from '../lib/ui/validation';
-    import { escapeHtml } from '../lib/ui/html';
-
-    const form = document.getElementById('tx-form') as HTMLFormElement;
-    const editIdInput = document.getElementById('edit-id') as HTMLInputElement;
-    const typeInput = document.getElementById('tx-type') as HTMLInputElement;
-    const amountInput = document.getElementById('tx-amount') as HTMLInputElement;
-    const accountInput = document.getElementById('tx-account') as HTMLInputElement;
-    const toAccountInput = document.getElementById('tx-to-account') as HTMLInputElement;
-    const categoryInput = document.getElementById('tx-category') as HTMLInputElement;
-    const dateInput = document.getElementById('tx-date') as HTMLInputElement;
-    const noteInput = document.getElementById('tx-note') as HTMLInputElement;
-    const actionsContainer = document.getElementById('form-actions-container')!;
-    const warningContainer = document.getElementById('tx-warning')!;
-
-    const accountLabel = document.getElementById('account-label')!;
-    const toAccountContainer = document.getElementById('to-account-container')!;
-    const categoryContainer = document.getElementById('category-container')!;
-
-    // Dropdown Elements
-    const accBtn = document.getElementById('account-dropdown-btn')!;
-    const accMenu = document.getElementById('account-dropdown-menu')!;
-    const accLabel = document.getElementById('selected-account-label')!;
-
-    const toAccBtn = document.getElementById('to-account-dropdown-btn')!;
-    const toAccMenu = document.getElementById('to-account-dropdown-menu')!;
-    const toAccLabel = document.getElementById('selected-to-account-label')!;
-
-    const catBtn = document.getElementById('category-dropdown-btn')!;
-    const catMenu = document.getElementById('category-dropdown-menu')!;
-    const catLabel = document.getElementById('selected-category-label')!;
-
-    let submitting = false;
-    let availableCategories: Category[] = [];
-
-    function toLocalDateKey(date = new Date()): string {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    dateInput.value = toLocalDateKey();
-
-    function renderFormActions(isEdit: boolean, editId?: string) {
-      if (isEdit) {
-        actionsContainer.innerHTML = `
-          <button type="button" id="delete-tx-btn" class="flex-1 bg-rose-50 text-finance-red font-semibold py-2.5 rounded-xl hover:bg-rose-100 transition text-xs">Hapus</button>
-          <button type="submit" id="submit-btn" class="flex-1 bg-accent-yellow text-brand-navy font-bold py-2.5 rounded-xl hover:bg-accent-yellow-hover transition text-xs shadow-xs">Perbarui</button>
-        `;
-
-        document.getElementById('delete-tx-btn')?.addEventListener('click', async () => {
-          if (!editId || submitting) return;
-
-          const confirmed = await confirmAction({
-            title: 'Hapus transaksi?',
-            message: 'Transaksi ini akan dihapus permanen dan saldo akan menyesuaikan kembali.',
-            confirmLabel: 'Hapus Transaksi',
-            variant: 'danger',
-          });
-          if (!confirmed) return;
-
-          submitting = true;
-          try {
-            await deleteTransaction(editId);
-            setFlash('Transaksi berhasil dihapus.');
-            window.location.href = '/history';
-          } catch {
-            submitting = false;
-            toast.error('Gagal menghapus transaksi. Coba lagi.');
-          }
-        });
-      } else {
-        actionsContainer.innerHTML = `
-          <a href="/history" class="flex-1 text-center bg-brand-light text-text-primary font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs flex items-center justify-center">Batal</a>
-          <button type="submit" id="submit-btn" class="flex-1 bg-accent-yellow text-brand-navy font-bold py-2.5 rounded-xl hover:bg-accent-yellow-hover transition text-xs shadow-xs">Simpan Transaksi</button>
-        `;
-      }
-    }
-
-    function getLucideIconHtml(iconName: string) {
-      const template = document.querySelector(`#icon-templates template[data-icon-name="${iconName}"]`) as HTMLTemplateElement;
-      if (template) return template.innerHTML;
-      const defaultTemplate = document.querySelector(`#icon-templates template[data-icon-name="ArrowLeftRight"]`) as HTMLTemplateElement;
-      return defaultTemplate ? defaultTemplate.innerHTML : '';
-    }
-
-    function renderFormWarnings(accounts: Account[], categories: Category[]) {
-      const warnings: string[] = [];
-
-      if (accounts.length === 0) {
-        warnings.push(`
-          Belum ada dompet. Tambahkan akun dulu di
-          <a href="/accounts" class="font-bold text-accent-yellow-hover underline underline-offset-2">halaman Dompet</a>
-          sebelum mencatat transaksi.
-        `);
-      }
-
-      if (categories.length === 0) {
-        warnings.push(`
-          Belum ada kategori. Buat kategori di
-          <a href="/categories" class="font-bold text-accent-yellow-hover underline underline-offset-2">halaman Kategori</a>
-          agar transaksi masuk/keluar bisa disimpan.
-        `);
-      }
-
-      if (warnings.length === 0) {
-        warningContainer.classList.add('hidden');
-        warningContainer.innerHTML = '';
-        return;
-      }
-
-      warningContainer.classList.remove('hidden');
-      warningContainer.innerHTML = warnings
-        .map(
-          (message) => `
-            <div class="rounded-2xl border border-accent-yellow/30 bg-accent-yellow/5 p-3.5 text-[11px] leading-relaxed text-brand-navy">
-              ${message}
-            </div>
-          `
-        )
-        .join('');
-    }
-
-    // Close Dropdowns on Click Outside
-    document.addEventListener('click', (event) => {
-      if (!accBtn.contains(event.target as Node) && !accMenu.contains(event.target as Node)) accMenu.classList.add('hidden');
-      if (!toAccBtn.contains(event.target as Node) && !toAccMenu.contains(event.target as Node)) toAccMenu.classList.add('hidden');
-      if (!catBtn.contains(event.target as Node) && !catMenu.contains(event.target as Node)) catMenu.classList.add('hidden');
-    });
-
-    accBtn.addEventListener('click', () => {
-      accMenu.classList.toggle('hidden');
-      toAccMenu.classList.add('hidden');
-      catMenu.classList.add('hidden');
-    });
-
-    toAccBtn.addEventListener('click', () => {
-      toAccMenu.classList.toggle('hidden');
-      accMenu.classList.add('hidden');
-      catMenu.classList.add('hidden');
-    });
-
-    catBtn.addEventListener('click', () => {
-      catMenu.classList.toggle('hidden');
-      accMenu.classList.add('hidden');
-      toAccMenu.classList.add('hidden');
-    });
-
-    function setSelectedAccount(acc?: Account) {
-      if (!acc) {
-        accountInput.value = '';
-        accLabel.className = 'flex items-center gap-2 text-text-secondary';
-        accLabel.innerHTML = 'Pilih Akun...';
-        return;
-      }
-
-      accountInput.value = acc.id;
-      clearFieldError(accBtn);
-      const [textColor, bgColor] = (acc.color || 'text-brand-navy bg-amber-50').split(' ');
-      accLabel.className = 'flex items-center gap-2 text-brand-navy font-bold';
-      accLabel.innerHTML = `
-        <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">
-          ${getLucideIconHtml(acc.icon || 'Wallet')}
-        </div>
-        <span>${escapeHtml(acc.name)}</span>
-      `;
-    }
-
-    function setSelectedToAccount(acc?: Account) {
-      if (!acc) {
-        toAccountInput.value = '';
-        toAccLabel.className = 'flex items-center gap-2 text-text-secondary';
-        toAccLabel.innerHTML = 'Pilih Akun Tujuan...';
-        return;
-      }
-
-      toAccountInput.value = acc.id;
-      clearFieldError(toAccBtn);
-      const [textColor, bgColor] = (acc.color || 'text-brand-navy bg-amber-50').split(' ');
-      toAccLabel.className = 'flex items-center gap-2 text-brand-navy font-bold';
-      toAccLabel.innerHTML = `
-        <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">
-          ${getLucideIconHtml(acc.icon || 'Wallet')}
-        </div>
-        <span>${escapeHtml(acc.name)}</span>
-      `;
-    }
-
-    function setSelectedCategory(cat?: Category) {
-      if (!cat) {
-        categoryInput.value = '';
-        catLabel.className = 'flex items-center gap-2 text-text-secondary';
-        catLabel.innerHTML = 'Pilih Kategori...';
-        return;
-      }
-
-      categoryInput.value = cat.id;
-      clearFieldError(catBtn);
-      const [textColor, bgColor] = (cat.color || 'text-brand-navy bg-amber-50').split(' ');
-      catLabel.className = 'flex items-center gap-2 text-brand-navy font-bold';
-      catLabel.innerHTML = `
-        <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">
-          ${getLucideIconHtml(cat.icon || 'Utensils')}
-        </div>
-        <span>${escapeHtml(cat.name)}</span>
-      `;
-    }
-
-    function handleTypeChange(type: TransactionType) {
-      typeInput.value = type;
-
-      if (type === 'transfer') {
-        accountLabel.textContent = 'Dari Akun';
-        toAccountContainer.classList.remove('hidden');
-        categoryContainer.classList.add('hidden');
-        setSelectedCategory(undefined);
-        return;
-      }
-
-      accountLabel.textContent = 'Akun / Dompet';
-      toAccountContainer.classList.add('hidden');
-      categoryContainer.classList.remove('hidden');
-      renderCategoryOptions(type);
-
-      const selected = availableCategories.find((cat) => cat.id === categoryInput.value);
-      if (selected && selected.type !== type) {
-        setSelectedCategory(undefined);
-      }
-    }
-
-    /**
-     * Kategori disaring sesuai tipe transaksi supaya kategori pemasukan
-     * tidak bisa dipakai untuk pengeluaran (dan sebaliknya).
-     */
-    function renderCategoryOptions(type: TransactionType): void {
-      const options = availableCategories.filter((cat) => cat.type === type);
-
-      if (options.length === 0) {
-        const label = type === 'income' ? 'pemasukan' : 'pengeluaran';
-        catMenu.innerHTML = `
-          <p class="px-3 py-3 text-[11px] leading-relaxed text-text-secondary">
-            Belum ada kategori ${label}.
-            <a href="/categories" class="font-bold text-accent-yellow-hover underline underline-offset-2">Buat kategori</a>
-            terlebih dahulu.
-          </p>
-        `;
-        return;
-      }
-
-      catMenu.innerHTML = options
-        .map((cat) => {
-          const [textColor, bgColor] = (cat.color || 'text-brand-navy bg-amber-50').split(' ');
-          return `
-            <button type="button" data-id="${escapeHtml(cat.id)}" class="cat-option w-full flex items-center gap-2 px-3 py-2 hover:bg-brand-light rounded-xl transition text-sm text-left">
-              <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">${getLucideIconHtml(cat.icon || 'Utensils')}</div>
-              <span class="font-bold text-brand-navy">${escapeHtml(cat.name)}</span>
-              <span class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full ${cat.type === 'income' ? 'bg-finance-green/10 text-finance-green' : 'bg-rose-50 text-finance-red'}">${cat.type}</span>
-            </button>
-          `;
-        })
-        .join('');
-
-      catMenu.querySelectorAll('.cat-option').forEach((btn) => {
-        btn.addEventListener('click', (event) => {
-          const id = (event.currentTarget as HTMLElement).getAttribute('data-id');
-          setSelectedCategory(availableCategories.find((cat) => cat.id === id));
-          catMenu.classList.add('hidden');
-        });
-      });
-    }
-
-    // Tabs Type Switching Logic
-    const typeTabBtns = document.querySelectorAll<HTMLElement>('.type-tab-btn');
-    typeTabBtns.forEach((btn) => {
-      btn.addEventListener('click', (event) => {
-        const target = event.currentTarget as HTMLElement;
-        const type = target.getAttribute('data-type') as TransactionType;
-
-        typeTabBtns.forEach((tabBtn) => {
-          tabBtn.className = 'type-tab-btn flex-1 py-2 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1 transition-all';
-        });
-        target.className = 'type-tab-btn flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all bg-white text-brand-navy shadow-xs';
-
-        handleTypeChange(type);
-        clearAllErrors(form);
-      });
-    });
-
-    async function getOrCreateTransferCategory(): Promise<string> {
-      const categories = await getAllCategories();
-      const existing = categories.find(
-        (cat) => cat.type === 'transfer' && cat.name.toLowerCase() === 'transfer'
-      );
-      if (existing) return existing.id;
-
-      const newId = await addCategory({
-        name: 'Transfer',
-        type: 'transfer',
-        icon: 'ArrowLeftRight',
-        color: 'text-brand-navy bg-amber-50',
-      });
-      return newId || '';
-    }
-
-    async function initForm() {
-      const accounts = await getAllAccounts();
-      const allCategories = await getAllCategories();
-      const categories = allCategories.filter((cat) => cat.name.toLowerCase() !== 'koreksi saldo');
-
-      renderFormWarnings(accounts, categories);
-
-      const renderAccountOptions = () => {
-        return accounts.map((acc) => {
-          const [textColor, bgColor] = (acc.color || 'text-brand-navy bg-amber-50').split(' ');
-          return `
-            <button type="button" data-id="${escapeHtml(acc.id)}" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-brand-light rounded-xl transition text-sm text-left font-bold text-brand-navy">
-              <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">${getLucideIconHtml(acc.icon || 'Wallet')}</div>
-              <span>${escapeHtml(acc.name)}</span>
-            </button>
-          `;
-        }).join('');
-      };
-
-      accMenu.innerHTML = renderAccountOptions();
-      accMenu.querySelectorAll('button').forEach((btn) => {
-        btn.addEventListener('click', (event) => {
-          const id = (event.currentTarget as HTMLElement).getAttribute('data-id');
-          setSelectedAccount(accounts.find((acc) => acc.id === id));
-          accMenu.classList.add('hidden');
-        });
-      });
-
-      toAccMenu.innerHTML = renderAccountOptions();
-      toAccMenu.querySelectorAll('button').forEach((btn) => {
-        btn.addEventListener('click', (event) => {
-          const id = (event.currentTarget as HTMLElement).getAttribute('data-id');
-          setSelectedToAccount(accounts.find((acc) => acc.id === id));
-          toAccMenu.classList.add('hidden');
-        });
-      });
-
-      availableCategories = categories;
-      renderCategoryOptions(typeInput.value as TransactionType);
-
-      // Mode Edit Check (?id=xxx)
-      const urlParams = new URLSearchParams(window.location.search);
-      const editId = urlParams.get('id');
-
-      if (editId) {
-        const transactions = await getAllTransactions();
-        const txToEdit = transactions.find((tx) => tx.id === editId);
-        if (txToEdit) {
-          editIdInput.value = txToEdit.id;
-          
-          // Set Active Tab UI berdasarkan tipe transaksi
-          typeInput.value = txToEdit.type;
-          typeTabBtns.forEach((btn) => {
-            if (btn.getAttribute('data-type') === txToEdit.type) {
-              btn.className = 'type-tab-btn flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all bg-white text-brand-navy shadow-xs';
-            } else {
-              btn.className = 'type-tab-btn flex-1 py-2 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1 transition-all';
-            }
-          });
-
-          handleTypeChange(txToEdit.type);
-
-          amountInput.value = txToEdit.amount.toString();
-          dateInput.value = txToEdit.date;
-          noteInput.value = txToEdit.note || '';
-
-          setSelectedAccount(accounts.find((acc) => acc.id === txToEdit.accountId));
-          if (txToEdit.toAccountId) {
-            setSelectedToAccount(accounts.find((acc) => acc.id === txToEdit.toAccountId));
-          }
-          if (txToEdit.categoryId) {
-            setSelectedCategory(categories.find((cat) => cat.id === txToEdit.categoryId));
-          }
-
-          renderFormActions(true, editId);
-        } else {
-          toast.error('Transaksi tidak ditemukan.');
-          renderFormActions(false);
-        }
-      } else {
-        renderFormActions(false);
-      }
-    }
-
-    function buildErrors(type: TransactionType): FieldError[] {
-      const errors: FieldError[] = [];
-
-      const amountRaw = amountInput.value.trim();
-      const amount = Number(amountRaw);
-
-      if (!amountRaw || !Number.isFinite(amount) || amount <= 0) {
-        errors.push({ field: amountInput, message: 'Nominal harus lebih dari 0.' });
-      } else if (!Number.isInteger(amount)) {
-        errors.push({ field: amountInput, message: 'Nominal tidak boleh mengandung desimal.' });
-      } else if (amount > 1_000_000_000_000) {
-        errors.push({ field: amountInput, message: 'Nominal terlalu besar.' });
-      }
-
-      if (!dateInput.value) {
-        errors.push({ field: dateInput, message: 'Tanggal wajib diisi.' });
-      } else if (Number.isNaN(new Date(`${dateInput.value}T00:00:00`).getTime())) {
-        errors.push({ field: dateInput, message: 'Tanggal tidak valid.' });
-      }
-
-      if (!accountInput.value) {
-        errors.push({ field: accBtn, message: 'Pilih akun terlebih dahulu.' });
-      }
-
-      if (type === 'transfer') {
-        if (!toAccountInput.value) {
-          errors.push({ field: toAccBtn, message: 'Pilih akun tujuan transfer.' });
-        } else if (toAccountInput.value === accountInput.value) {
-          errors.push({ field: toAccBtn, message: 'Akun asal dan tujuan tidak boleh sama.' });
-        }
-      } else if (!categoryInput.value) {
-        errors.push({ field: catBtn, message: 'Pilih kategori terlebih dahulu.' });
-      }
-
-      return errors;
-    }
-
-    clearOnInput([amountInput, dateInput, noteInput]);
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      if (submitting) return;
-
-      const editId = editIdInput.value;
-      const type = typeInput.value as TransactionType;
-      const amount = Number(amountInput.value);
-      const accountId = accountInput.value;
-      const toAccountId = toAccountInput.value;
-      const date = dateInput.value;
-      const note = noteInput.value;
-
-      clearAllErrors(form);
-      if (showFieldErrors(buildErrors(type))) {
-        toast.error('Periksa kembali field yang ditandai.');
-        return;
-      }
-
-      const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
-      const originalLabel = submitBtn?.textContent ?? '';
-      submitting = true;
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Menyimpan...';
-      }
-
-      try {
-        let categoryId = categoryInput.value;
-        if (type === 'transfer') {
-          categoryId = await getOrCreateTransferCategory();
-          if (!categoryId) {
-            toast.error('Gagal menyiapkan kategori transfer.');
-            return;
-          }
-        }
-
-        const txPayload = {
-          amount,
-          type,
-          accountId,
-          ...(type === 'transfer' ? { toAccountId } : {}),
-          categoryId,
-          date,
-          note: note.trim() || undefined,
-        };
-
-        if (editId) {
-          const res = await updateTransaction(editId, txPayload);
-          if (!res.success) {
-            toast.error(res.message);
-            return;
-          }
-          setFlash(res.message);
-        } else {
-          const newId = await addTransaction(txPayload);
-          if (!newId) {
-            toast.error('Gagal menyimpan transaksi.');
-            return;
-          }
-          setFlash('Transaksi berhasil dicatat.');
-        }
-
-        window.location.href = '/history';
-      } catch {
-        toast.error('Terjadi kesalahan saat menyimpan transaksi. Coba lagi.');
-      } finally {
-        submitting = false;
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = originalLabel;
-        }
-      }
-    });
-
-    initForm();
+    import { initTransactionsPage } from '../scripts/transactions';
+    initTransactionsPage();
   </script>
 </Layout>

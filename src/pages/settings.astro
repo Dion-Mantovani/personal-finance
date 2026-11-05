@@ -1,0 +1,173 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import {
+  Database,
+  Upload,
+  Trash2,
+  FileJson,
+  AlertTriangle,
+} from '@lucide/astro';
+---
+
+<Layout title="Kelola Data" hideNav>
+  <div class="space-y-4 pb-6">
+    <Header title="Kelola Data" showBack backHref="/" />
+
+    <p class="px-1 text-xs leading-relaxed text-text-secondary">
+      Import data dari aplikasi lain atau hapus seluruh data yang tersimpan di perangkat ini.
+    </p>
+
+    <!-- Ringkasan data -->
+    <section class="rounded-3xl border border-brand-border/70 bg-white p-4 shadow-xs">
+      <div class="flex items-center gap-2">
+        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-accent-yellow/10 text-accent-yellow-hover">
+          <Database class="w-4 h-4" />
+        </span>
+        <h2 class="text-sm font-bold text-brand-navy">Ringkasan Data</h2>
+      </div>
+
+      <div class="mt-3 grid grid-cols-3 gap-2">
+        <div class="rounded-2xl bg-brand-light px-2 py-3 text-center">
+          <p id="count-accounts" class="text-lg font-extrabold text-brand-navy">0</p>
+          <p class="text-[10px] font-semibold text-text-secondary">Akun</p>
+        </div>
+        <div class="rounded-2xl bg-brand-light px-2 py-3 text-center">
+          <p id="count-categories" class="text-lg font-extrabold text-brand-navy">0</p>
+          <p class="text-[10px] font-semibold text-text-secondary">Kategori</p>
+        </div>
+        <div class="rounded-2xl bg-brand-light px-2 py-3 text-center">
+          <p id="count-transactions" class="text-lg font-extrabold text-brand-navy">0</p>
+          <p class="text-[10px] font-semibold text-text-secondary">Transaksi</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Import data -->
+    <section class="rounded-3xl border border-brand-border/70 bg-white p-4 shadow-xs">
+      <div class="flex items-start gap-2.5">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent-yellow/10 text-accent-yellow-hover">
+          <Upload class="w-4 h-4" />
+        </span>
+        <div class="min-w-0">
+          <h2 class="text-sm font-bold text-brand-navy">Import Data</h2>
+          <p class="mt-0.5 text-[11px] leading-relaxed text-text-secondary">
+            Gabungkan akun, kategori, dan transaksi dari file JSON aplikasi lain.
+          </p>
+        </div>
+      </div>
+
+      <input
+        type="file"
+        id="import-file"
+        accept=".json,application/json"
+        class="hidden"
+      />
+
+      <button
+        type="button"
+        id="pick-import-file"
+        class="mt-4 flex w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-brand-border bg-brand-light/40 px-4 py-4 text-xs font-semibold text-text-secondary transition hover:border-accent-yellow hover:text-brand-navy active:scale-[0.99]"
+      >
+        <FileJson class="h-5 w-5 text-accent-yellow-hover" />
+        <span>Pilih file JSON</span>
+      </button>
+
+      <p id="import-file-name" class="mt-2 hidden truncate text-[11px] font-semibold text-brand-navy"></p>
+
+      <p
+        id="import-error"
+        class="mt-2 hidden rounded-xl bg-rose-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-finance-red"
+      ></p>
+
+      <div id="import-preview" class="mt-3 hidden rounded-2xl border border-brand-border/70 bg-brand-light/40 p-3">
+        <p id="import-summary" class="text-[11px] font-semibold leading-relaxed text-brand-navy"></p>
+        <ul id="import-warnings" class="mt-1.5 hidden list-disc space-y-0.5 pl-4 text-[10px] leading-relaxed text-text-secondary"></ul>
+        <button
+          type="button"
+          id="import-submit"
+          class="mt-3 w-full rounded-xl bg-brand-navy py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-brand-navy/90 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+        >
+          Import Data
+        </button>
+      </div>
+
+      <p class="mt-3 text-[10px] leading-relaxed text-text-secondary">
+        Format: array <code>accounts</code>, <code>categories</code>, dan <code>transactions</code>.
+        Data akan digabung, bukan menimpa data yang sudah ada.
+      </p>
+    </section>
+
+    <!-- Hapus data -->
+    <section class="rounded-3xl border border-finance-red/25 bg-white p-4 shadow-xs">
+      <div class="flex items-start gap-2.5">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-finance-red/10 text-finance-red">
+          <Trash2 class="w-4 h-4" />
+        </span>
+        <div class="min-w-0">
+          <h2 class="text-sm font-bold text-brand-navy">Hapus Semua Data</h2>
+          <p class="mt-0.5 text-[11px] leading-relaxed text-text-secondary">
+            Semua akun, kategori, dan transaksi akan dihapus permanen dari perangkat ini.
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        id="open-clear-dialog"
+        class="mt-4 w-full rounded-xl bg-finance-red py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-red-600 active:scale-95"
+      >
+        Hapus Semua Data
+      </button>
+    </section>
+  </div>
+
+  <!-- Dialog konfirmasi hapus -->
+  <dialog id="clear-data-dialog" class="app-dialog" aria-labelledby="clear-data-title">
+    <div class="rounded-2xl border border-brand-border bg-white p-5 shadow-xl">
+      <div class="flex items-start gap-3">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-finance-red/10 text-finance-red">
+          <AlertTriangle class="h-5 w-5" />
+        </span>
+        <div class="min-w-0">
+          <h2 id="clear-data-title" class="text-base font-bold text-brand-navy">Hapus semua data?</h2>
+          <p class="mt-1 text-xs leading-relaxed text-text-secondary">
+            Tindakan ini permanen. Ketik <strong class="text-brand-navy">HAPUS</strong> untuk mengaktifkan tombol.
+          </p>
+        </div>
+      </div>
+
+      <input
+        type="text"
+        id="clear-confirm-input"
+        autocomplete="off"
+        placeholder="Ketik HAPUS"
+        data-autofocus
+        class="mt-4 w-full rounded-xl border border-brand-border bg-brand-light/50 px-3 py-2.5 text-sm font-semibold text-brand-navy focus:outline-none focus:ring-2 focus:ring-finance-red"
+      />
+
+      <div class="mt-4 flex gap-2">
+        <button
+          type="button"
+          id="clear-cancel"
+          class="flex-1 rounded-xl bg-brand-light py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200 active:scale-95"
+        >
+          Batal
+        </button>
+        <button
+          type="button"
+          id="clear-confirm"
+          disabled
+          class="flex-1 rounded-xl bg-finance-red py-2.5 text-xs font-bold text-white transition hover:bg-red-600 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+        >
+          Hapus Semua
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    import { initSettingsPage } from '../scripts/settings';
+    initSettingsPage();
+  </script>
+</Layout>

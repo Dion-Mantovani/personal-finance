@@ -4,11 +4,10 @@ import {
   Wallet, 
   FolderKanban, 
   History, 
-  ArrowLeftRight 
 } from '@lucide/astro';
 
 interface Props {
-  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history' | 'transactions';
+  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history';
 }
 
 const { activeTab = 'dashboard' } = Astro.props;
@@ -18,13 +17,15 @@ const navItems = [
   { id: 'accounts', label: 'Dompet', href: '/accounts', icon: Wallet },
   { id: 'categories', label: 'Kategori', href: '/categories', icon: FolderKanban },
   { id: 'history', label: 'Riwayat', href: '/history', icon: History },
-  { id: 'transactions', label: 'Trans', href: '/transactions', icon: ArrowLeftRight },
 ];
 ---
 
 <!-- Bottom Navigation Container (Glassmorphism Style) -->
-<nav class="fixed bottom-0 left-0 right-0 z-50 w-full max-w-md mx-auto bg-brand-surface/80 backdrop-blur-xl border-t border-white/10 px-2 py-2">
-  <ul class="grid grid-cols-5 items-center">
+<nav
+  class="fixed bottom-0 left-0 right-0 z-50 w-full max-w-md mx-auto bg-brand-surface/80 backdrop-blur-xl border-t border-white/10 px-2 pt-2"
+  style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));"
+>
+  <ul class="grid grid-cols-4 items-center">
     {navItems.map((item) => {
       const Icon = item.icon;
       const isActive = activeTab === item.id;
