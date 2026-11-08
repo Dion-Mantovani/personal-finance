@@ -78,6 +78,8 @@ async function getOrCreateCorrectionCategory(type: 'income' | 'expense'): Promis
   const newCatId = await addCategory({
     name: 'Koreksi Saldo',
     type: type,
+    icon: 'RefreshCw',
+    color: 'text-blue-700 bg-blue-50',
   });
 
   return newCatId || '';

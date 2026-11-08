@@ -9,6 +9,7 @@ import {
 import { closeDialog, initDialog, openDialog } from '../lib/ui/dialog';
 import { toast } from '../lib/ui/toast';
 import { confirmAction } from '../lib/ui/confirm';
+import { getProfileName, setProfileName } from '../lib/ui/profile';
 import {
   mapForeignPayload,
   parseForeignPayload,
@@ -17,6 +18,14 @@ import {
 } from '../lib/import/foreign-format';
 
 export function initSettingsPage(): void {
+  const profileDialog = document.getElementById('profile-modal') as HTMLDialogElement;
+  const openProfileBtn = document.getElementById('open-profile-modal') as HTMLButtonElement;
+  const closeProfileBtn = document.getElementById('close-profile-modal') as HTMLButtonElement;
+  const cancelProfileBtn = document.getElementById('cancel-profile') as HTMLButtonElement;
+  const profileForm = document.getElementById('profile-form') as HTMLFormElement;
+  const profileNameInput = document.getElementById('profile-name-input') as HTMLInputElement;
+  const profileNameDisplay = document.getElementById('profile-name-display')!;
+
   const fileInput = document.getElementById('import-file') as HTMLInputElement;
   const pickFileBtn = document.getElementById('pick-import-file') as HTMLButtonElement;
   const fileNameEl = document.getElementById('import-file-name')!;
@@ -38,6 +47,41 @@ export function initSettingsPage(): void {
 
   let pendingPayload: ForeignPayload | null = null;
   let importing = false;
+
+  // ------------------------------------------------------------------
+  // Profil (nama tampil di sapaan Dashboard)
+  // ------------------------------------------------------------------
+
+  function refreshProfileDisplay(): void {
+    profileNameDisplay.textContent = getProfileName();
+  }
+
+  function openProfileModal(): void {
+    profileNameInput.value = getProfileName();
+    openDialog(profileDialog, '#profile-name-input');
+  }
+
+  initDialog(profileDialog);
+  refreshProfileDisplay();
+
+  openProfileBtn.addEventListener('click', openProfileModal);
+  closeProfileBtn.addEventListener('click', () => closeDialog(profileDialog));
+  cancelProfileBtn.addEventListener('click', () => closeDialog(profileDialog));
+
+  profileForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    if (!profileNameInput.value.trim()) {
+      toast.error('Nama tidak boleh kosong.');
+      profileNameInput.focus();
+      return;
+    }
+
+    setProfileName(profileNameInput.value);
+    refreshProfileDisplay();
+    closeDialog(profileDialog);
+    toast.success('Profil diperbarui.');
+  });
 
   function resetPreview(): void {
     pendingPayload = null;
@@ -223,6 +267,7 @@ export function initSettingsPage(): void {
     try {
       await clearAllData();
       localStorage.removeItem('pf:account-order');
+      localStorage.removeItem('pf:quick-shortcuts');
       toast.success('Semua data berhasil dihapus.');
       closeDialog(clearDialog);
       await refreshCounts();

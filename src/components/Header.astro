@@ -20,30 +20,39 @@ const {
 
 <header
   class:list={[
-    'sticky top-0 z-40 w-full bg-brand-light/80 backdrop-blur-md border-b border-brand-border/60 px-4 transition-all',
-    subtitle ? 'py-3.5' : 'py-3',
+    'fixed top-0 z-40 -mx-4 w-[calc(100%+2rem)] border-b border-border/80 bg-background/95 px-4 backdrop-blur-md',
+    subtitle ? 'py-3' : 'py-2.5',
   ]}
 >
-  <div class:list={['flex items-center gap-3', centerTitle && 'justify-center']}>
-    {showBack && (
-      <a 
+  <div
+    class:list={[
+      'flex items-center gap-2',
+      centerTitle ? 'justify-between' : '',
+    ]}
+  >
+    {showBack ? (
+      <a
         href={backHref}
-        class="flex items-center justify-center w-9 h-9 rounded-xl bg-white/80 border border-brand-border/80 text-brand-navy shadow-xs hover:bg-slate-100 active:scale-95 transition-all shrink-0"
+        class="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95"
         aria-label="Kembali"
       >
-        <ArrowLeft class="w-5 h-5 stroke-[2.2]" />
+        <ArrowLeft class="h-4.5 w-4.5 stroke-[2.5]" />
       </a>
-    )}
+    ) : centerTitle ? (
+      <span class="h-9.5 w-9.5 shrink-0" aria-hidden="true"></span>
+    ) : null}
 
-    <div class:list={['min-w-0', centerTitle && 'text-center']}>
-      <h1 class="text-lg font-bold text-brand-navy tracking-tight truncate leading-snug">
+    <div class:list={['min-w-0 flex-1', centerTitle && 'text-center']}>
+      <h1 class="truncate text-base font-extrabold leading-snug tracking-tight text-primary">
         {title}
       </h1>
       {subtitle && (
-        <p class="text-xs text-text-secondary line-clamp-2 mt-0.5 font-medium">
+        <p class="mt-0.5 line-clamp-2 text-[11px] font-medium text-muted-foreground">
           {subtitle}
         </p>
       )}
     </div>
+
+    {centerTitle && <span class="h-9.5 w-9.5 shrink-0" aria-hidden="true"></span>}
   </div>
 </header>

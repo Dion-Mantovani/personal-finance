@@ -78,15 +78,15 @@ export function confirmAction(options: ConfirmOptions): Promise<boolean> {
 
     okBtn.className = danger
       ? 'flex-1 rounded-xl bg-finance-red px-4 py-2.5 text-xs font-bold text-white transition hover:bg-red-600 active:scale-95'
-      : 'flex-1 rounded-xl bg-accent-yellow px-4 py-2.5 text-xs font-bold text-brand-navy transition hover:bg-accent-yellow-hover active:scale-95';
+      : 'flex-1 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:opacity-90 active:scale-95';
 
     cancelBtn.className =
-      'flex-1 rounded-xl bg-brand-light px-4 py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200 active:scale-95';
+      'flex-1 rounded-xl bg-muted px-4 py-2.5 text-xs font-semibold text-foreground transition hover:bg-slate-200 active:scale-95';
 
     if (iconEl) {
       iconEl.className = danger
         ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-finance-red/10 text-finance-red'
-        : 'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-yellow/15 text-accent-yellow-hover';
+        : 'flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-soft text-blue-main';
     }
 
     openDialog(dialog, '#app-confirm-cancel');

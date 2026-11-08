@@ -104,12 +104,12 @@ export function getQuickPalette(
   categoriesById: Map<string, Category>
 ): QuickPalette {
   const category = categoriesById.get(pattern.categoryId);
-  const colorClass = category?.color || 'text-brand-navy bg-amber-50';
+  const colorClass = category?.color || 'text-blue-700 bg-blue-50';
   const [textColor, bgColor] = colorClass.split(' ');
 
   return {
-    textColor: textColor || 'text-brand-navy',
-    bgColor: bgColor || 'bg-amber-50',
+    textColor: textColor || 'text-primary',
+    bgColor: bgColor || 'bg-blue-50',
     iconName: category?.icon || (pattern.type === 'transfer' ? 'ArrowLeftRight' : 'Wallet'),
   };
 }

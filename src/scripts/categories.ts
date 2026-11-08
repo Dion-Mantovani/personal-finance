@@ -57,7 +57,7 @@ export function initCategoriesPage(): void {
     typeInput.value = currentTab;
     clearAllErrors(form);
     setSelectedIconInPicker('Utensils');
-    setSelectedColorInPicker('text-brand-navy bg-amber-50');
+    setSelectedColorInPicker('text-blue-700 bg-blue-50');
   }
 
   function openModal(isEdit = false) {
@@ -87,12 +87,12 @@ export function initCategoriesPage(): void {
     typeInput.value = tab;
 
     if (tab === 'expense') {
-      tabExpenseBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs';
-      tabIncomeBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200';
+      tabExpenseBtn.className = 'tab-btn flex items-center justify-center gap-2 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground shadow-soft transition-all';
+      tabIncomeBtn.className = 'tab-btn flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold text-muted-foreground transition-all hover:text-foreground';
       categorySectionTitle.textContent = 'Kategori Pengeluaran';
     } else {
-      tabIncomeBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs';
-      tabExpenseBtn.className = 'tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200';
+      tabIncomeBtn.className = 'tab-btn flex items-center justify-center gap-2 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground shadow-soft transition-all';
+      tabExpenseBtn.className = 'tab-btn flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold text-muted-foreground transition-all hover:text-foreground';
       categorySectionTitle.textContent = 'Kategori Pemasukan';
     }
 
@@ -109,22 +109,22 @@ export function initCategoriesPage(): void {
       iconInput.value = selectedVal;
 
       iconBtns.forEach((b) => {
-        b.classList.remove('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
-        b.classList.add('border-brand-border', 'text-text-secondary');
+        b.classList.remove('border-blue-main', 'bg-blue-soft', 'text-primary');
+        b.classList.add('border-border', 'text-muted-foreground');
       });
 
-      (event.currentTarget as HTMLElement).classList.remove('border-brand-border', 'text-text-secondary');
-      (event.currentTarget as HTMLElement).classList.add('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+      (event.currentTarget as HTMLElement).classList.remove('border-border', 'text-muted-foreground');
+      (event.currentTarget as HTMLElement).classList.add('border-blue-main', 'bg-blue-soft', 'text-primary');
     });
   });
 
   colorBtns.forEach((btn) => {
     btn.addEventListener('click', (event) => {
-      const selectedVal = (event.currentTarget as HTMLElement).getAttribute('data-color-val') || 'text-brand-navy bg-amber-50';
+      const selectedVal = (event.currentTarget as HTMLElement).getAttribute('data-color-val') || 'text-blue-700 bg-blue-50';
       colorInput.value = selectedVal;
 
-      colorBtns.forEach((b) => b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500'));
-      (event.currentTarget as HTMLElement).classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+      colorBtns.forEach((b) => b.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-main'));
+      (event.currentTarget as HTMLElement).classList.add('ring-2', 'ring-offset-2', 'ring-blue-main');
     });
   });
 
@@ -132,11 +132,11 @@ export function initCategoriesPage(): void {
     iconInput.value = val;
     iconBtns.forEach((btn) => {
       if (btn.getAttribute('data-icon-val') === val) {
-        btn.classList.remove('border-brand-border', 'text-text-secondary');
-        btn.classList.add('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
+        btn.classList.remove('border-border', 'text-muted-foreground');
+        btn.classList.add('border-blue-main', 'bg-blue-soft', 'text-primary');
       } else {
-        btn.classList.remove('border-accent-yellow', 'bg-accent-yellow/10', 'text-brand-navy');
-        btn.classList.add('border-brand-border', 'text-text-secondary');
+        btn.classList.remove('border-blue-main', 'bg-blue-soft', 'text-primary');
+        btn.classList.add('border-border', 'text-muted-foreground');
       }
     });
   }
@@ -145,9 +145,9 @@ export function initCategoriesPage(): void {
     colorInput.value = val;
     colorBtns.forEach((btn) => {
       if (btn.getAttribute('data-color-val') === val) {
-        btn.classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+        btn.classList.add('ring-2', 'ring-offset-2', 'ring-blue-main');
       } else {
-        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500');
+        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-main');
       }
     });
   }
@@ -176,6 +176,9 @@ export function initCategoriesPage(): void {
 
     categoryCountBadge.textContent = `${filteredCategories.length} Kategori`;
 
+    // Tombol dashed hanya tampil kalau tab aktif sudah punya kategori.
+    openModalBtn.classList.toggle('hidden', filteredCategories.length === 0);
+
     if (filteredCategories.length === 0) {
       const label = currentTab === 'income' ? 'pemasukan' : 'pengeluaran';
       listContainer.innerHTML = emptyStateHtml({
@@ -186,7 +189,7 @@ export function initCategoriesPage(): void {
           <button
             type="button"
             data-empty-action="add-category"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-accent-yellow px-4 py-2 text-[11px] font-bold text-brand-navy shadow-xs transition hover:bg-accent-yellow-hover active:scale-95"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-[11px] font-bold text-white shadow-xs transition hover:opacity-90 active:scale-95"
           >
             Tambah Kategori
           </button>
@@ -198,25 +201,22 @@ export function initCategoriesPage(): void {
 
     listContainer.innerHTML = filteredCategories.map((cat) => {
       const iconName = cat.icon || 'Utensils';
-      const colorClass = cat.color || 'text-brand-navy bg-amber-50';
+      const colorClass = cat.color || 'text-blue-700 bg-blue-50';
       const [textColor, bgColor] = colorClass.split(' ');
 
       return `
-        <div 
-          class="category-card p-3.5 border border-brand-border/80 rounded-2xl bg-white shadow-xs hover:border-accent-yellow hover:shadow-md transition cursor-pointer flex items-center gap-3"
+        <div
+          class="category-card flex items-center gap-3 rounded-[22px] border border-border bg-card p-4 text-left shadow-soft transition-colors hover:bg-muted/40 active:scale-[0.99] cursor-pointer"
           data-id="${escapeHtml(cat.id)}"
           data-name="${escapeHtml(cat.name)}"
           data-type="${escapeHtml(cat.type)}"
           data-icon="${escapeHtml(iconName)}"
           data-color="${escapeHtml(colorClass)}"
         >
-          <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${bgColor || 'bg-amber-50'} ${textColor || 'text-brand-navy'} shadow-xs border border-brand-border/50">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${bgColor || 'bg-blue-50'} ${textColor || 'text-primary'}">
             ${getLucideIconHtml(iconName)}
           </div>
-          <div class="min-w-0">
-            <p class="font-bold text-brand-navy text-sm truncate">${escapeHtml(cat.name)}</p>
-            <p class="text-[11px] text-text-secondary font-medium mt-0.5">${cat.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}</p>
-          </div>
+          <span class="min-w-0 truncate text-sm font-semibold text-foreground">${escapeHtml(cat.name)}</span>
         </div>
       `;
     }).join('');
@@ -228,20 +228,16 @@ export function initCategoriesPage(): void {
         const name = el.getAttribute('data-name') || '';
         const type = el.getAttribute('data-type') || 'expense';
         const iconName = el.getAttribute('data-icon') || 'Utensils';
-        const colorClass = el.getAttribute('data-color') || 'text-brand-navy bg-amber-50';
+        const colorClass = el.getAttribute('data-color') || 'text-blue-700 bg-blue-50';
 
-        const [textColor, bgColor] = colorClass.split(' ');
-
-        detailIconWrapper.className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-xs border border-brand-border/50 mb-3 ${bgColor} ${textColor}`;
+        detailIconWrapper.className = 'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white';
         detailIconWrapper.innerHTML = getLucideIconHtml(iconName);
         detailName.textContent = name;
-        
+
         if (type === 'income') {
-          detailTypeBadge.textContent = 'Pemasukan';
-          detailTypeBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-finance-green/10 text-finance-green';
+          detailTypeBadge.textContent = 'Kategori Pemasukan';
         } else {
-          detailTypeBadge.textContent = 'Pengeluaran';
-          detailTypeBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-rose-50 text-finance-red';
+          detailTypeBadge.textContent = 'Kategori Pengeluaran';
         }
 
         detailEditBtn.onclick = () => {

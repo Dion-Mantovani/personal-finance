@@ -1,157 +1,206 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { 
-  Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAlert, 
-  ArrowLeftRight, Wallet, CreditCard, Landmark, PiggyBank, Coins, 
-  Plus, ChevronLeft, ChevronRight, Search, SlidersHorizontal, Download, ArrowUpRight, ArrowDownLeft, Calendar, X, Receipt
+import {
+  ArrowDownLeft,
+  ArrowLeft,
+  ArrowLeftRight,
+  ArrowUpRight,
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Search,
+  SlidersHorizontal,
+  X,
 } from '@lucide/astro';
 ---
 
-<Layout title="Riwayat Transaksi" activeTab='history'>
-  <div class="space-y-4 relative pb-20">
-    
-    <!-- 1. Action Bar: month/range/search + 3 icon buttons -->
-    <div class="flex items-center gap-2 px-1">
-      <!-- Month Picker (Flexible / Lebih Panjang di Kiri) -->
-      <div id="month-picker-wrap" class="flex flex-1 items-center justify-between rounded-2xl border border-brand-border/80 bg-white px-3 py-2 shadow-xs">
-        <button id="prev-month-btn" type="button" class="rounded-xl p-1.5 text-brand-navy transition-all hover:bg-brand-light active:scale-95" aria-label="Bulan Sebelumnya">
-          <ChevronLeft class="w-4 h-4 stroke-[2.5]" />
-        </button>
-        
-        <button id="month-picker-btn" type="button" class="flex items-center gap-1.5 rounded-lg px-1.5 py-1 transition hover:bg-brand-light" aria-label="Pilih bulan" aria-haspopup="dialog">
-          <Calendar class="w-4 h-4 shrink-0 text-accent-yellow" />
-          <span id="current-month-display" class="font-bold text-xs sm:text-sm text-brand-navy tracking-tight">Nov 2026</span>
-        </button>
+<Layout title="Riwayat Transaksi" activeTab="history">
+  <div class="relative pb-8">
+    <!-- Sticky header + kontrol -->
+    <div class="fixed top-0 z-40 -mx-4 -mt-0 space-y-3 border-b border-border/80 bg-background/95 px-4 pt-2.5 pb-3 w-screen backdrop-blur-md">
+      <div class="flex items-center justify-between">
+        <a
+          href="/"
+          class="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95"
+          aria-label="Kembali"
+        >
+          <ArrowLeft class="h-4.5 w-4.5 stroke-[2.5]" />
+        </a>
 
-        <button id="next-month-btn" type="button" class="rounded-xl p-1.5 text-brand-navy transition-all hover:bg-brand-light active:scale-95" aria-label="Bulan Selanjutnya">
-          <ChevronRight class="w-4 h-4 stroke-[2.5]" />
+        <h1 class="text-base font-extrabold tracking-tight text-primary">Riwayat Transaksi</h1>
+
+        <button
+          type="button"
+          id="toggle-summary"
+          aria-expanded="false"
+          aria-controls="history-summary"
+          aria-label="Tampilkan ringkasan transaksi"
+          title="Tampilkan ringkasan"
+          class="flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95"
+        >
+          <ChevronDown id="summary-chevron" class="h-4.5 w-4.5 stroke-[2.5] transition-transform duration-200" />
         </button>
       </div>
 
-      <!-- Chip rentang tanggal (menggantikan month picker) -->
-      <div id="range-picker-wrap" style="display: none;" class="flex flex-1 items-center gap-1.5 rounded-2xl border border-brand-border/80 bg-white px-3 py-2 shadow-xs">
-        <button id="range-picker-btn" type="button" class="flex min-w-0 flex-1 items-center gap-1.5 text-left" aria-label="Ubah rentang tanggal">
-          <Calendar class="w-4 h-4 shrink-0 text-accent-yellow" />
-          <span id="range-picker-label" class="truncate text-xs font-bold text-brand-navy"></span>
+      <!-- Month / range / search + icon buttons -->
+      <div class="flex items-center justify-between gap-2">
+        <div id="month-picker-wrap" class="flex min-w-0 flex-1 items-center justify-between rounded-2xl border border-border bg-card px-3 py-1.5 shadow-xs">
+          <button id="prev-month-btn" type="button" class="rounded-xl p-1.5 text-primary transition-all hover:bg-muted active:scale-95" aria-label="Bulan Sebelumnya">
+            <ChevronLeft class="h-4 w-4 stroke-[2.5]" />
+          </button>
+
+          <button id="month-picker-btn" type="button" class="flex min-w-0 items-center gap-1.5 rounded-lg px-1.5 py-1 transition hover:bg-muted" aria-label="Pilih bulan" aria-haspopup="dialog">
+            <Calendar class="h-3.5 w-3.5 shrink-0 text-blue-main" />
+            <span id="current-month-display" class="truncate text-xs font-bold tracking-tight text-foreground">Nov 2026</span>
+            <ChevronDown class="h-3.5 w-3.5 shrink-0 text-muted-foreground stroke-[2.5]" />
+          </button>
+
+          <button id="next-month-btn" type="button" class="rounded-xl p-1.5 text-primary transition-all hover:bg-muted active:scale-95" aria-label="Bulan Selanjutnya">
+            <ChevronRight class="h-4 w-4 stroke-[2.5]" />
+          </button>
+        </div>
+
+        <div id="range-picker-wrap" style="display: none;" class="flex min-w-0 flex-1 items-center gap-1.5 rounded-2xl border border-border bg-card px-3 py-2 shadow-xs">
+          <button id="range-picker-btn" type="button" class="flex min-w-0 flex-1 items-center gap-1.5 text-left" aria-label="Ubah rentang tanggal">
+            <Calendar class="h-4 w-4 shrink-0 text-blue-main" />
+            <span id="range-picker-label" class="truncate text-xs font-bold text-foreground"></span>
+          </button>
+          <button id="clear-range-btn" type="button" class="shrink-0 rounded-md p-0.5 text-muted-foreground transition hover:text-finance-red" aria-label="Hapus rentang tanggal">
+            <X class="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div id="search-wrap" style="display: none;" class="flex min-w-0 flex-1 items-center gap-1.5 rounded-2xl border border-blue-main bg-card px-3 py-2 shadow-xs">
+          <Search class="h-4 w-4 shrink-0 text-blue-main" />
+          <input
+            id="history-search"
+            type="search"
+            autocomplete="off"
+            placeholder="Cari transaksi, kategori, dompet..."
+            aria-label="Cari transaksi"
+            class="min-w-0 flex-1 bg-transparent text-xs font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+          <button id="search-clear-btn" type="button" style="display: none;" class="shrink-0 rounded-md p-0.5 text-muted-foreground transition hover:text-primary" aria-label="Hapus kata kunci">
+            <X class="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div class="flex shrink-0 items-center gap-1.5">
+          <button id="btn-search-trigger" type="button" class="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95" title="Cari Transaksi" aria-label="Cari transaksi" aria-expanded="false" aria-controls="search-wrap">
+            <Search class="h-4 w-4 stroke-2" />
+          </button>
+          <button id="btn-filter-trigger" type="button" class="relative flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95" title="Filter Transaksi" aria-label="Filter transaksi">
+            <SlidersHorizontal class="h-4 w-4 stroke-2" />
+            <span id="filter-badge" class="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-main px-1 text-[9px] font-bold text-white" style="display: none;">0</span>
+          </button>
+          <button id="btn-export-trigger" type="button" class="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95" title="Export Data" aria-label="Export data transaksi">
+            <Download class="h-4 w-4 stroke-2" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick filter pills -->
+      <div class="no-scrollbar flex items-center gap-2 overflow-x-auto pt-1">
+        <button
+          type="button"
+          class="history-tab-btn flex shrink-0 items-center gap-1.5 rounded-full border border-primary bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow-soft transition-all active:scale-95"
+          data-filter="all"
+        >
+          <span>Semua</span>
         </button>
-        <button id="clear-range-btn" type="button" class="shrink-0 rounded-md p-0.5 text-text-secondary transition hover:text-finance-red" aria-label="Hapus rentang tanggal">
-          <X class="w-3.5 h-3.5" />
+        <button
+          type="button"
+          class="history-tab-btn flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-all hover:bg-muted active:scale-95"
+          data-filter="expense"
+        >
+          <ArrowUpRight class="h-3.5 w-3.5 stroke-[2.5]" />
+          <span>Keluar</span>
+        </button>
+        <button
+          type="button"
+          class="history-tab-btn flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-all hover:bg-muted active:scale-95"
+          data-filter="income"
+        >
+          <ArrowDownLeft class="h-3.5 w-3.5 stroke-[2.5]" />
+          <span>Masuk</span>
+        </button>
+        <button
+          type="button"
+          class="history-tab-btn flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-all hover:bg-muted active:scale-95"
+          data-filter="transfer"
+        >
+          <ArrowLeftRight class="h-3.5 w-3.5 stroke-[2.5]" />
+          <span>Transfer</span>
         </button>
       </div>
 
-      <!-- Search realtime (menggantikan month picker) -->
-      <div id="search-wrap" style="display: none;" class="flex flex-1 items-center gap-1.5 rounded-2xl border border-accent-yellow bg-white px-3 py-2 shadow-xs">
-        <Search class="w-4 h-4 shrink-0 text-accent-yellow-hover" />
-        <input
-          id="history-search"
-          type="search"
-          autocomplete="off"
-          placeholder="Cari catatan, kategori, akun..."
-          aria-label="Cari transaksi"
-          class="min-w-0 flex-1 bg-transparent text-xs font-medium text-brand-navy placeholder:text-text-secondary focus:outline-none"
-        />
-        <button id="search-clear-btn" type="button" style="display: none;" class="shrink-0 rounded-md p-0.5 text-text-secondary transition hover:text-brand-navy" aria-label="Hapus kata kunci">
-          <X class="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      <!-- 3 Icon Buttons di Kanan -->
-      <div class="flex shrink-0 items-center gap-1.5">
-        <button id="btn-search-trigger" type="button" class="rounded-2xl border border-brand-border/80 bg-white p-3 text-text-secondary shadow-xs transition hover:border-accent-yellow hover:text-brand-navy" title="Cari Transaksi" aria-label="Cari transaksi" aria-expanded="false" aria-controls="search-wrap">
-          <Search class="w-4 h-4" />
-        </button>
-        <button id="btn-filter-trigger" type="button" class="relative rounded-2xl border border-brand-border/80 bg-white p-3 text-brand-navy shadow-xs transition hover:bg-brand-light" title="Filter Transaksi" aria-label="Filter transaksi">
-          <SlidersHorizontal class="w-4 h-4" />
-          <span id="filter-badge" class="absolute -top-1 -right-1 h-4 min-w-4 items-center justify-center rounded-full bg-accent-yellow px-1 text-[9px] font-bold text-brand-navy" style="display: none;">0</span>
-        </button>
-        <button id="btn-export-trigger" type="button" class="rounded-2xl border border-brand-border/80 bg-white p-3 text-brand-navy shadow-xs transition hover:bg-brand-light" title="Export Data" aria-label="Export data transaksi">
-          <Download class="w-4 h-4" />
-        </button>
+      <!-- Ringkasan filter aktif -->
+      <div id="active-filter-row" class="rounded-2xl border border-border bg-card px-3 py-2 shadow-xs" style="display: none;">
+        <div class="flex items-center gap-2">
+          <p id="active-filter-text" class="min-w-0 flex-1 truncate text-[11px] font-semibold text-muted-foreground"></p>
+          <button id="reset-active-filters" type="button" class="shrink-0 text-[11px] font-bold text-blue-main transition hover:text-primary">
+            Reset
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- 3. Tabs Quick Filter (Semua, Keluar, Masuk, Transfer) -->
-    <div class="p-1.5 rounded-2xl bg-slate-200/70 backdrop-blur-md grid grid-cols-4 gap-1 border border-brand-border/40">
-      <button 
-        class="history-tab-btn py-2 rounded-xl font-bold text-xs text-center transition-all duration-200 bg-white text-brand-navy shadow-xs"
-        data-filter="all"
+    <!-- Konten riwayat + summary -->
+    <div id="history-content" class="mt-30">
+      <section
+        id="history-summary"
+        class="mb-3 hidden rounded-3xl bg-card-blue-dark p-3 shadow-soft"
+        aria-label="Ringkasan transaksi"
       >
-        Semua
-      </button>
-      <button 
-        class="history-tab-btn py-2 rounded-xl font-medium text-xs text-center text-text-secondary hover:text-brand-navy transition-all duration-200"
-        data-filter="expense"
-      >
-        Keluar
-      </button>
-      <button 
-        class="history-tab-btn py-2 rounded-xl font-medium text-xs text-center text-text-secondary hover:text-brand-navy transition-all duration-200"
-        data-filter="income"
-      >
-        Masuk
-      </button>
-      <button 
-        class="history-tab-btn py-2 rounded-xl font-medium text-xs text-center text-text-secondary hover:text-brand-navy transition-all duration-200"
-        data-filter="transfer"
-      >
-        Transfer
-      </button>
-    </div>
+        <div class="grid grid-cols-3 gap-1.5">
+          <div class="rounded-2xl bg-white/10 px-2.5 py-2">
+            <p class="text-[9px] font-semibold text-white/60">Pemasukan</p>
+            <p id="summary-income" class="mt-0.5 truncate text-[11px] font-extrabold text-emerald-300 tabular-nums">Rp 0</p>
+          </div>
+          <div class="rounded-2xl bg-white/10 px-2.5 py-2">
+            <p class="text-[9px] font-semibold text-white/60">Pengeluaran</p>
+            <p id="summary-expense" class="mt-0.5 truncate text-[11px] font-extrabold text-rose-300 tabular-nums">Rp 0</p>
+          </div>
+          <div class="rounded-2xl bg-white/10 px-2.5 py-2">
+            <p class="text-[9px] font-semibold text-white/60">Balance</p>
+            <p id="summary-balance" class="mt-0.5 truncate text-[11px] font-extrabold text-blue-200 tabular-nums">Rp 0</p>
+          </div>
+        </div>
+      </section>
 
-    <!-- 4. Ringkasan filter aktif (muncul hanya jika ada filter) -->
-    <div id="active-filter-row" class="rounded-2xl border border-brand-border/70 bg-white px-3 py-2" style="display: none;">
-      <div class="flex items-center gap-2">
-        <p id="active-filter-text" class="min-w-0 flex-1 text-[11px] font-semibold text-text-secondary truncate"></p>
-        <button id="reset-active-filters" type="button" class="shrink-0 text-[11px] font-bold text-accent-yellow-hover transition hover:text-brand-navy">
-          Reset
-        </button>
+      <!-- Daftar transaksi -->
+      <div id="tx-grouped-container" class="space-y-5">
+        <p class="py-8 text-center text-sm text-muted-foreground">Memuat data...</p>
       </div>
     </div>
-
-    <!-- 5. Grouped Transaction List Container -->
-    <div id="tx-grouped-container" class="space-y-4">
-      <p class="text-text-secondary text-sm text-center py-8">Memuat data...</p>
-    </div>
-
   </div>
 
-  <!-- Extended Floating Action Button (FAB) Kanan Bawah -->
-  <a 
-    href="/transactions" 
-    style="bottom: calc(5rem + env(safe-area-inset-bottom));"
-    class="fixed right-6 z-40 flex items-center gap-2.5 px-5 py-3.5 bg-accent-yellow text-brand-navy rounded-full shadow-xl shadow-accent-yellow/30 hover:bg-accent-yellow-hover hover:scale-105 active:scale-95 transition-all font-bold text-sm border-2 border-white/20 group"
-    aria-label="Catat Transaksi Baru"
-  >
-    <div class="w-6 h-6 rounded-full bg-brand-navy text-accent-yellow flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
-      <Plus class="w-4 h-4 stroke-[3]" />
-    </div>
-    <span class="tracking-wide">Catat Transaksi</span>
-  </a>
-
   <!-- Modal Pilih Bulan -->
-  <dialog id="month-modal" class="app-dialog" aria-labelledby="month-modal-title">
-    <div class="rounded-2xl border border-brand-border bg-white shadow-xl">
-      <div class="flex items-center justify-between border-b border-brand-border/60 px-5 py-4">
-        <h2 id="month-modal-title" class="text-base font-bold text-brand-navy">Pilih Bulan</h2>
-        <button type="button" id="close-month-modal" class="text-text-secondary transition hover:text-brand-navy" aria-label="Tutup pilihan bulan">
-          <X class="w-5 h-5" />
+  <dialog id="month-modal" class="app-sheet" aria-labelledby="month-modal-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h2 id="month-modal-title" class="text-base font-extrabold text-primary">Pilih Bulan</h2>
+        <button type="button" id="close-month-modal" class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted" aria-label="Tutup pilihan bulan">
+          <X class="h-4 w-4 stroke-[2.5]" />
         </button>
       </div>
 
       <div class="p-5">
         <div class="mb-4 flex items-center justify-between">
-          <button type="button" id="picker-prev-year" class="rounded-xl p-1.5 text-brand-navy transition hover:bg-brand-light active:scale-95" aria-label="Tahun Sebelumnya">
-            <ChevronLeft class="w-4 h-4 stroke-[2.5]" />
+          <button type="button" id="picker-prev-year" class="rounded-xl p-1.5 text-primary transition hover:bg-muted active:scale-95" aria-label="Tahun Sebelumnya">
+            <ChevronLeft class="h-4 w-4 stroke-[2.5]" />
           </button>
-          <span id="picker-year-label" class="text-sm font-bold text-brand-navy">2026</span>
-          <button type="button" id="picker-next-year" class="rounded-xl p-1.5 text-brand-navy transition hover:bg-brand-light active:scale-95" aria-label="Tahun Selanjutnya">
-            <ChevronRight class="w-4 h-4 stroke-[2.5]" />
+          <span id="picker-year-label" class="text-sm font-bold text-primary">2026</span>
+          <button type="button" id="picker-next-year" class="rounded-xl p-1.5 text-primary transition hover:bg-muted active:scale-95" aria-label="Tahun Selanjutnya">
+            <ChevronRight class="h-4 w-4 stroke-[2.5]" />
           </button>
         </div>
 
         <div id="month-grid" class="grid grid-cols-3 gap-2"></div>
 
-        <button type="button" id="picker-current-month" class="mt-4 w-full rounded-xl bg-brand-light py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200">
+        <button type="button" id="picker-current-month" class="mt-4 w-full rounded-2xl bg-muted py-3 text-xs font-bold text-foreground transition hover:bg-slate-200">
           Ke bulan ini
         </button>
       </div>
@@ -159,67 +208,67 @@ import {
   </dialog>
 
   <!-- Modal Filter -->
-  <dialog id="filter-modal" class="app-dialog" aria-labelledby="filter-modal-title">
-    <div class="max-h-[90vh] overflow-y-auto rounded-2xl border border-brand-border bg-white shadow-xl">
-      <div class="sticky top-0 z-10 flex items-center justify-between border-b border-brand-border/60 bg-white px-5 py-4">
-        <h2 id="filter-modal-title" class="text-base font-bold text-brand-navy">Filter Transaksi</h2>
-        <button type="button" id="close-filter-modal" class="text-text-secondary transition hover:text-brand-navy" aria-label="Tutup filter">
-          <X class="w-5 h-5" />
+  <dialog id="filter-modal" class="app-sheet" aria-labelledby="filter-modal-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h2 id="filter-modal-title" class="text-base font-extrabold text-primary">Filter Transaksi</h2>
+        <button type="button" id="close-filter-modal" class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted" aria-label="Tutup filter">
+          <X class="h-4 w-4 stroke-[2.5]" />
         </button>
       </div>
 
-      <form id="filter-form" class="space-y-4 p-5" novalidate>
-        <div data-field>
-          <label for="filter-account" class="mb-1 block text-xs font-semibold text-brand-navy">Akun</label>
-          <select id="filter-account" data-autofocus class="w-full rounded-xl border border-brand-border bg-brand-light/50 px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-yellow">
+      <form id="filter-form" class="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-5" novalidate>
+        <div data-field class="space-y-1.5">
+          <label for="filter-account" class="block text-[11px] font-bold text-foreground">Akun</label>
+          <select id="filter-account" data-autofocus class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main">
             <option value="">Semua akun</option>
           </select>
         </div>
 
-        <div data-field>
-          <label for="filter-category" class="mb-1 block text-xs font-semibold text-brand-navy">Kategori</label>
-          <select id="filter-category" class="w-full rounded-xl border border-brand-border bg-brand-light/50 px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-yellow">
+        <div data-field class="space-y-1.5">
+          <label for="filter-category" class="block text-[11px] font-bold text-foreground">Kategori</label>
+          <select id="filter-category" class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main">
             <option value="">Semua kategori</option>
           </select>
         </div>
 
-        <div>
-          <span class="mb-1 block text-xs font-semibold text-brand-navy">Rentang tanggal</span>
+        <div class="space-y-1.5">
+          <span class="block text-[11px] font-bold text-foreground">Rentang tanggal</span>
           <div class="grid grid-cols-2 gap-3">
-            <div data-field>
-              <label for="filter-start-date" class="mb-1 block text-[11px] font-medium text-text-secondary">Dari tanggal</label>
-              <input type="date" id="filter-start-date" class="w-full rounded-xl border border-brand-border bg-brand-light/50 px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-yellow" />
+            <div data-field class="space-y-1.5">
+              <label for="filter-start-date" class="block text-[10px] font-medium text-muted-foreground">Dari tanggal</label>
+              <input type="date" id="filter-start-date" class="w-full rounded-2xl border border-border bg-background px-3 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main" />
             </div>
-            <div data-field>
-              <label for="filter-end-date" class="mb-1 block text-[11px] font-medium text-text-secondary">Sampai tanggal</label>
-              <input type="date" id="filter-end-date" class="w-full rounded-xl border border-brand-border bg-brand-light/50 px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-yellow" />
+            <div data-field class="space-y-1.5">
+              <label for="filter-end-date" class="block text-[10px] font-medium text-muted-foreground">Sampai tanggal</label>
+              <input type="date" id="filter-end-date" class="w-full rounded-2xl border border-border bg-background px-3 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main" />
             </div>
           </div>
         </div>
 
-        <div>
-          <span class="mb-1 block text-xs font-semibold text-brand-navy">Rentang nominal</span>
+        <div class="space-y-1.5">
+          <span class="block text-[11px] font-bold text-foreground">Rentang nominal</span>
           <div class="grid grid-cols-2 gap-3">
-            <div data-field>
-              <label for="filter-min" class="mb-1 block text-[11px] font-medium text-text-secondary">Minimum (Rp)</label>
-              <input type="number" id="filter-min" min="0" step="1" placeholder="0" class="w-full rounded-xl border border-brand-border bg-brand-light/50 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow" />
+            <div data-field class="space-y-1.5">
+              <label for="filter-min" class="block text-[10px] font-medium text-muted-foreground">Minimum (Rp)</label>
+              <input type="text" inputmode="numeric" autocomplete="off" id="filter-min" placeholder="0" class="w-full rounded-2xl border border-border bg-background px-3 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main" />
             </div>
-            <div data-field>
-              <label for="filter-max" class="mb-1 block text-[11px] font-medium text-text-secondary">Maksimum (Rp)</label>
-              <input type="number" id="filter-max" min="0" step="1" placeholder="Tanpa batas" class="w-full rounded-xl border border-brand-border bg-brand-light/50 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow" />
+            <div data-field class="space-y-1.5">
+              <label for="filter-max" class="block text-[10px] font-medium text-muted-foreground">Maksimum (Rp)</label>
+              <input type="text" inputmode="numeric" autocomplete="off" id="filter-max" placeholder="Tanpa batas" class="w-full rounded-2xl border border-border bg-background px-3 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main" />
             </div>
           </div>
         </div>
 
-        <p class="text-[11px] leading-relaxed text-text-secondary">
+        <p class="text-[11px] leading-relaxed text-muted-foreground">
           Filter digabung dengan bulan/rentang tanggal dan tab tipe yang aktif.
         </p>
 
-        <div class="flex gap-2 pt-2">
-          <button type="button" id="filter-reset" class="flex-1 rounded-xl bg-brand-light py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200">
+        <div class="flex gap-2 border-t border-border pt-4">
+          <button type="button" id="filter-reset" class="flex-1 rounded-2xl bg-muted py-3 text-xs font-bold text-foreground transition hover:bg-slate-200 active:scale-95">
             Reset
           </button>
-          <button type="submit" class="flex-1 rounded-xl bg-accent-yellow py-2.5 text-xs font-bold text-brand-navy transition hover:bg-accent-yellow-hover">
+          <button type="submit" class="flex-1 rounded-2xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95">
             Terapkan
           </button>
         </div>
@@ -228,53 +277,53 @@ import {
   </dialog>
 
   <!-- Modal Export -->
-  <dialog id="export-modal" class="app-dialog" aria-labelledby="export-modal-title">
-    <div class="rounded-2xl border border-brand-border bg-white shadow-xl">
-      <div class="flex items-center justify-between border-b border-brand-border/60 px-5 py-4">
-        <h2 id="export-modal-title" class="text-base font-bold text-brand-navy">Export Data</h2>
-        <button type="button" id="close-export-modal" class="text-text-secondary transition hover:text-brand-navy" aria-label="Tutup export">
-          <X class="w-5 h-5" />
+  <dialog id="export-modal" class="app-sheet" aria-labelledby="export-modal-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h2 id="export-modal-title" class="text-base font-extrabold text-primary">Export Data</h2>
+        <button type="button" id="close-export-modal" class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted" aria-label="Tutup export">
+          <X class="h-4 w-4 stroke-[2.5]" />
         </button>
       </div>
 
-      <form id="export-form" class="space-y-4 p-5">
+      <form id="export-form" class="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
         <fieldset>
-          <legend class="mb-2 block text-xs font-semibold text-brand-navy">Cakupan data</legend>
+          <legend class="mb-2 block text-[11px] font-bold text-foreground">Cakupan data</legend>
           <div class="space-y-2">
-            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-brand-border bg-brand-light/40 px-3 py-2.5 text-xs font-medium text-brand-navy">
-              <input type="radio" name="export-scope" value="month" checked data-autofocus class="accent-amber-500" />
+            <label class="flex cursor-pointer items-center gap-2 rounded-2xl border border-border bg-background/60 px-3 py-3 text-xs font-semibold text-foreground">
+              <input type="radio" name="export-scope" value="month" checked data-autofocus class="accent-blue-main" />
               <span id="export-month-scope-label">Bulan yang sedang dibuka</span>
             </label>
-            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-brand-border bg-brand-light/40 px-3 py-2.5 text-xs font-medium text-brand-navy">
-              <input type="radio" name="export-scope" value="all" class="accent-amber-500" />
+            <label class="flex cursor-pointer items-center gap-2 rounded-2xl border border-border bg-background/60 px-3 py-3 text-xs font-semibold text-foreground">
+              <input type="radio" name="export-scope" value="all" class="accent-blue-main" />
               Semua transaksi
             </label>
           </div>
         </fieldset>
 
         <fieldset>
-          <legend class="mb-2 block text-xs font-semibold text-brand-navy">Format file</legend>
+          <legend class="mb-2 block text-[11px] font-bold text-foreground">Format file</legend>
           <div class="space-y-2">
-            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-brand-border bg-brand-light/40 px-3 py-2.5 text-xs font-medium text-brand-navy">
-              <input type="radio" name="export-format" value="csv" checked class="accent-amber-500" />
+            <label class="flex cursor-pointer items-center gap-2 rounded-2xl border border-border bg-background/60 px-3 py-3 text-xs font-semibold text-foreground">
+              <input type="radio" name="export-format" value="csv" checked class="accent-blue-main" />
               CSV (Excel / Google Sheets)
             </label>
-            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-brand-border bg-brand-light/40 px-3 py-2.5 text-xs font-medium text-brand-navy">
-              <input type="radio" name="export-format" value="json" class="accent-amber-500" />
+            <label class="flex cursor-pointer items-center gap-2 rounded-2xl border border-border bg-background/60 px-3 py-3 text-xs font-semibold text-foreground">
+              <input type="radio" name="export-format" value="json" class="accent-blue-main" />
               JSON (backup data)
             </label>
           </div>
         </fieldset>
 
-        <p id="export-info" class="rounded-xl bg-brand-light px-3 py-2 text-[11px] leading-relaxed text-text-secondary">
+        <p id="export-info" class="rounded-2xl bg-muted px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
           Menghitung data...
         </p>
 
-        <div class="flex gap-2 pt-2">
-          <button type="button" id="export-cancel" class="flex-1 rounded-xl bg-brand-light py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200">
+        <div class="flex gap-2 border-t border-border pt-4">
+          <button type="button" id="export-cancel" class="flex-1 rounded-2xl bg-muted py-3 text-xs font-bold text-foreground transition hover:bg-slate-200 active:scale-95">
             Batal
           </button>
-          <button type="submit" class="flex-1 rounded-xl bg-accent-yellow py-2.5 text-xs font-bold text-brand-navy transition hover:bg-accent-yellow-hover">
+          <button type="submit" class="flex-1 rounded-2xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95">
             Unduh
           </button>
         </div>

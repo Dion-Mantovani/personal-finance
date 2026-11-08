@@ -1,50 +1,92 @@
 ---
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  FolderKanban, 
-  History, 
+import {
+  Home,
+  Wallet,
+  History,
+  Settings,
+  Plus,
 } from '@lucide/astro';
 
 interface Props {
-  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history';
+  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history' | 'settings';
 }
 
 const { activeTab = 'dashboard' } = Astro.props;
 
+const pathname = Astro.url.pathname;
+
+// Tombol + selalu membuka form tambah transaksi.
+const fabHref = '/transactions';
+const fabLabel = 'Tambah Transaksi';
+
 const navItems = [
-  { id: 'dashboard', label: 'Home', href: '/', icon: LayoutDashboard },
+  { id: 'dashboard', label: 'Home', href: '/', icon: Home },
   { id: 'accounts', label: 'Dompet', href: '/accounts', icon: Wallet },
-  { id: 'categories', label: 'Kategori', href: '/categories', icon: FolderKanban },
   { id: 'history', label: 'Riwayat', href: '/history', icon: History },
+  { id: 'settings', label: 'Pengaturan', href: '/settings', icon: Settings },
 ];
+
+const leftItems = navItems.slice(0, 2);
+const rightItems = navItems.slice(2);
 ---
 
-<!-- Bottom Navigation Container (Glassmorphism Style) -->
-<nav
-  class="fixed bottom-0 left-0 right-0 z-50 w-full max-w-md mx-auto bg-brand-surface/80 backdrop-blur-xl border-t border-white/10 px-2 pt-2"
-  style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));"
+<!-- Floating bottom navigation -->
+<div
+  class="pointer-events-none fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-md bg-linear-to-t from-background via-background/95 to-transparent px-4 pt-6 pb-3"
+  style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));"
 >
-  <ul class="grid grid-cols-4 items-center">
-    {navItems.map((item) => {
+  <nav
+    class="pointer-events-auto grid grid-cols-5 items-end rounded-3xl border border-border/80 bg-card/90 px-2 py-1.5 shadow-xl shadow-primary/5 backdrop-blur-xl"
+    aria-label="Navigasi utama"
+  >
+    {leftItems.map((item) => {
       const Icon = item.icon;
-      const isActive = activeTab === item.id;
-      
+      const isActive =
+        (item.id === 'dashboard' && (activeTab === 'dashboard' || pathname === '/')) ||
+        item.id === activeTab;
+
       return (
-        <li>
-          <a
-            href={item.href}
-            class={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all duration-200 ${
-              isActive
-                ? 'text-accent-yellow font-semibold scale-105'
-                : 'text-text-secondary hover:text-text-primary hover:bg-white/5 active:scale-95'
-            }`}
-          >
-            <Icon class={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
-            <span class="text-[10px] tracking-tight">{item.label}</span>
-          </a>
-        </li>
+        <a
+          href={item.href}
+          class={`flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 transition-colors ${
+            isActive
+              ? 'font-bold text-primary'
+              : 'font-medium text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Icon class={`h-5 w-5 ${isActive ? 'stroke-[2.2]' : 'stroke-2'}`} />
+          <span class="text-[10px]">{item.label}</span>
+        </a>
       );
     })}
-  </ul>
-</nav>
+
+    <div class="relative -top-5 flex justify-center">
+      <a
+        href={fabHref}
+        class="flex h-12 w-12 items-center justify-center rounded-full border-4 border-background bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 active:scale-95"
+        aria-label={fabLabel}
+      >
+        <Plus class="h-6 w-6 stroke-[2.5]" />
+      </a>
+    </div>
+
+    {rightItems.map((item) => {
+      const Icon = item.icon;
+      const isActive = item.id === activeTab;
+
+      return (
+        <a
+          href={item.href}
+          class={`flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 transition-colors ${
+            isActive
+              ? 'font-bold text-primary'
+              : 'font-medium text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Icon class={`h-5 w-5 ${isActive ? 'stroke-[2.2]' : 'stroke-2'}`} />
+          <span class="text-[10px]">{item.label}</span>
+        </a>
+      );
+    })}
+  </nav>
+</div>

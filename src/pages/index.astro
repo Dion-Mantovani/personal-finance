@@ -2,157 +2,144 @@
 import Layout from '../layouts/Layout.astro';
 import {
   ArrowDownLeft,
-  ArrowUpRight,
   ArrowLeftRight,
-  Plus,
-  Wallet,
-  FolderKanban,
-  History,
-  Settings,
-  CreditCard,
-  Landmark,
-  PiggyBank,
-  Coins,
-  Utensils,
-  ShoppingBag,
-  Car,
-  Zap,
-  Banknote,
-  HeartPulse,
-  Film,
-  ShieldAlert,
-  Receipt,
+  ArrowUpRight,
+  Check,
+  ChevronDown,
   Eye,
   EyeOff,
-  RefreshCw,
+  Flame,
+  FolderKanban,
+  History,
+  Plus,
+  Search,
+  SlidersHorizontal,
   Sparkles,
-  ChevronDown,
-  TrendingUp,
   TrendingDown,
+  TrendingUp,
+  Wallet,
+  X,
+  Zap,
 } from '@lucide/astro';
 ---
 
 <Layout title="Dashboard" activeTab="dashboard">
-  <div class="space-y-5 relative pb-20">
+  <div class="space-y-5 pb-20">
 
     <!-- 1. Greeting + Top Actions -->
-    <header class="flex items-center justify-between gap-3">
+    <header class="-mt-14 flex items-center justify-between gap-3 pt-3">
       <div class="min-w-0">
-        <h1 id="dash-greeting" class="text-xl font-extrabold text-brand-navy tracking-tight">
+        <h1 id="dash-greeting" class="truncate text-base font-extrabold tracking-tight text-primary sm:text-lg">
           Selamat malam
         </h1>
-        <p id="dash-date" class="mt-0.5 text-xs font-medium text-text-secondary">—</p>
+        <p id="dash-date" class="mt-0.5 text-[11px] font-medium text-muted-foreground">—</p>
       </div>
 
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex shrink-0 items-center gap-2">
+        <!-- Streak: UI-only dulu, belum dihitung dari data -->
         <button
-          id="refresh-btn"
           type="button"
-          class="w-10 h-10 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy hover:border-accent-yellow hover:text-accent-yellow-hover active:scale-95 transition disabled:opacity-60 disabled:pointer-events-none"
-          aria-label="Muat ulang dashboard"
-          title="Muat ulang"
+          class="flex h-9.5 items-center gap-1 rounded-2xl border border-border bg-card px-2.5 text-muted-foreground shadow-xs transition-all active:scale-95"
+          title="Streak mencatat"
+          aria-label="Streak mencatat 3 hari"
         >
-          <RefreshCw id="refresh-icon" class="w-4 h-4" />
+          <Flame class="h-4 w-4 fill-orange-500/20 stroke-orange-500 stroke-[2.2]" />
+          <span class="text-[11px] font-extrabold text-primary">3</span>
         </button>
+
         <a
-          href="/settings"
-          class="w-10 h-10 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy hover:border-accent-yellow hover:text-accent-yellow-hover active:scale-95 transition"
-          aria-label="Kelola data"
-          title="Kelola Data"
+          href="/history?search=1"
+          class="flex h-9.5 w-9.5 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95"
+          title="Cari transaksi"
+          aria-label="Cari transaksi"
         >
-          <Settings class="w-4 h-4" />
+          <Search class="h-4.5 w-4.5 stroke-2" />
         </a>
       </div>
     </header>
 
     <!-- 2. Hero Total Saldo -->
-    <section class="relative overflow-hidden rounded-[28px] bg-brand-navy text-white p-5 shadow-xl border border-white/10">
-      <div class="absolute -right-12 -top-16 w-48 h-48 rounded-full bg-accent-yellow/15 blur-3xl pointer-events-none"></div>
-      <div class="absolute right-[-40px] bottom-[-70px] w-44 h-44 rounded-full bg-white/5 pointer-events-none"></div>
-      <div class="absolute left-[-60px] bottom-[-90px] w-52 h-52 rounded-full bg-white/5 pointer-events-none"></div>
+    <section class="relative overflow-hidden rounded-[28px] bg-card-blue-dark p-6 text-white shadow-soft">
+      <div class="pointer-events-none absolute -right-8 -bottom-10 h-40 w-40 rounded-full bg-white/10"></div>
+      <div class="pointer-events-none absolute right-16 -bottom-16 h-32 w-32 rounded-full bg-white/5"></div>
 
       <div class="relative z-10">
         <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
-              <Wallet class="w-4 h-4 text-accent-yellow" />
+          <div class="flex items-center gap-2.5">
+            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md">
+              <Wallet class="h-4 w-4 stroke-[2.2] text-white" />
             </span>
-            <span class="text-[11px] font-semibold text-slate-200">Total Saldo</span>
+            <span class="text-xs font-semibold tracking-wide text-white/80">Total Saldo</span>
           </div>
 
           <button
             id="toggle-amounts"
             type="button"
-            class="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-slate-200 hover:bg-white/15 active:scale-95 transition"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:bg-white/25 active:scale-95"
             aria-label="Sembunyikan nominal"
             title="Sembunyikan nominal"
           >
-            <Eye id="eye-open-icon" class="w-4 h-4" />
-            <EyeOff id="eye-closed-icon" class="w-4 h-4 hidden" />
+            <Eye id="eye-open-icon" class="h-4 w-4 stroke-2" />
+            <EyeOff id="eye-closed-icon" class="hidden h-4 w-4 stroke-2" />
           </button>
         </div>
 
-        <h2 id="dash-total-balance" data-amount="0" class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight tabular-nums">
-          <span class="inline-block h-9 w-48 rounded-lg bg-white/15 animate-pulse align-middle"></span>
+        <h2 id="dash-total-balance" data-amount="0" class="mt-5 text-3xl font-extrabold tracking-tight tabular-nums">
+          <span class="inline-block h-9 w-48 animate-pulse rounded-lg bg-white/15 align-middle"></span>
         </h2>
 
-        <div
-          id="cashflow-pill"
-          class="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/10 px-2.5 py-1 text-[11px] font-semibold text-finance-green"
-        >
-          <TrendingUp id="cashflow-up" class="w-3.5 h-3.5" />
-          <TrendingDown id="cashflow-down" class="w-3.5 h-3.5 hidden" />
-          <span id="cashflow-amount" data-amount="0">Rp 0</span>
-          <span class="font-medium text-slate-300">arus kas bulan ini</span>
+        <div class="mt-2 flex items-center gap-2">
+          <div
+            id="cashflow-pill"
+            class="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold text-finance-green backdrop-blur-md"
+          >
+            <TrendingUp id="cashflow-up" class="h-3 w-3 stroke-[2.5]" />
+            <TrendingDown id="cashflow-down" class="hidden h-3 w-3 stroke-[2.5]" />
+            <span id="cashflow-amount" data-amount="0">Rp 0</span>
+          </div>
+          <span class="text-[10px] font-medium text-white/70">arus kas bulan ini</span>
         </div>
 
-        <button
-          id="detail-toggle"
-          type="button"
-          aria-expanded="false"
-          aria-controls="hero-detail"
-          class="mt-6 inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-slate-100 hover:bg-white/15 active:scale-95 transition"
-        >
-          <Sparkles class="w-3.5 h-3.5 text-accent-yellow" />
-          <span id="detail-toggle-label">Buka Detail</span>
-          <ChevronDown id="detail-chevron" class="w-3.5 h-3.5 transition-transform" />
-        </button>
+        <div class="mt-5">
+          <button
+            id="detail-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="hero-detail"
+            class="flex w-fit items-center gap-2 rounded-2xl bg-white/15 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition-all hover:bg-white/25 active:scale-95"
+          >
+            <Sparkles class="h-3.5 w-3.5 stroke-[2.2]" />
+            <span id="detail-toggle-label">Lihat Detail</span>
+            <ChevronDown id="detail-chevron" class="h-4 w-4 stroke-[2.5] transition-transform duration-300" />
+          </button>
+        </div>
 
-        <div id="hero-detail" class="mt-4 hidden">
-          <div class="border-t border-white/10 pt-4">
-            <div class="flex items-center justify-between gap-3">
-              <p class="text-[11px] font-medium text-slate-300">
-                Periode <span id="dash-period">Bulan Ini</span>
-              </p>
-              <span class="inline-flex items-center gap-1 rounded-full bg-white/10 border border-white/10 px-2.5 py-1 text-[10px] font-semibold text-slate-100">
-                <span class="w-1.5 h-1.5 rounded-full bg-finance-green"></span>
-                Aktif
-              </span>
+        <div id="hero-detail" class="mt-4 hidden overflow-hidden">
+          <div class="space-y-3 border-t border-white/15 pt-4">
+            <div class="flex items-center justify-between gap-3 px-1 text-[10px] font-medium text-white/70">
+              <span>Periode <span id="dash-period">Bulan Ini</span></span>
+              <span class="rounded-full bg-white/20 px-2 py-0.5 text-[9px] text-white">Aktif</span>
             </div>
 
-            <div class="mt-3 grid grid-cols-2 gap-2.5">
-              <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
-                <div class="flex items-center gap-2">
-                  <span class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                    <ArrowDownLeft class="w-3.5 h-3.5 text-finance-green stroke-[2.5]" />
-                  </span>
-                  <span class="text-[10px] font-medium text-slate-300">Pemasukan</span>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="flex items-center gap-2.5 rounded-2xl bg-white/10 p-3 backdrop-blur-xs">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white">
+                  <ArrowDownLeft class="h-3.5 w-3.5 stroke-[2.5]" />
+                </span>
+                <div class="flex min-w-0 flex-col">
+                  <span class="text-[10px] font-medium text-white/70">Pemasukan</span>
+                  <span id="dash-month-income" data-amount="0" class="truncate text-[11px] font-bold text-white tabular-nums">Rp 0</span>
                 </div>
-                <p id="dash-month-income" data-amount="0" class="mt-2 text-sm font-bold text-white tabular-nums truncate">
-                  Rp 0
-                </p>
               </div>
 
-              <div class="rounded-2xl bg-white/10 border border-white/10 p-3">
-                <div class="flex items-center gap-2">
-                  <span class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                    <ArrowUpRight class="w-3.5 h-3.5 text-finance-red stroke-[2.5]" />
-                  </span>
-                  <span class="text-[10px] font-medium text-slate-300">Pengeluaran</span>
+              <div class="flex items-center gap-2.5 rounded-2xl bg-white/10 p-3 backdrop-blur-xs">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white">
+                  <ArrowUpRight class="h-3.5 w-3.5 stroke-[2.5]" />
+                </span>
+                <div class="flex min-w-0 flex-col">
+                  <span class="text-[10px] font-medium text-white/70">Pengeluaran</span>
+                  <span id="dash-month-expense" data-amount="0" class="truncate text-[11px] font-bold text-white tabular-nums">Rp 0</span>
                 </div>
-                <p id="dash-month-expense" data-amount="0" class="mt-2 text-sm font-bold text-white tabular-nums truncate">
-                  Rp 0
-                </p>
               </div>
             </div>
           </div>
@@ -160,53 +147,64 @@ import {
       </div>
     </section>
 
-    <!-- 3. Shortcut Row -->
+    <!-- 3. Shortcut Grid -->
     <nav class="grid grid-cols-4 gap-2" aria-label="Aksi cepat">
       <a href="/accounts" class="group flex flex-col items-center gap-2">
-        <span class="w-12 h-12 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy group-hover:border-accent-yellow group-hover:text-accent-yellow-hover group-active:scale-95 transition">
-          <Wallet class="w-5 h-5" />
+        <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
+          <Wallet class="h-4.5 w-4.5 stroke-2" />
         </span>
-        <span class="text-[10px] font-semibold text-text-secondary">Dompet</span>
+        <span class="text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">Dompet</span>
       </a>
 
       <a href="/categories" class="group flex flex-col items-center gap-2">
-        <span class="w-12 h-12 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy group-hover:border-accent-yellow group-hover:text-accent-yellow-hover group-active:scale-95 transition">
-          <FolderKanban class="w-5 h-5" />
+        <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
+          <FolderKanban class="h-4.5 w-4.5 stroke-2" />
         </span>
-        <span class="text-[10px] font-semibold text-text-secondary">Kategori</span>
+        <span class="text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">Kategori</span>
       </a>
 
       <a href="/history" class="group flex flex-col items-center gap-2">
-        <span class="w-12 h-12 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy group-hover:border-accent-yellow group-hover:text-accent-yellow-hover group-active:scale-95 transition">
-          <History class="w-5 h-5" />
+        <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
+          <History class="h-4.5 w-4.5 stroke-2" />
         </span>
-        <span class="text-[10px] font-semibold text-text-secondary">Riwayat</span>
+        <span class="text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">Riwayat</span>
       </a>
 
       <a href="/transactions" class="group flex flex-col items-center gap-2">
-        <span class="w-12 h-12 rounded-full bg-white border border-brand-border/70 shadow-xs flex items-center justify-center text-brand-navy group-hover:border-accent-yellow group-hover:text-accent-yellow-hover group-active:scale-95 transition">
-          <ArrowLeftRight class="w-5 h-5" />
+        <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
+          <ArrowLeftRight class="h-4.5 w-4.5 stroke-2" />
         </span>
-        <span class="text-[10px] font-semibold text-text-secondary">Transaksi</span>
+        <span class="text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">Transaksi</span>
       </a>
     </nav>
 
-    <!-- 4. Catat Cepat (One-tap Create) -->
-    <section id="quick-section" class="hidden space-y-3">
+    <!-- 4. Catat Cepat -->
+    <section id="quick-section" class="space-y-3">
       <div class="flex items-center justify-between gap-2 px-1">
-        <div class="flex items-center gap-1.5 min-w-0">
-          <Zap class="w-4 h-4 text-accent-yellow shrink-0" />
-          <h3 class="text-xs font-bold text-brand-navy truncate">Catat Cepat</h3>
-          <span class="rounded-full bg-brand-light border border-brand-border/60 px-2 py-0.5 text-[9px] font-semibold text-text-secondary shrink-0">
-            1 tap
+        <div class="flex min-w-0 items-center gap-2">
+          <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-soft text-primary shadow-xs">
+            <Zap class="h-3.5 w-3.5 fill-current stroke-2" />
+          </span>
+          <h3 class="truncate text-xs font-extrabold tracking-tight text-primary">Catat Cepat</h3>
+          <span class="shrink-0 rounded-full bg-blue-soft px-2 py-0.5 text-[9px] font-extrabold text-blue-main">
+            One Click Instant
           </span>
         </div>
-        <a
-          href="/transactions"
-          class="text-[11px] font-semibold text-accent-yellow-hover hover:text-brand-navy transition shrink-0"
+
+        <button
+          type="button"
+          id="open-custom-quick"
+          class="flex shrink-0 items-center gap-1 text-[11px] font-bold text-blue-main transition-colors hover:text-primary active:scale-95"
         >
-          + Custom
-        </a>
+          <Plus class="h-3.5 w-3.5 stroke-[2.5]" />
+          <span>Custom</span>
+        </button>
+      </div>
+
+      <div class="relative overflow-hidden rounded-[26px] border border-border bg-card p-4 shadow-soft">
+        <div class="relative z-10">
+          <div id="quick-list" class="no-scrollbar flex items-center gap-2.5 overflow-x-auto"></div>
+        </div>
       </div>
 
       <div
@@ -217,90 +215,63 @@ import {
         <button
           type="button"
           id="quick-undo"
-          class="ml-auto shrink-0 text-text-secondary underline underline-offset-2 hover:text-brand-navy"
+          class="ml-auto shrink-0 text-muted-foreground underline underline-offset-2 hover:text-primary"
         >
           Urungkan
         </button>
       </div>
-
-      <div
-        id="quick-list"
-        class="no-scrollbar flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-px-4 -mx-4 px-4 pb-2"
-      ></div>
     </section>
 
-    <!-- 5. Pengeluaran Mingguan (Placeholder) -->
+    <!-- 5. Grafik Pengeluaran Mingguan -->
     <section class="space-y-3">
       <div class="flex items-center justify-between px-1">
-        <h3 class="text-sm font-bold text-brand-navy">Pengeluaran Mingguan</h3>
-        <a
-          href="/history"
-          class="text-[11px] font-semibold text-accent-yellow-hover hover:text-brand-navy transition"
-        >
-          Riwayat &gt;
+        <h3 class="text-sm font-bold text-primary">Pengeluaran Mingguan</h3>
+        <a href="/history" class="flex items-center gap-0.5 text-xs font-semibold text-blue-main transition-colors hover:text-primary">
+          <span>Riwayat</span>
         </a>
       </div>
 
-      <div class="rounded-3xl bg-white border border-brand-border/70 p-4 shadow-xs">
-        <div class="flex items-center justify-between gap-3">
-          <span class="text-[11px] font-semibold text-text-secondary">Minggu Ini</span>
-          <span class="rounded-full bg-brand-light border border-brand-border/60 px-3 py-1 text-[10px] font-bold text-text-secondary">
-            Segera
-          </span>
+      <div class="space-y-4 rounded-[28px] border border-border bg-card p-5 shadow-soft">
+        <div class="flex items-center justify-between border-b border-border pb-3">
+          <span class="text-xs font-bold text-muted-foreground">Bulan Ini</span>
+          <div class="flex items-center gap-1.5 rounded-full bg-blue-soft px-3 py-1">
+            <TrendingDown class="h-3 w-3 stroke-[2.5] text-primary" />
+            <span id="weekly-expense-total" class="text-[11px] font-bold text-primary">Rp 0</span>
+          </div>
         </div>
 
         <div
-          class="mt-4 flex items-end justify-between gap-2 h-28"
+          class="flex h-32 w-full items-end justify-between gap-2 px-1 pt-4"
           role="img"
-          aria-label="Grafik pengeluaran mingguan, masih placeholder"
+          aria-label="Grafik pengeluaran mingguan (placeholder visual)"
         >
-          <div class="flex-1 flex flex-col items-center gap-2">
-            <div class="h-24 w-full flex items-end justify-center">
-              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 36%"></div>
-            </div>
-            <span class="week-label text-[10px] font-medium text-text-secondary">Sen</span>
+          <div class="flex w-full flex-col items-center gap-1.5">
+            <div class="week-bar h-12 w-full rounded-full bg-blue-soft transition-all"></div>
+            <span class="week-label text-[10px] font-bold text-muted-foreground">Sen</span>
           </div>
-
-          <div class="flex-1 flex flex-col items-center gap-2">
-            <div class="h-24 w-full flex items-end justify-center">
-              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 68%"></div>
-            </div>
-            <span class="week-label text-[10px] font-medium text-text-secondary">Sel</span>
+          <div class="flex w-full flex-col items-center gap-1.5">
+            <div class="week-bar h-24 w-full rounded-full bg-primary transition-all"></div>
+            <span class="week-label text-[10px] font-bold text-primary">Sel</span>
           </div>
-
-          <div class="flex-1 flex flex-col items-center gap-2">
-            <div class="h-24 w-full flex items-end justify-center">
-              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 28%"></div>
-            </div>
-            <span class="week-label text-[10px] font-medium text-text-secondary">Rab</span>
+          <div class="flex w-full flex-col items-center gap-1.5">
+            <div class="week-bar h-8 w-full rounded-full bg-blue-soft transition-all"></div>
+            <span class="week-label text-[10px] font-bold text-muted-foreground">Rab</span>
           </div>
-
-          <div class="flex-1 flex flex-col items-center gap-2">
-            <div class="h-24 w-full flex items-end justify-center">
-              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 52%"></div>
-            </div>
-            <span class="week-label text-[10px] font-medium text-text-secondary">Kam</span>
+          <div class="flex w-full flex-col items-center gap-1.5">
+            <div class="week-bar h-16 w-full rounded-full bg-blue-soft transition-all"></div>
+            <span class="week-label text-[10px] font-bold text-muted-foreground">Kam</span>
           </div>
-
-          <div class="flex-1 flex flex-col items-center gap-2">
-            <div class="h-24 w-full flex items-end justify-center">
-              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 82%"></div>
-            </div>
-            <span class="week-label text-[10px] font-medium text-text-secondary">Jum</span>
+          <div class="flex w-full flex-col items-center gap-1.5">
+            <div class="week-bar h-28 w-full rounded-full bg-blue-main transition-all"></div>
+            <span class="week-label text-[10px] font-bold text-blue-main">Jum</span>
           </div>
-
-          <div class="flex-1 flex flex-col items-center gap-2">
-            <div class="h-24 w-full flex items-end justify-center">
-              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 20%"></div>
-            </div>
-            <span class="week-label text-[10px] font-medium text-text-secondary">Sab</span>
+          <div class="flex w-full flex-col items-center gap-1.5">
+            <div class="week-bar h-10 w-full rounded-full bg-blue-soft transition-all"></div>
+            <span class="week-label text-[10px] font-bold text-muted-foreground">Sab</span>
           </div>
-
-          <div class="flex-1 flex flex-col items-center gap-2">
-            <div class="h-24 w-full flex items-end justify-center">
-              <div class="week-bar w-4 rounded-full bg-brand-border transition-all" style="height: 44%"></div>
-            </div>
-            <span class="week-label text-[10px] font-medium text-text-secondary">Min</span>
+          <div class="flex w-full flex-col items-center gap-1.5">
+            <div class="week-bar h-14 w-full rounded-full bg-blue-soft transition-all"></div>
+            <span class="week-label text-[10px] font-bold text-muted-foreground">Min</span>
           </div>
         </div>
       </div>
@@ -309,35 +280,27 @@ import {
     <!-- 6. Aktivitas Terakhir -->
     <section class="space-y-3">
       <div class="flex items-center justify-between px-1">
-        <h3 class="text-sm font-bold text-brand-navy">Aktivitas Terakhir</h3>
-        <a
-          href="/history"
-          class="text-[11px] font-semibold text-accent-yellow-hover hover:text-brand-navy transition"
-        >
-          Lihat Semua &gt;
+        <h3 class="text-sm font-bold tracking-tight text-primary">Aktivitas Terakhir</h3>
+        <a href="/history" class="flex items-center gap-0.5 text-xs font-semibold text-blue-main transition-colors hover:text-primary">
+          <span>Lihat Semua</span>
         </a>
       </div>
 
-      <div id="dash-recent-list" class="space-y-2">
-        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-brand-border/60 animate-pulse">
-          <div class="w-11 h-11 rounded-full bg-slate-200/80 shrink-0"></div>
-          <div class="flex-1 space-y-2 min-w-0">
-            <div class="h-3 w-2/3 rounded bg-slate-200/80"></div>
-            <div class="h-2.5 w-1/2 rounded bg-slate-200/70"></div>
+      <div class="divide-y divide-border overflow-hidden rounded-[28px] border border-border bg-card shadow-soft">
+        <div id="dash-recent-list" class="divide-y divide-border">
+          <div class="flex animate-pulse items-center gap-3.5 p-4">
+            <div class="h-10 w-10 shrink-0 rounded-2xl bg-slate-200/80"></div>
+            <div class="min-w-0 flex-1 space-y-2">
+              <div class="h-3 w-2/3 rounded bg-slate-200/80"></div>
+              <div class="h-2.5 w-1/2 rounded bg-slate-200/70"></div>
+            </div>
           </div>
-        </div>
-        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-brand-border/60 animate-pulse">
-          <div class="w-11 h-11 rounded-full bg-slate-200/80 shrink-0"></div>
-          <div class="flex-1 space-y-2 min-w-0">
-            <div class="h-3 w-3/5 rounded bg-slate-200/80"></div>
-            <div class="h-2.5 w-2/5 rounded bg-slate-200/70"></div>
-          </div>
-        </div>
-        <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-brand-border/60 animate-pulse">
-          <div class="w-11 h-11 rounded-full bg-slate-200/80 shrink-0"></div>
-          <div class="flex-1 space-y-2 min-w-0">
-            <div class="h-3 w-1/2 rounded bg-slate-200/80"></div>
-            <div class="h-2.5 w-1/3 rounded bg-slate-200/70"></div>
+          <div class="flex animate-pulse items-center gap-3.5 p-4">
+            <div class="h-10 w-10 shrink-0 rounded-2xl bg-slate-200/80"></div>
+            <div class="min-w-0 flex-1 space-y-2">
+              <div class="h-3 w-3/5 rounded bg-slate-200/80"></div>
+              <div class="h-2.5 w-2/5 rounded bg-slate-200/70"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -345,17 +308,137 @@ import {
 
   </div>
 
-  <!-- Extended FAB -->
-  <a
-    href="/transactions"
-    class="fixed bottom-20 right-6 z-40 flex items-center gap-2.5 px-5 py-3.5 bg-accent-yellow text-brand-navy rounded-full shadow-xl shadow-accent-yellow/30 hover:bg-accent-yellow-hover hover:scale-105 active:scale-95 transition-all font-bold text-sm border-2 border-white/20 group"
-    aria-label="Catat Transaksi Baru"
-  >
-    <div class="w-6 h-6 rounded-full bg-brand-navy text-accent-yellow flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
-      <Plus class="w-4 h-4 stroke-[3]" />
+  <!-- Modal Custom Catat Cepat -->
+  <dialog id="quick-custom-dialog" class="app-sheet" aria-labelledby="quick-custom-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h3 id="quick-custom-title" class="text-base font-extrabold text-primary">Custom Catat Cepat</h3>
+
+        <div class="flex items-center gap-1.5">
+          <button
+            type="button"
+            id="quick-manage-open"
+            class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
+            title="Kelola Catat Cepat"
+            aria-label="Kelola Catat Cepat"
+          >
+            <SlidersHorizontal class="h-3.5 w-3.5 stroke-[2.5]" />
+          </button>
+          <button
+            type="button"
+            id="quick-custom-close"
+            class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
+            aria-label="Tutup form"
+          >
+            <X class="h-4 w-4 stroke-[2.5]" />
+          </button>
+        </div>
+      </div>
+
+      <form id="quick-custom-form" class="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-5" novalidate>
+        <div class="space-y-1.5">
+          <label for="quick-name" class="text-[11px] font-bold text-foreground">Nama Transaksi</label>
+          <input
+            type="text"
+            id="quick-name"
+            maxlength="40"
+            placeholder="Misal: Kopi Kenangan"
+            data-autofocus
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="quick-type" class="text-[11px] font-bold text-foreground">Tipe Transaksi</label>
+          <select
+            id="quick-type"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
+          >
+            <option value="expense">Pengeluaran</option>
+            <option value="income">Pemasukan</option>
+          </select>
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="quick-amount" class="text-[11px] font-bold text-foreground">Nominal (Rp)</label>
+          <input
+            type="text"
+            id="quick-amount"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="0"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-bold text-foreground outline-none focus:border-blue-main"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="quick-category" class="text-[11px] font-bold text-foreground">Kategori</label>
+          <select
+            id="quick-category"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
+          >
+            <option value="">Pilih Kategori</option>
+          </select>
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="quick-account" class="text-[11px] font-bold text-foreground">Akun / Dompet</label>
+          <select
+            id="quick-account"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
+          >
+            <option value="">Pilih Akun</option>
+          </select>
+        </div>
+
+        <div class="pt-1">
+          <button
+            type="submit"
+            id="quick-custom-submit"
+            class="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95"
+          >
+            <Check class="h-4 w-4 stroke-[2.5]" />
+            <span>Simpan Shortcut</span>
+          </button>
+        </div>
+      </form>
     </div>
-    <span class="tracking-wide">Catat Transaksi</span>
-  </a>
+  </dialog>
+
+  <!-- Modal Kelola Catat Cepat -->
+  <dialog id="quick-manage-dialog" class="app-sheet" aria-labelledby="quick-manage-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h3 id="quick-manage-title" class="text-base font-extrabold text-primary">Kelola Catat Cepat</h3>
+        <button
+          type="button"
+          id="quick-manage-close"
+          class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
+          aria-label="Tutup kelola catat cepat"
+        >
+          <X class="h-4 w-4 stroke-[2.5]" />
+        </button>
+      </div>
+
+      <div class="no-scrollbar min-h-0 max-h-[60vh] flex-1 space-y-3 overflow-y-auto p-5">
+        <p class="text-xs leading-relaxed text-muted-foreground">
+          Daftar shortcut catat cepat yang tersimpan (maksimal 5 item). Kalau slot penuh, shortcut terlama akan diganti.
+        </p>
+        <div id="quick-manage-list" class="space-y-2.5"></div>
+      </div>
+
+      <div class="border-t border-border p-5">
+        <button
+          type="button"
+          id="quick-manage-add"
+          class="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-soft py-3.5 text-xs font-bold text-blue-main shadow-soft transition-colors hover:bg-blue-main hover:text-white"
+        >
+          <Plus class="h-4 w-4 stroke-[2.5]" />
+          <span>Tambah Shortcut Baru</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
 
   <script>
     import { initDashboardPage } from '../scripts/dashboard';

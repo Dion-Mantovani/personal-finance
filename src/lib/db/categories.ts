@@ -7,7 +7,12 @@ export async function addCategory(category: Omit<Category, 'id'> & { id?: string
   if (!db) return null;
 
   const id = category.id || crypto.randomUUID();
-  const newCategory: Category = { ...category, id };
+  const newCategory: Category = {
+    icon: 'Tag',
+    color: 'text-blue-700 bg-blue-50',
+    ...category,
+    id,
+  };
 
   await db.put('categories', newCategory);
   return id;

@@ -16,17 +16,17 @@ export function emptyStateHtml(options: EmptyStateOptions): string {
   const { iconHtml, title, description, actionHtml, className = '' } = options;
 
   return `
-    <div class="rounded-2xl border border-dashed border-brand-border bg-white/60 px-5 py-7 text-center ${className}">
-      <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-brand-border/60 bg-brand-light text-text-secondary">
+    <div class="px-6 py-10 text-center ${className}">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-soft text-primary">
         ${iconHtml}
       </div>
-      <p class="mt-3 text-sm font-bold text-brand-navy">${escapeHtml(title)}</p>
+      <p class="mt-4 text-sm font-extrabold text-primary">${escapeHtml(title)}</p>
       ${
         description
-          ? `<p class="mx-auto mt-1 max-w-[260px] text-[11px] leading-relaxed text-text-secondary">${escapeHtml(description)}</p>`
+          ? `<p class="mx-auto mt-1 max-w-[260px] text-[11px] font-medium leading-relaxed text-muted-foreground">${escapeHtml(description)}</p>`
           : ''
       }
-      ${actionHtml ? `<div class="mt-3.5 flex justify-center">${actionHtml}</div>` : ''}
+      ${actionHtml ? `<div class="mt-4 flex justify-center">${actionHtml}</div>` : ''}
     </div>
   `;
 }

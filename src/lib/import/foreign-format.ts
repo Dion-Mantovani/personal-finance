@@ -198,7 +198,7 @@ const CATEGORY_ICON_MAP: Record<string, string> = {
 };
 
 const EXPENSE_COLORS = [
-  'text-brand-navy bg-amber-50',
+  'text-blue-700 bg-blue-50',
   'text-rose-700 bg-rose-50',
   'text-violet-700 bg-violet-50',
   'text-emerald-700 bg-emerald-50',
@@ -233,7 +233,7 @@ function mapIcon(value: unknown, kind: 'account' | 'category'): string {
 
 function colorForCategory(type: TransactionType, name: string): string {
   if (type === 'income') return 'text-emerald-700 bg-emerald-50';
-  if (type === 'transfer') return 'text-brand-navy bg-amber-50';
+  if (type === 'transfer') return 'text-blue-700 bg-blue-50';
 
   let hash = 0;
   for (let index = 0; index < name.length; index += 1) {
@@ -349,7 +349,7 @@ export function mapForeignPayload(
       name,
       balance: Number.isFinite(balanceRaw) ? balanceRaw : 0,
       icon: mapIcon(item.icon, 'account'),
-      color: 'text-brand-navy bg-amber-50',
+      color: 'text-blue-700 bg-blue-50',
     };
 
     newAccounts.push(account);
@@ -366,6 +366,84 @@ export function mapForeignPayload(
       category,
     ])
   );
+  const categoryIdByRawAndType = new Map<string, string>();
+  const autoCreatedCategoryLabels: string[] = [];
+
+  /**
+   * Cari kategori berdasarkan tipe + nama. Kalau belum ada, buat baru.
+   * Dipakai untuk kategori lintas tipe dan fallback transaksi tanpa kategori.
+   */
+  function ensureCategory(
+    rawName: string,
+    type: TransactionType,
+    icon: string,
+    color?: string
+  ): Category {
+    const name = rawName.trim() || 'Lainnya';
+    const key = `${type}|${name.toLowerCase()}`;
+    const existing = categoriesByKey.get(key);
+    if (existing) return existing;
+
+    const category: Category = {
+      id: newId(),
+      name,
+      type,
+      icon,
+      color: color || colorForCategory(type, name),
+    };
+
+    newCategories.push(category);
+    categoriesById.set(category.id, category);
+    categoriesByKey.set(key, category);
+    autoCreatedCategoryLabels.push(
+      `${name} (${type === 'income' ? 'Pemasukan' : type === 'expense' ? 'Pengeluaran' : 'Transfer'})`
+    );
+
+    return category;
+  }
+
+  function resolveCategoryForTransaction(
+    rawCategoryId: string,
+    type: TransactionType,
+    description: string
+  ): string {
+    const exact = rawCategoryId
+      ? categoryIdByRawAndType.get(`${rawCategoryId}|${type}`)
+      : undefined;
+    if (exact) return exact;
+
+    const legacyId = rawCategoryId ? categoryIdMap.get(rawCategoryId) : undefined;
+    const base =
+      (legacyId ? categoriesById.get(legacyId) : undefined) ??
+      (rawCategoryId ? categoriesById.get(rawCategoryId) : undefined);
+
+    if (base) {
+      if (base.type === type) {
+        if (rawCategoryId) {
+          categoryIdByRawAndType.set(`${rawCategoryId}|${type}`, base.id);
+        }
+        return base.id;
+      }
+
+      // Satu kategori dipakai untuk tipe berbeda: buat pasangannya.
+      const twin = ensureCategory(
+        base.name,
+        type,
+        base.icon,
+        colorForCategory(type, base.name)
+      );
+      if (rawCategoryId) {
+        categoryIdByRawAndType.set(`${rawCategoryId}|${type}`, twin.id);
+      }
+      return twin.id;
+    }
+
+    // Kategori tidak ditemukan sama sekali.
+    const isCorrection = /koreksi\s*saldo/i.test(description);
+    const fallbackName = isCorrection ? 'Koreksi Saldo' : 'Lainnya';
+    const fallbackIcon = isCorrection ? 'RefreshCw' : 'MoreHorizontal';
+    return ensureCategory(fallbackName, type, fallbackIcon).id;
+  }
 
   payload.categories.forEach((item, index) => {
     if (!item || typeof item !== 'object') {
@@ -381,34 +459,32 @@ export function mapForeignPayload(
       return;
     }
 
-    if (name.toLowerCase() === 'koreksi saldo') {
-      warnings.push('Kategori "Koreksi Saldo" dilewati karena nama tersebut dipakai sistem.');
-      return;
-    }
-
     const rawId = readId(item.id);
+    const isCorrection = name.toLowerCase() === 'koreksi saldo';
     const key = `${type}|${name.toLowerCase()}`;
-    const existingByKey = categoriesByKey.get(key);
+    let category = categoriesByKey.get(key);
 
-    if (existingByKey) {
-      if (rawId) categoryIdMap.set(rawId, existingByKey.id);
-      return;
+    if (!category) {
+      const existingById = rawId ? categoriesById.get(rawId) : undefined;
+      category = {
+        id: existingById ? newId() : rawId || newId(),
+        name,
+        type,
+        icon: isCorrection ? 'RefreshCw' : mapIcon(item.icon, 'category'),
+        color: isCorrection
+          ? 'text-blue-700 bg-blue-50'
+          : colorForCategory(type, name),
+      };
+
+      newCategories.push(category);
+      categoriesById.set(category.id, category);
+      categoriesByKey.set(key, category);
     }
 
-    const existingById = rawId ? categoriesById.get(rawId) : undefined;
-    const id = existingById ? newId() : rawId || newId();
-    const category: Category = {
-      id,
-      name,
-      type,
-      icon: mapIcon(item.icon, 'category'),
-      color: colorForCategory(type, name),
-    };
-
-    newCategories.push(category);
-    categoriesById.set(category.id, category);
-    categoriesByKey.set(key, category);
-    if (rawId) categoryIdMap.set(rawId, category.id);
+    if (rawId) {
+      categoryIdMap.set(rawId, category.id);
+      categoryIdByRawAndType.set(`${rawId}|${type}`, category.id);
+    }
   });
 
   const hasTransferTransaction = payload.transactions.some(
@@ -427,7 +503,7 @@ export function mapForeignPayload(
       name: 'Transfer',
       type: 'transfer',
       icon: 'ArrowLeftRight',
-      color: 'text-brand-navy bg-amber-50',
+      color: 'text-blue-700 bg-blue-50',
     };
     newCategories.push(transferCategory);
     categoriesById.set(transferCategory.id, transferCategory);
@@ -478,6 +554,9 @@ export function mapForeignPayload(
       return;
     }
 
+    const description =
+      typeof item.description === 'string' ? item.description.trim() : '';
+
     let toAccountId: string | undefined;
     let categoryId: string | undefined;
 
@@ -501,16 +580,7 @@ export function mapForeignPayload(
       }
     } else {
       const rawCategoryId = readId(item.category_id);
-      categoryId =
-        categoryIdMap.get(rawCategoryId) ??
-        (categoriesById.has(rawCategoryId) ? rawCategoryId : undefined);
-
-      const category = categoryId ? categoriesById.get(categoryId) : undefined;
-      if (!category || category.type !== type) {
-        skippedTransactions += 1;
-        warnings.push(`Transaksi #${index + 1} dilewati: kategori tidak sesuai tipe.`);
-        return;
-      }
+      categoryId = resolveCategoryForTransaction(rawCategoryId, type, description);
     }
 
     const rawId = readId(item.id);
@@ -528,7 +598,6 @@ export function mapForeignPayload(
 
     const createdAtRaw =
       typeof item.created_at === 'string' ? Date.parse(item.created_at) : NaN;
-    const note = typeof item.description === 'string' ? item.description.trim() : '';
 
     importedTransactions.push({
       id,
@@ -538,13 +607,22 @@ export function mapForeignPayload(
       amount,
       type,
       date,
-      ...(note ? { note } : {}),
+      ...(description ? { note: description } : {}),
       createdAt: Number.isFinite(createdAtRaw) ? createdAtRaw : Date.now(),
     });
   });
 
   if (skippedTransactions > 0) {
     warnings.push(`${skippedTransactions} transaksi dilewati (tidak valid atau sudah ada).`);
+  }
+
+  if (autoCreatedCategoryLabels.length > 0) {
+    const uniqueLabels = [...new Set(autoCreatedCategoryLabels)];
+    const preview = uniqueLabels.slice(0, 5).join(', ');
+    const suffix = uniqueLabels.length > 5 ? `, +${uniqueLabels.length - 5} lainnya` : '';
+    warnings.push(
+      `${uniqueLabels.length} kategori dibuat otomatis: ${preview}${suffix}.`
+    );
   }
 
   if (ignoredFees > 0) {

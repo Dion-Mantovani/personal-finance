@@ -1,32 +1,47 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
-import { Wallet, CreditCard, Landmark, PiggyBank, Coins, Banknote, Building2, Smartphone, Briefcase, HandCoins, ChartLine, CircleDollarSign, Plus, X, ArrowUpRight, Activity, ArrowUpDown, Check, ChevronUp, ChevronDown } from '@lucide/astro';
+import {
+  Wallet,
+  CreditCard,
+  Landmark,
+  PiggyBank,
+  Coins,
+  Banknote,
+  Building2,
+  Smartphone,
+  Briefcase,
+  HandCoins,
+  ChartLine,
+  CircleDollarSign,
+  Plus,
+  X,
+  ArrowRightLeft,
+  ArrowUpRight,
+  Activity,
+  ArrowUpDown,
+  Check,
+  Star,
+} from '@lucide/astro';
 ---
 
-<Layout title="Accounts" activeTab='accounts'>
-  <div class="space-y-6">
-    
-    <!-- 1. Header yang baru -->
-    <Header 
-      title="Daftar Akun" 
-      centerTitle
-    />
+<Layout title="Dompet Saya" activeTab="accounts">
+  <div class="space-y-5 pb-8">
 
-    <!-- 2. Main Card & Micro Info Grid -->
-    <section class="relative overflow-hidden rounded-[28px] bg-brand-navy text-white p-5 shadow-xl border border-white/10">
-      <div class="absolute -right-12 -top-16 w-48 h-48 rounded-full bg-accent-yellow/15 blur-3xl pointer-events-none"></div>
-      <div class="absolute right-[-40px] bottom-[-70px] w-44 h-44 rounded-full bg-white/5 pointer-events-none"></div>
-      <div class="absolute left-[-60px] bottom-[-90px] w-52 h-52 rounded-full bg-white/5 pointer-events-none"></div>
+    <Header title="Dompet Saya" showBack centerTitle />
 
-      <!-- Konten Utama: Total Saldo -->
+    <!-- Kartu utama total saldo -->
+    <section class="relative overflow-hidden rounded-[28px] bg-card-blue-dark p-6 text-white shadow-soft">
+      <div class="pointer-events-none absolute -right-8 -bottom-10 h-40 w-40 rounded-full bg-white/10"></div>
+      <div class="pointer-events-none absolute right-16 -bottom-16 h-32 w-32 rounded-full bg-white/5"></div>
+
       <div class="relative z-10">
         <div class="flex items-center justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-2">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10">
-              <Wallet class="w-4 h-4 text-accent-yellow" />
+          <div class="flex min-w-0 items-center gap-2.5">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md">
+              <Wallet class="h-4 w-4 stroke-[2.2] text-white" />
             </span>
-            <span class="truncate text-[11px] font-semibold text-slate-200">Total Saldo Seluruh Akun</span>
+            <span class="truncate text-xs font-semibold tracking-wide text-white/80">Total Saldo Dompet</span>
           </div>
 
           <button
@@ -34,218 +49,247 @@ import { Wallet, CreditCard, Landmark, PiggyBank, Coins, Banknote, Building2, Sm
             type="button"
             aria-pressed="false"
             style="display: none;"
-            class="shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-slate-100 transition hover:bg-white/15 active:scale-95"
+            class="shrink-0 items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
           >
             <span id="sort-icon-default" class="flex items-center">
-              <ArrowUpDown class="w-3.5 h-3.5 text-accent-yellow" />
+              <ArrowUpDown class="h-3.5 w-3.5 stroke-[2.5] text-white" />
             </span>
             <span id="sort-icon-done" style="display: none;" class="items-center">
-              <Check class="w-3.5 h-3.5" />
+              <Check class="h-3.5 w-3.5 stroke-[2.5]" />
             </span>
             <span id="sort-toggle-label">Urutkan</span>
           </button>
         </div>
 
-        <div class="flex items-baseline gap-2 mt-3">
-          <h2 id="total-combined-balance" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white tabular-nums">Rp 0</h2>
-          <span class="text-xs font-medium text-finance-green flex items-center bg-finance-green/10 px-2 py-0.5 rounded-full">
-            <ArrowUpRight class="w-3.5 h-3.5 inline mr-0.5" /> Live
+        <div class="mt-5 mb-4 flex items-baseline gap-2">
+          <h2 id="total-combined-balance" class="text-3xl font-extrabold tracking-tight text-white tabular-nums">Rp 0</h2>
+          <span class="flex items-center rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-md">
+            <ArrowUpRight class="mr-0.5 inline h-3 w-3 stroke-[2.5]" /> Live
           </span>
         </div>
-      </div>
 
-      <!-- Garis Pemisah (Divider) -->
-      <div class="relative z-10 my-5 border-t border-white/10"></div>
-
-      <!-- 3 Micro Info di Dalam Card Wrapper (Dipisah Kolom/Garis Tipis) -->
-      <div class="relative z-10 grid grid-cols-3 gap-3 divide-x divide-white/10">
-        <!-- Info 1: Jumlah Wallet -->
-        <div class="flex flex-col justify-between pr-2">
-          <span class="text-[11px] font-medium text-slate-300">Dompet</span>
-          <div class="flex items-center gap-1.5 mt-1.5">
-            <Wallet class="w-4 h-4 text-accent-yellow shrink-0" />
-            <span id="micro-wallet-count" class="text-xs sm:text-sm font-bold text-white">0 Akun</span>
+        <div class="grid grid-cols-3 gap-1.5 border-t border-white/15 pt-3">
+          <div class="flex min-w-0 items-center gap-1.5">
+            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
+              <Wallet class="h-3 w-3 stroke-[2.2]" />
+            </span>
+            <div class="flex min-w-0 flex-col">
+              <span id="micro-wallet-count" class="truncate text-[11px] font-extrabold leading-tight text-white">0</span>
+              <span class="truncate text-[9px] font-medium text-white/70">Dompet</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Info 2: Top Wallet -->
-        <div class="flex flex-col justify-between px-2">
-          <span class="text-[11px] font-medium text-slate-300">Teratas</span>
-          <div class="flex items-center gap-1.5 mt-1.5 overflow-hidden">
-            <Landmark class="w-4 h-4 text-finance-green shrink-0" />
-            <span id="micro-top-wallet" class="text-xs sm:text-sm font-bold text-white truncate">--</span>
+          <div class="flex min-w-0 items-center gap-1.5">
+            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
+              <Star class="h-3 w-3 stroke-[2.2]" />
+            </span>
+            <div class="flex min-w-0 flex-col">
+              <span id="micro-top-wallet" class="truncate text-[11px] font-extrabold leading-tight text-white">--</span>
+              <span class="truncate text-[9px] font-medium text-white/70">Teratas</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Info 3: Total Aktivitas -->
-        <div class="flex flex-col justify-between pl-2">
-          <span class="text-[11px] font-medium text-slate-300">Aktivitas</span>
-          <div class="flex items-center gap-1.5 mt-1.5">
-            <Activity class="w-4 h-4 text-amber-400 shrink-0" />
-            <span id="micro-monthly-activity" class="text-xs sm:text-sm font-bold text-white">0 Tx</span>
+          <div class="flex min-w-0 items-center gap-1.5">
+            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
+              <Activity class="h-3 w-3 stroke-[2.2]" />
+            </span>
+            <div class="flex min-w-0 flex-col">
+              <span id="micro-monthly-activity" class="truncate text-[11px] font-extrabold leading-tight text-white">0</span>
+              <span class="truncate text-[9px] font-medium text-white/70">Aktivitas</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. List Akun (Clean Vertical Stack) -->
-    <div class="space-y-3">
-      <h3 class="text-xs font-bold text-text-secondary uppercase tracking-wider px-1">Daftar Dompet Tersedia</h3>
-      <div id="accounts-list" class="space-y-2.5">
-        <p class="text-text-secondary text-sm text-center py-6">Memuat data...</p>
+    <!-- Header daftar + shortcut transfer -->
+    <div class="flex items-center justify-between px-1">
+      <span class="text-sm font-bold text-primary">Daftar Dompet</span>
+      <a
+        href="/transactions?type=transfer"
+        class="flex items-center gap-1.5 rounded-full bg-blue-soft px-3.5 py-1.5 text-xs font-bold text-blue-main transition-all hover:bg-blue-main hover:text-white active:scale-95"
+      >
+        <ArrowRightLeft class="h-3.5 w-3.5 stroke-[2.5]" />
+        <span>Transfer</span>
+      </a>
+    </div>
+
+    <!-- Daftar dompet -->
+    <div class="overflow-hidden rounded-[28px] border border-border bg-card shadow-soft">
+      <div id="accounts-list" class="divide-y divide-border">
+        <p class="py-8 text-center text-sm text-muted-foreground">Memuat data...</p>
       </div>
     </div>
+
+    <!-- Tombol tambah dompet -->
+    <button
+      type="button"
+      id="open-add-modal"
+      class="hidden flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-main/40 bg-blue-soft/30 py-3.5 text-blue-main shadow-xs transition-all hover:border-blue-main hover:bg-blue-soft active:scale-95"
+      aria-label="Tambah Dompet Baru"
+    >
+      <Plus class="h-4 w-4 stroke-[2.5]" />
+      <span class="text-xs font-bold">Tambah Dompet Baru</span>
+    </button>
   </div>
 
-  <!-- Floating Action Button (FAB) Extended: Icon + Teks yang Kontras -->
-  <button 
-    id="open-add-modal" 
-    style="bottom: calc(5rem + env(safe-area-inset-bottom));"
-    class="fixed right-6 z-40 flex items-center gap-2.5 px-5 py-3.5 bg-accent-yellow text-brand-navy rounded-full shadow-xl shadow-accent-yellow/30 hover:bg-accent-yellow-hover hover:scale-105 active:scale-95 transition-all font-bold text-sm border-2 border-white/20 group"
-    aria-label="Tambah Akun Baru"
-  >
-    <div class="w-6 h-6 rounded-full bg-brand-navy text-accent-yellow flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
-      <Plus class="w-4 h-4 stroke-[3]" />
-    </div>
-    <span class="tracking-wide">Tambah Akun</span>
-  </button>
-  
-  <!-- Modal Detail & Aksi Akun (Trigger by Click Item) -->
-  <dialog id="account-detail-modal" class="app-dialog" aria-labelledby="detail-modal-name">
-    <div class="relative rounded-2xl border border-brand-border bg-white p-6 text-center shadow-xl">
-      <button
-        type="button"
-        id="close-detail-modal"
-        class="absolute top-4 right-4 text-text-secondary hover:text-brand-navy transition"
-        aria-label="Tutup detail akun"
-      >
-        <X class="w-5 h-5" />
-      </button>
+  <!-- Modal detail dompet -->
+  <dialog id="account-detail-modal" class="app-sheet" aria-labelledby="detail-modal-name">
+    <div class="sheet-panel">
+      <div class="relative overflow-hidden bg-card-blue-dark p-6 text-white">
+        <div class="pointer-events-none absolute -right-6 -bottom-8 h-28 w-28 rounded-full bg-white/10"></div>
 
-      <!-- Icon Akun Terpilih -->
-      <div id="detail-modal-icon-wrapper" class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-xs border border-brand-border/50 mb-3">
-        <!-- Rendered via JS -->
+        <div class="relative z-10 flex items-center justify-between">
+          <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
+            Detail Dompet
+          </span>
+          <button
+            type="button"
+            id="close-detail-modal"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+            aria-label="Tutup detail akun"
+          >
+            <X class="h-4 w-4 stroke-[2.5]" />
+          </button>
+        </div>
+
+        <div class="relative z-10 mt-5 flex items-center gap-3.5">
+          <div id="detail-modal-icon-wrapper" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white">
+            <!-- Rendered via JS -->
+          </div>
+          <div class="min-w-0">
+            <h3 id="detail-modal-name" class="truncate text-base font-extrabold text-white">Nama Akun</h3>
+            <p class="text-[10px] font-medium text-white/70">Saldo Saat Ini</p>
+          </div>
+        </div>
+
+        <p id="detail-modal-balance" class="relative z-10 mt-5 text-2xl font-black tracking-tight text-white">Rp 0</p>
+        <p id="detail-modal-activity" class="relative z-10 mt-2 inline-block rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold text-white/80">Aktivitas: 0 transaksi</p>
       </div>
 
-      <h3 id="detail-modal-name" class="text-base font-bold text-brand-navy">Nama Akun</h3>
-      <p class="text-xs text-text-secondary mt-0.5">Saldo Saat Ini</p>
-      <p id="detail-modal-balance" class="text-xl font-extrabold text-brand-navy mt-1">Rp 0</p>
-      <p id="detail-modal-activity" class="text-xs font-medium text-text-secondary mt-2 bg-brand-light py-1.5 px-3 rounded-xl inline-block">Aktivitas: 0 transaksi</p>
-
-      <!-- Action Buttons (Edit & Hapus) -->
-      <div class="grid grid-cols-2 gap-2.5 mt-6 pt-4 border-t border-brand-border/60">
-        <button type="button" id="detail-edit-btn" class="w-full bg-brand-light text-brand-navy font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs flex items-center justify-center gap-1.5">
+      <div class="grid grid-cols-2 gap-2.5 border-t border-border p-5">
+        <button
+          type="button"
+          id="detail-edit-btn"
+          class="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-muted py-3 text-xs font-bold text-primary transition hover:bg-slate-200 active:scale-95"
+        >
           Edit Akun
         </button>
-        <button type="button" id="detail-delete-btn" class="w-full bg-rose-50 text-finance-red font-semibold py-2.5 rounded-xl hover:bg-rose-100 transition text-xs flex items-center justify-center gap-1.5">
+        <button
+          type="button"
+          id="detail-delete-btn"
+          class="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-rose-50 py-3 text-xs font-bold text-rose-600 transition hover:bg-rose-100 active:scale-95"
+        >
           Hapus Akun
         </button>
       </div>
     </div>
   </dialog>
-  
-  <!-- Modal Box Form (Create / Edit) -->
-  <dialog id="account-modal" class="app-dialog" aria-labelledby="modal-title">
-    <div class="max-h-[90vh] overflow-y-auto rounded-2xl border border-brand-border bg-white shadow-xl">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-brand-border/60 sticky top-0 z-10 bg-white">
-        <h3 id="modal-title" class="text-base font-bold text-brand-navy">Tambah Akun Baru</h3>
+
+  <!-- Modal form tambah/edit dompet -->
+  <dialog id="account-modal" class="app-sheet" aria-labelledby="modal-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h3 id="modal-title" class="text-base font-extrabold text-primary">Tambah Dompet Baru</h3>
         <button
           type="button"
           id="close-modal"
-          class="text-text-secondary hover:text-brand-navy transition"
+          class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
           aria-label="Tutup form akun"
         >
-          <X class="w-5 h-5" />
+          <X class="h-4 w-4 stroke-[2.5]" />
         </button>
       </div>
 
-      <form id="account-form" class="p-6 space-y-4" novalidate>
+      <form id="account-form" class="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-5" novalidate>
         <input type="hidden" id="edit-id" value="" />
         <input type="hidden" id="icon" value="Wallet" />
-        <input type="hidden" id="color" value="text-brand-navy bg-amber-50" />
-        
-        <div data-field>
-          <label class="block text-xs font-semibold text-brand-navy mb-1" for="name">Nama Akun (cth: BCA, Dompet Saku)</label>
+        <input type="hidden" id="color" value="text-blue-700 bg-blue-50" />
+
+        <div data-field class="space-y-1.5">
+          <label class="block text-[11px] font-bold text-foreground" for="name">Nama Akun (cth: BCA, Dompet Saku)</label>
           <input
             type="text"
             id="name"
             required
             maxlength="40"
             data-autofocus
-            class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
           />
         </div>
 
-        <div data-field>
-          <label class="block text-xs font-semibold text-brand-navy mb-1" for="balance">Saldo Saat Ini (Rp)</label>
+        <div data-field class="space-y-1.5">
+          <label class="block text-[11px] font-bold text-foreground" for="balance">Saldo Saat Ini (Rp)</label>
           <input
-            type="number"
+            type="text"
             id="balance"
             value="0"
+            inputmode="numeric"
+            autocomplete="off"
             required
-            class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
           />
-          <p class="text-[11px] text-text-secondary mt-1">*Selisih dari saldo saat ini akan otomatis dicatat sebagai "Koreksi Saldo".</p>
+          <p class="text-[10px] font-medium leading-relaxed text-muted-foreground">
+            *Selisih dari saldo saat ini akan otomatis dicatat sebagai "Koreksi Saldo".
+          </p>
         </div>
 
-        <!-- Custom Icon Picker Grid -->
-        <div>
-          <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Icon</label>
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-bold text-foreground">Pilih Icon</label>
           <div id="icon-picker" class="grid grid-cols-6 gap-2">
-            <button type="button" data-icon-val="Wallet" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-accent-yellow bg-accent-yellow/10 text-brand-navy transition" aria-label="Ikon wallet">
-              <Wallet class="w-5 h-5" />
+            <button type="button" data-icon-val="Wallet" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-blue-main bg-blue-soft text-primary transition" aria-label="Ikon wallet">
+              <Wallet class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="CreditCard" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon kartu">
-              <CreditCard class="w-5 h-5" />
+            <button type="button" data-icon-val="CreditCard" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon kartu">
+              <CreditCard class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="Landmark" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon bank">
-              <Landmark class="w-5 h-5" />
+            <button type="button" data-icon-val="Landmark" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon bank">
+              <Landmark class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="PiggyBank" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon tabungan">
-              <PiggyBank class="w-5 h-5" />
+            <button type="button" data-icon-val="PiggyBank" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon tabungan">
+              <PiggyBank class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="Coins" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon koin">
-              <Coins class="w-5 h-5" />
+            <button type="button" data-icon-val="Coins" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon koin">
+              <Coins class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="Banknote" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon uang tunai">
-              <Banknote class="w-5 h-5" />
+            <button type="button" data-icon-val="Banknote" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon uang tunai">
+              <Banknote class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="Building2" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon gedung">
-              <Building2 class="w-5 h-5" />
+            <button type="button" data-icon-val="Building2" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon gedung">
+              <Building2 class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="Smartphone" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon e-wallet">
-              <Smartphone class="w-5 h-5" />
+            <button type="button" data-icon-val="Smartphone" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon e-wallet">
+              <Smartphone class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="Briefcase" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon dompet kerja">
-              <Briefcase class="w-5 h-5" />
+            <button type="button" data-icon-val="Briefcase" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon dompet kerja">
+              <Briefcase class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="HandCoins" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon pendapatan">
-              <HandCoins class="w-5 h-5" />
+            <button type="button" data-icon-val="HandCoins" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon pendapatan">
+              <HandCoins class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="ChartLine" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon investasi">
-              <ChartLine class="w-5 h-5" />
+            <button type="button" data-icon-val="ChartLine" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon investasi">
+              <ChartLine class="h-5 w-5" />
             </button>
-            <button type="button" data-icon-val="CircleDollarSign" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-brand-border text-text-secondary transition hover:border-accent-yellow" aria-label="Ikon dolar">
-              <CircleDollarSign class="w-5 h-5" />
+            <button type="button" data-icon-val="CircleDollarSign" class="icon-opt flex aspect-square items-center justify-center rounded-xl border-2 border-border text-muted-foreground transition hover:border-blue-main" aria-label="Ikon dolar">
+              <CircleDollarSign class="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        <!-- Custom Color Picker Grid -->
-        <div>
-          <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Warna Tema</label>
-          <div id="color-picker" class="flex gap-3 items-center">
-            <button type="button" data-color-val="text-amber-500 bg-amber-50" class="color-opt w-7 h-7 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-amber-500 transition" aria-label="Warna amber"></button>
-            <button type="button" data-color-val="text-emerald-700 bg-emerald-50" class="color-opt w-7 h-7 rounded-full bg-finance-green transition" aria-label="Warna hijau"></button>
-            <button type="button" data-color-val="text-violet-700 bg-violet-50" class="color-opt w-7 h-7 rounded-full bg-violet-500 transition" aria-label="Warna violet"></button>
-            <button type="button" data-color-val="text-blue-700 bg-blue-50" class="color-opt w-7 h-7 rounded-full bg-blue-500 transition" aria-label="Warna biru"></button>
-            <button type="button" data-color-val="text-rose-700 bg-rose-50" class="color-opt w-7 h-7 rounded-full bg-finance-red transition" aria-label="Warna merah"></button>
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-bold text-foreground">Pilih Warna Tema</label>
+          <div id="color-picker" class="flex items-center gap-3">
+            <button type="button" data-color-val="text-blue-700 bg-blue-50" class="color-opt h-7 w-7 rounded-full bg-blue-main ring-2 ring-blue-main ring-offset-2 transition" aria-label="Warna biru"></button>
+            <button type="button" data-color-val="text-emerald-700 bg-emerald-50" class="color-opt h-7 w-7 rounded-full bg-finance-green transition" aria-label="Warna hijau"></button>
+            <button type="button" data-color-val="text-violet-700 bg-violet-50" class="color-opt h-7 w-7 rounded-full bg-violet-500 transition" aria-label="Warna violet"></button>
+            <button type="button" data-color-val="text-amber-600 bg-amber-50" class="color-opt h-7 w-7 rounded-full bg-amber-500 transition" aria-label="Warna amber"></button>
+            <button type="button" data-color-val="text-rose-700 bg-rose-50" class="color-opt h-7 w-7 rounded-full bg-finance-red transition" aria-label="Warna merah"></button>
           </div>
         </div>
 
-        <div class="flex gap-2 pt-4 border-t border-brand-border/60">
-          <button type="button" id="cancel-modal" class="flex-1 bg-brand-light text-text-primary font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs">Batal</button>
-          <button type="submit" id="submit-btn" class="flex-1 bg-accent-yellow text-brand-navy font-bold py-2.5 rounded-xl hover:bg-accent-yellow-hover transition text-xs shadow-xs">Simpan Akun</button>
+        <div class="flex gap-2 border-t border-border pt-4">
+          <button type="button" id="cancel-modal" class="flex-1 rounded-2xl bg-muted py-3 text-xs font-bold text-foreground transition hover:bg-slate-200 active:scale-95">Batal</button>
+          <button type="submit" id="submit-btn" class="flex-1 rounded-2xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95">Simpan Akun</button>
         </div>
       </form>
     </div>

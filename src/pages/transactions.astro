@@ -1,14 +1,22 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { 
-  Utensils, ShoppingBag, Car, Zap, Banknote, HeartPulse, Film, ShieldAlert, 
-  ArrowLeftRight, Wallet, CreditCard, Landmark, PiggyBank, Coins, ChevronDown,
-  ArrowDownLeft, ArrowUpRight, X, Sparkles, History, Calendar, LayoutGrid, StickyNote
+import {
+  ArrowDownLeft,
+  ArrowLeftRight,
+  ArrowUpRight,
+  Calendar,
+  ChevronRight,
+  History,
+  LayoutGrid,
+  Sparkles,
+  StickyNote,
+  Wallet,
+  X,
 } from '@lucide/astro';
 ---
 
-<Layout title="Form Transaksi" activeTab='history' hideNav fitScreen>
-  <form id="tx-form" class="flex flex-col gap-3" novalidate>
+<Layout title="Form Transaksi" activeTab="history" hideNav fitScreen>
+  <form id="tx-form" class="flex flex-col gap-4 pb-4" novalidate>
     <input type="hidden" id="edit-id" value="" />
     <input type="hidden" id="tx-type" value="expense" />
     <input type="hidden" id="tx-account" value="" />
@@ -16,42 +24,42 @@ import {
     <input type="hidden" id="tx-category" value="" />
 
     <!-- Hero: judul + nominal -->
-    <section class="relative shrink-0 overflow-hidden rounded-[26px] border border-white/10 bg-brand-navy p-4 text-white shadow-xl">
-      <div class="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-accent-yellow/15 blur-3xl"></div>
-      <div class="pointer-events-none absolute -left-12 bottom-[-60px] h-40 w-40 rounded-full bg-white/5"></div>
+    <section class="relative shrink-0 overflow-hidden rounded-[28px] bg-card-blue-dark p-6 text-white shadow-soft">
+      <div class="pointer-events-none absolute -right-8 -bottom-10 h-40 w-40 rounded-full bg-white/10"></div>
+      <div class="pointer-events-none absolute right-16 -bottom-16 h-32 w-32 rounded-full bg-white/5"></div>
 
-      <div class="relative z-10 flex flex-col gap-3">
+      <div class="relative z-10">
         <div class="flex items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-2.5">
-            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/10">
-              <Sparkles class="w-3.5 h-3.5 text-accent-yellow" />
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md">
+              <Sparkles class="h-4 w-4 stroke-[2.2] text-white" />
             </span>
-            <h1 id="tx-page-title" class="truncate text-sm font-bold tracking-tight text-white">Tambah Transaksi</h1>
+            <h1 id="tx-page-title" class="truncate text-base font-extrabold tracking-tight text-white">Tambah Transaksi</h1>
           </div>
 
           <a
             href="/history"
-            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:bg-white/15 active:scale-95"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:bg-white/25 active:scale-95"
             aria-label="Tutup form transaksi"
           >
-            <X class="w-3.5 h-3.5" />
+            <X class="h-4 w-4 stroke-[2.5]" />
           </a>
         </div>
 
-        <div data-field class="tx-amount-field">
-          <p class="text-center text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-300">Nominal Transaksi</p>
-          <div class="tx-amount-row mt-1.5 flex items-baseline gap-2">
-            <span class="text-sm font-bold text-white/70">Rp</span>
+        <div data-field class="tx-amount-field mt-6 mb-2 space-y-1 text-center">
+          <p class="text-[9px] font-extrabold uppercase tracking-widest text-white/70">Nominal Transaksi</p>
+          <div class="tx-amount-row flex items-center justify-center gap-1.5">
+            <span class="text-xl font-extrabold text-white/90">Rp</span>
             <input
-              type="number"
+              type="text"
               id="tx-amount"
               placeholder="0"
-              min="1"
-              step="1"
+              inputmode="numeric"
+              autocomplete="off"
               required
               enterkeyhint="next"
               aria-label="Nominal transaksi"
-              class="min-w-0 flex-1 border-0 bg-transparent text-3xl font-extrabold tracking-tight text-white placeholder:text-white/30 focus:outline-none"
+              class="w-full max-w-56 border-0 bg-transparent text-center text-3xl font-black tracking-tight text-white placeholder:text-white/30 focus:outline-none sm:text-4xl"
             />
           </div>
         </div>
@@ -62,156 +70,171 @@ import {
     <div id="tx-warning" class="hidden shrink-0 space-y-2"></div>
 
     <!-- Sering Digunakan (Isi Cepat) -->
-    <section id="autofill-section" class="hidden shrink-0">
-      <div class="mb-1.5 flex items-center gap-1.5 px-1">
-        <History class="h-3.5 w-3.5 text-accent-yellow-hover" />
-        <span class="text-[11px] font-bold text-brand-navy">Sering Digunakan</span>
-        <span class="text-[10px] italic text-text-secondary">(Auto-fill)</span>
+    <section id="autofill-section" class="hidden shrink-0 space-y-2.5">
+      <div class="flex items-center gap-1.5 px-1">
+        <History class="h-3.5 w-3.5 stroke-[2.2] text-blue-main" />
+        <span class="text-xs font-bold text-primary">Sering Digunakan</span>
+        <span class="text-[10px] font-medium text-muted-foreground">(Auto-fill)</span>
       </div>
-      <div id="autofill-list" class="no-scrollbar flex gap-2 overflow-x-auto pb-0.5"></div>
+      <div id="autofill-list" class="no-scrollbar flex items-center gap-2 overflow-x-auto pb-0.5"></div>
     </section>
 
     <!-- Tipe Transaksi -->
-    <div class="shrink-0 rounded-2xl border border-brand-border/70 bg-white p-1 shadow-xs">
-      <div class="grid grid-cols-3 gap-1">
-        <button
-          type="button"
-          class="type-tab-btn flex items-center justify-center gap-1 rounded-xl bg-brand-navy py-2 text-xs font-bold text-white shadow-xs transition-all"
-          data-type="expense"
-        >
-          <ArrowDownLeft class="w-3.5 h-3.5" />
-          <span>Keluar</span>
-        </button>
-        <button
-          type="button"
-          class="type-tab-btn flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-medium text-text-secondary transition-all hover:bg-brand-light hover:text-brand-navy"
-          data-type="income"
-        >
-          <ArrowUpRight class="w-3.5 h-3.5" />
-          <span>Masuk</span>
-        </button>
-        <button
-          type="button"
-          class="type-tab-btn flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-medium text-text-secondary transition-all hover:bg-brand-light hover:text-brand-navy"
-          data-type="transfer"
-        >
-          <ArrowLeftRight class="w-3.5 h-3.5" />
-          <span>Transfer</span>
-        </button>
-      </div>
+    <div class="grid shrink-0 grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-1 shadow-xs">
+      <button
+        type="button"
+        class="type-tab-btn flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground shadow-soft transition-all active:scale-95"
+        data-type="expense"
+      >
+        <ArrowDownLeft class="h-3.5 w-3.5 stroke-[2.5]" />
+        <span>Keluar</span>
+      </button>
+      <button
+        type="button"
+        class="type-tab-btn flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold text-muted-foreground transition-all hover:text-foreground active:scale-95"
+        data-type="income"
+      >
+        <ArrowUpRight class="h-3.5 w-3.5 stroke-[2.5]" />
+        <span>Masuk</span>
+      </button>
+      <button
+        type="button"
+        class="type-tab-btn flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold text-muted-foreground transition-all hover:text-foreground active:scale-95"
+        data-type="transfer"
+      >
+        <ArrowLeftRight class="h-3.5 w-3.5 stroke-[2.5]" />
+        <span>Transfer</span>
+      </button>
     </div>
 
     <!-- Card field -->
-    <div class="flex flex-col rounded-[24px] border border-brand-border/60 bg-white p-4 shadow-lg shadow-slate-200/60">
-      <div class="flex flex-col gap-3">
-        <div data-field>
-          <label class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy" for="tx-date">
-            <Calendar class="w-3.5 h-3.5 text-accent-yellow-hover" />
-            Tanggal
-          </label>
-          <input
-            type="date"
-            id="tx-date"
-            required
-            class="w-full rounded-xl border border-brand-border/70 bg-brand-light/60 px-3 py-3 text-[13px] font-semibold text-brand-navy focus:outline-none focus:ring-2 focus:ring-accent-yellow"
-          />
-        </div>
+    <div class="flex flex-col gap-4 rounded-[28px] border border-border bg-card p-5 shadow-soft">
+      <div data-field class="space-y-1.5">
+        <label class="flex items-center gap-1.5 text-xs font-bold text-primary" for="tx-date">
+          <Calendar class="h-3.5 w-3.5 stroke-2 text-blue-main" />
+          <span>Tanggal</span>
+        </label>
+        <input
+          type="date"
+          id="tx-date"
+          required
+          class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
+        />
+      </div>
 
-        <div data-field>
-          <label id="account-label" class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy">
-            <Wallet class="w-3.5 h-3.5 text-accent-yellow-hover" />
-            <span id="account-label-text">Akun</span>
-          </label>
-          <button
-            type="button"
-            id="account-summary-btn"
-            class="flex w-full items-center justify-between gap-2 rounded-xl border border-brand-border/70 bg-brand-light/60 px-3 py-3 text-left text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow"
-          >
-            <span id="account-summary-text" class="truncate text-text-secondary">Pilih akun...</span>
-            <ChevronDown class="w-4 h-4 shrink-0 text-text-secondary" />
-          </button>
-        </div>
+      <div data-field class="space-y-1.5">
+        <label id="account-label" class="flex items-center gap-1.5 text-xs font-bold text-primary">
+          <Wallet class="h-3.5 w-3.5 stroke-2 text-blue-main" />
+          <span id="account-label-text">Akun</span>
+        </label>
+        <button
+          type="button"
+          id="account-summary-btn"
+          class="flex w-full items-center justify-between gap-2 rounded-2xl border border-border bg-background px-4 py-3 text-left text-xs transition-all hover:border-blue-main active:scale-95"
+        >
+          <span id="account-summary-text" class="truncate text-muted-foreground">Pilih akun...</span>
+          <ChevronRight class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        </button>
+      </div>
 
-        <div id="category-container" class="relative" data-field>
-          <label class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy">
-            <LayoutGrid class="w-3.5 h-3.5 text-accent-yellow-hover" />
-            Kategori
-          </label>
-          <button
-            type="button"
-            id="category-dropdown-btn"
-            class="flex w-full items-center justify-between rounded-xl border border-brand-border/70 bg-brand-light/60 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow"
-          >
-            <span id="selected-category-label" class="flex items-center gap-2 text-text-secondary">Pilih Kategori...</span>
-            <ChevronDown class="w-4 h-4 text-text-secondary" />
-          </button>
-          <div id="category-dropdown-menu" class="hidden absolute bottom-full z-30 mb-1 w-full space-y-1 rounded-xl border border-brand-border bg-white p-1 shadow-lg max-h-48 overflow-y-auto"></div>
-        </div>
+      <div id="category-container" class="space-y-1.5" data-field>
+        <label class="flex items-center gap-1.5 text-xs font-bold text-primary">
+          <LayoutGrid class="h-3.5 w-3.5 stroke-2 text-blue-main" />
+          <span>Kategori</span>
+        </label>
+        <button
+          type="button"
+          id="category-dropdown-btn"
+          class="flex w-full items-center justify-between gap-2 rounded-2xl border border-border bg-background px-4 py-3 text-xs transition-all hover:border-blue-main active:scale-95"
+        >
+          <span id="selected-category-label" class="flex items-center gap-2 text-muted-foreground">Pilih Kategori...</span>
+          <ChevronRight class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        </button>
+      </div>
 
-        <div>
-          <label class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy" for="tx-note">
-            <StickyNote class="w-3.5 h-3.5 text-accent-yellow-hover" />
-            Deskripsi (Opsional)
-          </label>
-          <input
-            type="text"
-            id="tx-note"
-            enterkeyhint="done"
-            placeholder="Tulis detail transaksi di sini..."
-            class="w-full rounded-xl border border-brand-border/70 bg-brand-light/60 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-yellow"
-          />
-        </div>
+      <div class="space-y-1.5">
+        <label class="flex items-center gap-1.5 text-xs font-bold text-primary" for="tx-note">
+          <StickyNote class="h-3.5 w-3.5 stroke-2 text-blue-main" />
+          <span>Catatan (Opsional)</span>
+        </label>
+        <textarea
+          id="tx-note"
+          rows="2"
+          enterkeyhint="done"
+          placeholder="Tulis detail transaksi di sini..."
+          class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-medium text-foreground outline-none placeholder:text-muted-foreground focus:border-blue-main"
+        ></textarea>
       </div>
     </div>
 
     <!-- Actions -->
-    <div id="form-actions-container" class="mt-1 flex gap-2"></div>
+    <div id="form-actions-container" class="mt-1 flex gap-2.5"></div>
   </form>
 
-  <!-- Modal Pilih Akun (sumber / transfer) -->
-  <dialog id="tx-account-modal" class="app-dialog" aria-labelledby="tx-account-modal-title">
-    <div class="flex max-h-[85vh] flex-col overflow-hidden rounded-2xl border border-brand-border bg-white shadow-xl">
-      <div class="flex items-center justify-between border-b border-brand-border/60 px-5 py-4">
-        <h2 id="tx-account-modal-title" class="text-base font-bold text-brand-navy">Pilih Akun</h2>
+  <!-- Modal pilih akun -->
+  <dialog id="tx-account-modal" class="app-sheet" aria-labelledby="tx-account-modal-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h2 id="tx-account-modal-title" class="text-base font-extrabold text-primary">Pilih Akun</h2>
         <button
           type="button"
           id="close-account-modal"
-          class="text-text-secondary transition hover:text-brand-navy"
+          class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
           aria-label="Tutup pilihan akun"
         >
-          <X class="w-5 h-5" />
+          <X class="h-4 w-4 stroke-[2.5]" />
         </button>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto p-5">
+      <div class="no-scrollbar min-h-0 flex-1 overflow-y-auto p-5">
         <section>
-          <p id="source-account-heading" class="mb-2 text-xs font-semibold text-brand-navy">Akun Sumber</p>
+          <p id="source-account-heading" class="mb-2 text-[11px] font-bold text-foreground">Akun Sumber</p>
           <div id="source-account-list" class="space-y-2"></div>
         </section>
 
         <section id="destination-account-section" class="mt-4 hidden">
-          <p class="mb-2 text-xs font-semibold text-brand-navy">Ke Akun Tujuan</p>
+          <p class="mb-2 text-[11px] font-bold text-foreground">Ke Akun Tujuan</p>
           <div id="destination-account-list" class="space-y-2"></div>
         </section>
 
         <p id="account-modal-hint" class="mt-3 hidden rounded-xl bg-rose-50 px-3 py-2 text-[11px] font-semibold text-finance-red"></p>
       </div>
 
-      <div class="flex gap-2 border-t border-brand-border/60 px-5 py-4">
+      <div class="flex gap-2 border-t border-border p-5">
         <button
           type="button"
           id="account-modal-cancel"
-          class="flex-1 rounded-xl bg-brand-light py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200 active:scale-95"
+          class="flex-1 rounded-2xl bg-muted py-3 text-xs font-bold text-foreground transition hover:bg-slate-200 active:scale-95"
         >
           Batal
         </button>
         <button
           type="button"
           id="account-modal-confirm"
-          class="hidden flex-1 rounded-xl bg-accent-yellow py-2.5 text-xs font-bold text-brand-navy transition hover:bg-accent-yellow-hover active:scale-95"
+          class="hidden flex-1 rounded-2xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95"
         >
           Lanjut
         </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal pilih kategori -->
+  <dialog id="tx-category-modal" class="app-sheet" aria-labelledby="tx-category-modal-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h2 id="tx-category-modal-title" class="text-base font-extrabold text-primary">Pilih Kategori</h2>
+        <button
+          type="button"
+          id="close-category-modal"
+          class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
+          aria-label="Tutup pilihan kategori"
+        >
+          <X class="h-4 w-4 stroke-[2.5]" />
+        </button>
+      </div>
+      <div class="no-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
+        <div id="category-dropdown-menu" class="space-y-1"></div>
       </div>
     </div>
   </dialog>

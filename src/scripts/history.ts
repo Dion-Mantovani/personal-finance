@@ -12,6 +12,11 @@ import {
 } from '../lib/ui/validation';
 import { emptyStateHtml } from '../lib/ui/empty-state';
 import { escapeHtml } from '../lib/ui/html';
+import {
+  bindCurrencyInput,
+  formatNumberInput,
+  parseNumberInput,
+} from '../lib/ui/currency-input';
 
 interface HistoryFilters {
   search: string;
@@ -40,6 +45,7 @@ export function initHistoryPage(): void {
   let latestCategories: Category[] = [];
 
   let searchOpen = false;
+  let summaryOpen = false;
   let searchTimer: number | null = null;
   let pickerYear = currentDate.getFullYear();
 
@@ -48,6 +54,13 @@ export function initHistoryPage(): void {
   const prevMonthBtn = document.getElementById('prev-month-btn')!;
   const nextMonthBtn = document.getElementById('next-month-btn')!;
   const groupedContainer = document.getElementById('tx-grouped-container')!;
+  const historyContent = document.getElementById('history-content')!;
+  const summarySection = document.getElementById('history-summary')!;
+  const summaryIncome = document.getElementById('summary-income')!;
+  const summaryExpense = document.getElementById('summary-expense')!;
+  const summaryBalance = document.getElementById('summary-balance')!;
+  const toggleSummaryBtn = document.getElementById('toggle-summary') as HTMLButtonElement;
+  const summaryChevron = document.getElementById('summary-chevron')!;
 
   const monthPickerWrap = document.getElementById('month-picker-wrap')!;
   const rangePickerWrap = document.getElementById('range-picker-wrap')!;
@@ -87,6 +100,9 @@ export function initHistoryPage(): void {
   const filterMax = document.getElementById('filter-max') as HTMLInputElement;
   const filterResetBtn = document.getElementById('filter-reset')!;
   const closeFilterModalBtn = document.getElementById('close-filter-modal')!;
+
+  bindCurrencyInput(filterMin);
+  bindCurrencyInput(filterMax);
 
   const exportForm = document.getElementById('export-form') as HTMLFormElement;
   const exportInfo = document.getElementById('export-info')!;
@@ -146,9 +162,9 @@ export function initHistoryPage(): void {
       : '';
 
     searchBtn.setAttribute('aria-expanded', String(searchOpen));
-    searchBtn.classList.toggle('border-accent-yellow', searchOpen);
-    searchBtn.classList.toggle('text-accent-yellow-hover', searchOpen);
-    searchBtn.classList.toggle('text-text-secondary', !searchOpen);
+    searchBtn.className = searchOpen
+      ? 'flex h-9 w-9 items-center justify-center rounded-2xl border border-blue-main bg-blue-soft text-blue-main shadow-xs transition-all active:scale-95'
+      : 'flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95';
   }
 
   function renderMonthGrid(): void {
@@ -166,8 +182,8 @@ export function initHistoryPage(): void {
             data-month="${index}"
             class="rounded-xl border px-2 py-2.5 text-xs font-semibold transition ${
               selected
-                ? 'border-accent-yellow bg-accent-yellow text-brand-navy shadow-xs'
-                : 'border-brand-border/70 bg-white text-text-primary hover:border-accent-yellow hover:bg-brand-light'
+                ? 'border-primary bg-primary text-primary-foreground shadow-soft'
+                : 'border-border bg-card text-foreground hover:border-blue-main hover:bg-blue-soft'
             }"
           >${name}</button>
         `;
@@ -236,9 +252,9 @@ export function initHistoryPage(): void {
       selectedFilter = target.getAttribute('data-filter') as 'all' | TransactionType;
 
       tabBtns.forEach((tabBtn) => {
-        tabBtn.className = 'history-tab-btn py-2 rounded-xl font-medium text-xs text-center text-text-secondary hover:text-brand-navy transition-all duration-200';
+        tabBtn.className = 'history-tab-btn flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-all hover:bg-muted active:scale-95';
       });
-      target.className = 'history-tab-btn py-2 rounded-xl font-bold text-xs text-center transition-all duration-200 bg-white text-brand-navy shadow-xs';
+      target.className = 'history-tab-btn flex shrink-0 items-center gap-1.5 rounded-full border border-primary bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow-soft transition-all active:scale-95';
 
       renderHistory();
     });
@@ -286,10 +302,9 @@ export function initHistoryPage(): void {
     filterBadge.textContent = String(filterCount);
     filterBadge.style.display = filterCount > 0 ? 'flex' : 'none';
 
-    filterBtn.classList.toggle('border-brand-border/80', filterCount === 0);
-    filterBtn.classList.toggle('border-accent-yellow', filterCount > 0);
-    filterBtn.classList.toggle('text-accent-yellow-hover', filterCount > 0);
-    filterBtn.classList.toggle('text-brand-navy', filterCount === 0);
+    filterBtn.className = filterCount > 0
+      ? 'relative flex h-9 w-9 items-center justify-center rounded-2xl border border-blue-main bg-blue-soft text-blue-main shadow-xs transition-all active:scale-95'
+      : 'relative flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all hover:bg-muted active:scale-95';
 
     const parts: string[] = [];
     if (filters.search) parts.push(`"${filters.search}"`);
@@ -317,6 +332,11 @@ export function initHistoryPage(): void {
     activeFilterText.textContent = parts.length > 0 ? `Filter aktif: ${parts.join(' • ')}` : '';
     activeFilterRow.style.display = parts.length > 0 ? 'block' : 'none';
 
+    // Margin konten: default mt-32, saat ada filter aktif jadi mt-40.
+    const hasActiveFilters = parts.length > 0;
+    historyContent.classList.toggle('mt-38', hasActiveFilters);
+    historyContent.classList.toggle('mt-30', !hasActiveFilters);
+
     updatePickerVisibility();
   }
 
@@ -343,6 +363,51 @@ export function initHistoryPage(): void {
   }
 
   resetActiveFiltersBtn.addEventListener('click', resetAllFilters);
+
+  // ---------------------------------------------------------------
+  // Ringkasan pemasukan / pengeluaran / balance
+  // ---------------------------------------------------------------
+
+  function setSummaryOpen(open: boolean): void {
+    summaryOpen = open;
+    summarySection.classList.toggle('hidden', !open);
+    toggleSummaryBtn.setAttribute('aria-expanded', String(open));
+    toggleSummaryBtn.setAttribute(
+      'aria-label',
+      open ? 'Sembunyikan ringkasan transaksi' : 'Tampilkan ringkasan transaksi'
+    );
+    toggleSummaryBtn.setAttribute(
+      'title',
+      open ? 'Sembunyikan ringkasan' : 'Tampilkan ringkasan'
+    );
+    summaryChevron.classList.toggle('rotate-180', open);
+  }
+
+  toggleSummaryBtn.addEventListener('click', () => {
+    setSummaryOpen(!summaryOpen);
+  });
+
+  function formatRupiah(value: number): string {
+    const sign = value < 0 ? '-' : '';
+    return `${sign}Rp ${Math.abs(value).toLocaleString('id-ID')}`;
+  }
+
+  function renderSummary(transactions: Transaction[]): void {
+    const totalIncome = transactions
+      .filter((tx) => tx.type === 'income')
+      .reduce((sum, tx) => sum + tx.amount, 0);
+    const totalExpense = transactions
+      .filter((tx) => tx.type === 'expense')
+      .reduce((sum, tx) => sum + tx.amount, 0);
+    const balance = totalIncome - totalExpense;
+
+    summaryIncome.textContent = formatRupiah(totalIncome);
+    summaryExpense.textContent = formatRupiah(totalExpense);
+    summaryBalance.textContent = formatRupiah(balance);
+
+    summaryBalance.classList.toggle('text-blue-200', balance >= 0);
+    summaryBalance.classList.toggle('text-rose-300', balance < 0);
+  }
 
   // ---------------------------------------------------------------
   // Search realtime (debounce 300ms, menggantikan month picker)
@@ -466,8 +531,8 @@ export function initHistoryPage(): void {
     filterCategory.value = filters.categoryId;
     filterStartDate.value = filters.startDate;
     filterEndDate.value = filters.endDate;
-    filterMin.value = filters.min !== null ? String(filters.min) : '';
-    filterMax.value = filters.max !== null ? String(filters.max) : '';
+    filterMin.value = filters.min !== null ? formatNumberInput(String(filters.min)) : '';
+    filterMax.value = filters.max !== null ? formatNumberInput(String(filters.max)) : '';
   }
 
   filterBtn.addEventListener('click', async () => {
@@ -487,8 +552,8 @@ export function initHistoryPage(): void {
     const endDate = filterEndDate.value;
     const minRaw = filterMin.value.trim();
     const maxRaw = filterMax.value.trim();
-    const min = minRaw === '' ? null : Number(minRaw);
-    const max = maxRaw === '' ? null : Number(maxRaw);
+    const min = minRaw === '' ? null : parseNumberInput(minRaw);
+    const max = maxRaw === '' ? null : parseNumberInput(maxRaw);
 
     let hasError = false;
 
@@ -804,6 +869,7 @@ export function initHistoryPage(): void {
     });
 
     updateFilterIndicators();
+    renderSummary(filteredTx);
 
     if (filteredTx.length === 0) {
       const hasFilters =
@@ -838,7 +904,7 @@ export function initHistoryPage(): void {
             <button
               type="button"
               data-empty-action="reset-filters"
-              class="inline-flex items-center gap-1.5 rounded-xl bg-accent-yellow px-4 py-2 text-[11px] font-bold text-brand-navy shadow-xs transition hover:bg-accent-yellow-hover active:scale-95"
+              class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-[11px] font-bold text-white shadow-xs transition hover:opacity-90 active:scale-95"
             >
               Reset filter
             </button>
@@ -846,7 +912,7 @@ export function initHistoryPage(): void {
           : `
             <a
               href="/transactions"
-              class="inline-flex items-center gap-1.5 rounded-xl bg-accent-yellow px-4 py-2 text-[11px] font-bold text-brand-navy shadow-xs transition hover:bg-accent-yellow-hover active:scale-95"
+              class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-[11px] font-bold text-white shadow-xs transition hover:opacity-90 active:scale-95"
             >
               Catat transaksi
             </a>
@@ -876,12 +942,10 @@ export function initHistoryPage(): void {
         const toAcc = tx.toAccountId ? accountMap.get(tx.toAccountId) : null;
 
         const iconName = cat?.icon || (tx.type === 'transfer' ? 'ArrowLeftRight' : 'Wallet');
-        const colorClass = cat?.color || 'text-brand-navy bg-amber-50';
-        const [textColor, bgColor] = colorClass.split(' ');
 
         let accountAndCategory = '';
         const categoryName = cat?.name || (tx.type === 'transfer' ? 'Transfer' : 'Kategori Dihapus');
-        
+
         if (tx.type === 'transfer') {
           const accName = acc?.name || 'Asal';
           const toAccName = toAcc?.name || 'Tujuan';
@@ -893,45 +957,62 @@ export function initHistoryPage(): void {
 
         const headlineText = tx.note && tx.note.trim() !== '' ? tx.note : categoryName;
 
-        let amountColorClass = 'text-brand-navy';
+        let amountColorClass = 'text-foreground';
         let amountPrefix = '';
         if (tx.type === 'income') {
-          amountColorClass = 'text-finance-green';
+          amountColorClass = 'text-emerald-600';
           amountPrefix = '+ ';
         } else if (tx.type === 'expense') {
-          amountColorClass = 'text-finance-red';
+          amountColorClass = 'text-foreground';
           amountPrefix = '- ';
+        } else {
+          amountColorClass = 'text-blue-main';
         }
 
         return `
-          <a 
+          <a
             href="/transactions?id=${encodeURIComponent(tx.id)}"
-            class="flex justify-between items-center p-3.5 border border-brand-border/60 rounded-2xl bg-white hover:border-accent-yellow hover:shadow-xs transition block"
+            class="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-muted/50"
           >
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${bgColor || 'bg-amber-50'} ${textColor || 'text-brand-navy'} shadow-xs border border-brand-border/40">
+            <div class="flex min-w-0 items-center gap-3.5">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-soft text-primary">
                 ${getLucideIconHtml(iconName)}
               </div>
-              <div class="min-w-0">
-                <p class="font-bold text-brand-navy text-sm truncate">${escapeHtml(headlineText)}</p>
-                <p class="text-[11px] text-text-secondary mt-0.5 truncate">${escapeHtml(accountAndCategory)}</p>
+              <div class="flex min-w-0 flex-col">
+                <span class="truncate text-xs font-bold text-foreground">${escapeHtml(headlineText)}</span>
+                <span class="truncate text-[10px] font-medium text-muted-foreground">${escapeHtml(accountAndCategory)}</span>
               </div>
             </div>
-            <div class="text-right shrink-0 pl-2">
-              <p class="text-sm font-extrabold ${amountColorClass}">
+            <div class="flex shrink-0 items-center gap-1 pl-2">
+              <span class="text-xs font-extrabold tabular-nums ${amountColorClass}">
                 ${amountPrefix}Rp ${tx.amount.toLocaleString('id-ID')}
-              </p>
+              </span>
             </div>
           </a>
         `;
       }).join('');
 
+      const groupNet = txList.reduce((sum, tx) => {
+        if (tx.type === 'income') return sum + tx.amount;
+        if (tx.type === 'expense') return sum - tx.amount;
+        return sum;
+      }, 0);
+      const groupNetLabel =
+        groupNet === 0
+          ? 'Rp 0'
+          : `${groupNet > 0 ? '+Rp' : '-Rp'} ${Math.abs(groupNet).toLocaleString('id-ID')}`;
+
       htmlContent += `
-        <div class="space-y-2">
-          <div class="flex justify-between items-center px-1 pt-1">
-            <span class="text-xs font-bold text-brand-navy uppercase tracking-wider">${escapeHtml(dateFormatted)}</span>
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-xs font-bold tracking-tight text-primary">${escapeHtml(dateFormatted)}</span>
+            <div class="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
+              <span>${txList.length} transaksi</span>
+              <span>•</span>
+              <span class="font-bold text-foreground">${groupNetLabel}</span>
+            </div>
           </div>
-          <div class="space-y-2">
+          <div class="divide-y divide-border overflow-hidden rounded-[28px] border border-border bg-card shadow-soft">
             ${txItemsHtml}
           </div>
         </div>
@@ -939,6 +1020,12 @@ export function initHistoryPage(): void {
     });
 
     groupedContainer.innerHTML = htmlContent;
+  }
+
+  // Deep link dari ikon search di Dashboard.
+  if (new URLSearchParams(window.location.search).get('search') === '1') {
+    openSearch();
+    history.replaceState(null, '', window.location.pathname);
   }
 
   updateMonthDisplay();

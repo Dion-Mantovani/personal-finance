@@ -2,137 +2,224 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import {
-  Database,
-  Upload,
-  Trash2,
-  FileJson,
   AlertTriangle,
+  ChevronRight,
+  Database,
+  FileJson,
+  Trash2,
+  Upload,
+  User,
+  X,
 } from '@lucide/astro';
 ---
 
-<Layout title="Kelola Data" hideNav>
-  <div class="space-y-4 pb-6">
-    <Header title="Kelola Data" showBack backHref="/" />
+<Layout title="Pengaturan" activeTab="settings">
+  <div class="space-y-5 pb-8">
 
-    <p class="px-1 text-xs leading-relaxed text-text-secondary">
-      Import data dari aplikasi lain atau hapus seluruh data yang tersimpan di perangkat ini.
-    </p>
+    <Header title="Pengaturan" showBack centerTitle />
+
+    <!-- Profil -->
+    <section class="space-y-2">
+      <p class="px-1 text-xs font-bold text-primary">Profil</p>
+
+      <div class="divide-y divide-border overflow-hidden rounded-[28px] border border-border bg-card shadow-soft">
+        <button
+          type="button"
+          id="open-profile-modal"
+          class="flex w-full items-center justify-between p-4 text-left transition hover:bg-muted/50 active:scale-[0.99]"
+        >
+          <div class="flex items-center gap-3.5">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-soft text-primary">
+              <User class="h-5 w-5 stroke-2" />
+            </div>
+            <div class="flex min-w-0 flex-col">
+              <p id="profile-name-display" class="truncate text-xs font-bold text-foreground">Pengguna</p>
+              <p class="text-[10px] font-medium text-muted-foreground">Nama yang tampil di Dashboard</p>
+            </div>
+          </div>
+          <ChevronRight class="h-4 w-4 shrink-0 text-muted-foreground" />
+        </button>
+      </div>
+    </section>
 
     <!-- Ringkasan data -->
-    <section class="rounded-3xl border border-brand-border/70 bg-white p-4 shadow-xs">
-      <div class="flex items-center gap-2">
-        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-accent-yellow/10 text-accent-yellow-hover">
-          <Database class="w-4 h-4" />
-        </span>
-        <h2 class="text-sm font-bold text-brand-navy">Ringkasan Data</h2>
-      </div>
+    <section class="space-y-2">
+      <p class="px-1 text-xs font-bold text-primary">Data</p>
 
-      <div class="mt-3 grid grid-cols-3 gap-2">
-        <div class="rounded-2xl bg-brand-light px-2 py-3 text-center">
-          <p id="count-accounts" class="text-lg font-extrabold text-brand-navy">0</p>
-          <p class="text-[10px] font-semibold text-text-secondary">Akun</p>
+      <div class="rounded-[28px] border border-border bg-card p-4 shadow-soft">
+        <div class="flex items-center gap-2.5">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-soft text-primary">
+            <Database class="h-5 w-5 stroke-2" />
+          </div>
+          <div class="min-w-0">
+            <h2 class="text-xs font-bold text-foreground">Ringkasan Data</h2>
+            <p class="text-[10px] font-medium text-muted-foreground">Semua data tersimpan di perangkat ini</p>
+          </div>
         </div>
-        <div class="rounded-2xl bg-brand-light px-2 py-3 text-center">
-          <p id="count-categories" class="text-lg font-extrabold text-brand-navy">0</p>
-          <p class="text-[10px] font-semibold text-text-secondary">Kategori</p>
-        </div>
-        <div class="rounded-2xl bg-brand-light px-2 py-3 text-center">
-          <p id="count-transactions" class="text-lg font-extrabold text-brand-navy">0</p>
-          <p class="text-[10px] font-semibold text-text-secondary">Transaksi</p>
+
+        <div class="mt-4 grid grid-cols-3 gap-2">
+          <div class="rounded-2xl bg-background px-2 py-3 text-center">
+            <p id="count-accounts" class="text-lg font-extrabold text-primary">0</p>
+            <p class="text-[10px] font-semibold text-muted-foreground">Akun</p>
+          </div>
+          <div class="rounded-2xl bg-background px-2 py-3 text-center">
+            <p id="count-categories" class="text-lg font-extrabold text-primary">0</p>
+            <p class="text-[10px] font-semibold text-muted-foreground">Kategori</p>
+          </div>
+          <div class="rounded-2xl bg-background px-2 py-3 text-center">
+            <p id="count-transactions" class="text-lg font-extrabold text-primary">0</p>
+            <p class="text-[10px] font-semibold text-muted-foreground">Transaksi</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Import data -->
-    <section class="rounded-3xl border border-brand-border/70 bg-white p-4 shadow-xs">
-      <div class="flex items-start gap-2.5">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent-yellow/10 text-accent-yellow-hover">
-          <Upload class="w-4 h-4" />
-        </span>
-        <div class="min-w-0">
-          <h2 class="text-sm font-bold text-brand-navy">Import Data</h2>
-          <p class="mt-0.5 text-[11px] leading-relaxed text-text-secondary">
-            Gabungkan akun, kategori, dan transaksi dari file JSON aplikasi lain.
-          </p>
+    <!-- Import -->
+    <section class="space-y-2">
+      <p class="px-1 text-xs font-bold text-primary">Import</p>
+
+      <div class="rounded-[28px] border border-border bg-card p-4 shadow-soft">
+        <div class="flex items-start gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-soft text-primary">
+            <Upload class="h-5 w-5 stroke-2" />
+          </div>
+          <div class="min-w-0">
+            <h2 class="text-xs font-bold text-foreground">Import Data</h2>
+            <p class="mt-0.5 text-[10px] font-medium leading-relaxed text-muted-foreground">
+              Gabungkan data akun, kategori, dan transaksi dari file JSON aplikasi lain.
+            </p>
+          </div>
         </div>
-      </div>
 
-      <input
-        type="file"
-        id="import-file"
-        accept=".json,application/json"
-        class="hidden"
-      />
+        <input
+          type="file"
+          id="import-file"
+          accept="application/json,.json"
+          class="hidden"
+        />
 
-      <button
-        type="button"
-        id="pick-import-file"
-        class="mt-4 flex w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-brand-border bg-brand-light/40 px-4 py-4 text-xs font-semibold text-text-secondary transition hover:border-accent-yellow hover:text-brand-navy active:scale-[0.99]"
-      >
-        <FileJson class="h-5 w-5 text-accent-yellow-hover" />
-        <span>Pilih file JSON</span>
-      </button>
-
-      <p id="import-file-name" class="mt-2 hidden truncate text-[11px] font-semibold text-brand-navy"></p>
-
-      <p
-        id="import-error"
-        class="mt-2 hidden rounded-xl bg-rose-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-finance-red"
-      ></p>
-
-      <div id="import-preview" class="mt-3 hidden rounded-2xl border border-brand-border/70 bg-brand-light/40 p-3">
-        <p id="import-summary" class="text-[11px] font-semibold leading-relaxed text-brand-navy"></p>
-        <ul id="import-warnings" class="mt-1.5 hidden list-disc space-y-0.5 pl-4 text-[10px] leading-relaxed text-text-secondary"></ul>
         <button
           type="button"
-          id="import-submit"
-          class="mt-3 w-full rounded-xl bg-brand-navy py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-brand-navy/90 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+          id="pick-import-file"
+          class="mt-4 flex w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-border bg-background/40 px-4 py-5 text-xs font-semibold text-muted-foreground transition hover:border-blue-main hover:text-primary active:scale-[0.99]"
         >
-          Import Data
+          <FileJson class="h-5 w-5 text-blue-main" />
+          <span>Pilih file JSON</span>
         </button>
-      </div>
+        <p id="import-file-name" class="mt-2 hidden truncate text-[11px] font-semibold text-foreground"></p>
 
-      <p class="mt-3 text-[10px] leading-relaxed text-text-secondary">
-        Format: array <code>accounts</code>, <code>categories</code>, dan <code>transactions</code>.
-        Data akan digabung, bukan menimpa data yang sudah ada.
-      </p>
+        <div
+          id="import-error"
+          class="mt-2 hidden rounded-xl bg-rose-50 px-3 py-2 text-[11px] font-semibold leading-relaxed text-finance-red"
+        ></div>
+
+        <div id="import-preview" class="mt-3 hidden rounded-2xl border border-border bg-background/50 p-3">
+          <p id="import-summary" class="text-[11px] font-semibold leading-relaxed text-foreground"></p>
+          <ul id="import-warnings" class="mt-1.5 hidden list-disc space-y-0.5 pl-4 text-[10px] leading-relaxed text-muted-foreground"></ul>
+
+          <button
+            type="button"
+            id="import-submit"
+            class="mt-3 w-full rounded-2xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+          >
+            Import Data
+          </button>
+        </div>
+
+        <p class="mt-3 text-[10px] leading-relaxed text-muted-foreground">
+          Maksimal file 5 MB. Data yang sudah ada tidak akan dihapus.
+        </p>
+      </div>
     </section>
 
     <!-- Hapus data -->
-    <section class="rounded-3xl border border-finance-red/25 bg-white p-4 shadow-xs">
-      <div class="flex items-start gap-2.5">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-finance-red/10 text-finance-red">
-          <Trash2 class="w-4 h-4" />
-        </span>
-        <div class="min-w-0">
-          <h2 class="text-sm font-bold text-brand-navy">Hapus Semua Data</h2>
-          <p class="mt-0.5 text-[11px] leading-relaxed text-text-secondary">
-            Semua akun, kategori, dan transaksi akan dihapus permanen dari perangkat ini.
-          </p>
-        </div>
-      </div>
+    <section class="space-y-2">
+      <p class="px-1 text-xs font-bold text-primary">Zona Berbahaya</p>
 
-      <button
-        type="button"
-        id="open-clear-dialog"
-        class="mt-4 w-full rounded-xl bg-finance-red py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-red-600 active:scale-95"
-      >
-        Hapus Semua Data
-      </button>
+      <div class="rounded-[28px] border border-finance-red/25 bg-card p-4 shadow-soft">
+        <div class="flex items-start gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-finance-red/10 text-finance-red">
+            <Trash2 class="h-5 w-5 stroke-2" />
+          </div>
+          <div class="min-w-0">
+            <h2 class="text-xs font-bold text-foreground">Hapus Semua Data</h2>
+            <p class="mt-0.5 text-[10px] font-medium leading-relaxed text-muted-foreground">
+              Menghapus seluruh akun, kategori, dan transaksi secara permanen dari perangkat ini.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="open-clear-dialog"
+          class="mt-4 w-full rounded-2xl bg-finance-red py-3 text-xs font-bold text-white shadow-xs transition hover:bg-red-600 active:scale-95"
+        >
+          Hapus Semua Data
+        </button>
+      </div>
     </section>
+
+    <!-- Footer -->
+    <div class="space-y-1 pt-4 pb-2 text-center">
+      <p class="text-xs font-extrabold tracking-tight text-primary">Personal Finance</p>
+      <p class="text-[10px] font-medium text-muted-foreground">Versi 1.0.0 • Data tersimpan lokal</p>
+    </div>
   </div>
 
-  <!-- Dialog konfirmasi hapus -->
+  <!-- Modal edit profil -->
+  <dialog id="profile-modal" class="app-sheet" aria-labelledby="profile-modal-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h2 id="profile-modal-title" class="text-base font-extrabold text-primary">Edit Profil</h2>
+        <button
+          type="button"
+          id="close-profile-modal"
+          class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
+          aria-label="Tutup edit profil"
+        >
+          <X class="h-4 w-4 stroke-[2.5]" />
+        </button>
+      </div>
+
+      <form id="profile-form" class="space-y-4 p-5" novalidate>
+        <div class="space-y-1.5">
+          <label for="profile-name-input" class="block text-[11px] font-bold text-foreground">Nama</label>
+          <input
+            type="text"
+            id="profile-name-input"
+            maxlength="40"
+            data-autofocus
+            placeholder="Nama kamu"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
+          />
+          <p class="text-[10px] font-medium text-muted-foreground">
+            Nama ini akan tampil di sapaan Dashboard.
+          </p>
+        </div>
+
+        <div class="flex gap-2 border-t border-border pt-4">
+          <button type="button" id="cancel-profile" class="flex-1 rounded-2xl bg-muted py-3 text-xs font-bold text-foreground transition hover:bg-slate-200 active:scale-95">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 rounded-2xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95">
+            Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Dialog konfirmasi hapus data -->
   <dialog id="clear-data-dialog" class="app-dialog" aria-labelledby="clear-data-title">
-    <div class="rounded-2xl border border-brand-border bg-white p-5 shadow-xl">
+    <div class="rounded-2xl border border-border bg-card p-5 shadow-xl">
       <div class="flex items-start gap-3">
         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-finance-red/10 text-finance-red">
           <AlertTriangle class="h-5 w-5" />
         </span>
         <div class="min-w-0">
-          <h2 id="clear-data-title" class="text-base font-bold text-brand-navy">Hapus semua data?</h2>
-          <p class="mt-1 text-xs leading-relaxed text-text-secondary">
-            Tindakan ini permanen. Ketik <strong class="text-brand-navy">HAPUS</strong> untuk mengaktifkan tombol.
+          <h2 id="clear-data-title" class="text-base font-bold text-primary">Hapus semua data?</h2>
+          <p class="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Tindakan ini permanen. Ketik <strong class="text-primary">HAPUS</strong> untuk mengaktifkan tombol.
           </p>
         </div>
       </div>
@@ -141,23 +228,20 @@ import {
         type="text"
         id="clear-confirm-input"
         autocomplete="off"
-        placeholder="Ketik HAPUS"
-        data-autofocus
-        class="mt-4 w-full rounded-xl border border-brand-border bg-brand-light/50 px-3 py-2.5 text-sm font-semibold text-brand-navy focus:outline-none focus:ring-2 focus:ring-finance-red"
+        class="mt-4 w-full rounded-xl border border-border bg-background/50 px-3 py-2.5 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-finance-red"
       />
 
       <div class="mt-4 flex gap-2">
         <button
           type="button"
           id="clear-cancel"
-          class="flex-1 rounded-xl bg-brand-light py-2.5 text-xs font-semibold text-text-primary transition hover:bg-slate-200 active:scale-95"
+          class="flex-1 rounded-xl bg-muted py-2.5 text-xs font-semibold text-foreground transition hover:bg-slate-200 active:scale-95"
         >
           Batal
         </button>
         <button
           type="button"
           id="clear-confirm"
-          disabled
           class="flex-1 rounded-xl bg-finance-red py-2.5 text-xs font-bold text-white transition hover:bg-red-600 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
         >
           Hapus Semua

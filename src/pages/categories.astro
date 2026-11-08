@@ -81,85 +81,139 @@ const categoryIcons = [
   { name: 'Tag', label: 'Label', Icon: Tag },
   { name: 'CircleHelp', label: 'Tidak diketahui', Icon: CircleHelp },
 ];
+
+const categoryColors = [
+  { value: 'text-blue-700 bg-blue-50', swatch: 'bg-blue-main', label: 'Biru', active: true },
+  { value: 'text-emerald-700 bg-emerald-50', swatch: 'bg-finance-green', label: 'Hijau' },
+  { value: 'text-violet-700 bg-violet-50', swatch: 'bg-violet-500', label: 'Violet' },
+  { value: 'text-amber-600 bg-amber-50', swatch: 'bg-amber-500', label: 'Amber' },
+  { value: 'text-rose-700 bg-rose-50', swatch: 'bg-finance-red', label: 'Merah' },
+];
 ---
 
-<Layout title="Categories" activeTab='categories'>
-  <div class="space-y-5 relative pb-16">
-    
-    <!-- 1. Header Bersih -->
-    <Header 
-      title="Daftar Kategori" 
-      centerTitle
-    />
+<Layout title="Kategori" activeTab="categories">
+  <div class="space-y-5 pb-8">
 
-    <!-- 2. Segmented Control Tabs (Pengeluaran vs Pemasukan) -->
-    <div class="p-1.5 rounded-2xl bg-slate-200/70 backdrop-blur-md flex items-center border border-brand-border/40">
-      <button 
-        id="tab-expense" 
-        class="tab-btn flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-200 bg-white text-brand-navy shadow-xs"
+    <Header title="Kategori Transaksi" showBack centerTitle />
+
+    <!-- Segmented control -->
+    <div class="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-card p-1 shadow-xs">
+      <button
+        id="tab-expense"
+        type="button"
+        class="tab-btn flex items-center justify-center gap-2 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground shadow-soft transition-all"
         data-type="expense"
       >
-        <ArrowDownLeft class="w-4 h-4 text-finance-red stroke-[2.5]" />
+        <ArrowDownLeft class="h-3.5 w-3.5 stroke-[2.5]" />
         <span>Pengeluaran</span>
       </button>
-      <button 
-        id="tab-income" 
-        class="tab-btn flex-1 py-2.5 rounded-xl font-medium text-xs text-text-secondary hover:text-brand-navy flex items-center justify-center gap-1.5 transition-all duration-200"
+      <button
+        id="tab-income"
+        type="button"
+        class="tab-btn flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold text-muted-foreground transition-all hover:text-foreground"
         data-type="income"
       >
-        <ArrowUpRight class="w-4 h-4 text-finance-green stroke-[2.5]" />
+        <ArrowUpRight class="h-3.5 w-3.5 stroke-[2.5]" />
         <span>Pemasukan</span>
       </button>
     </div>
 
-    <!-- 3. List Kategori (Grid 2 Kolom) -->
+    <!-- Daftar kategori -->
     <div class="space-y-3">
-      <div class="flex justify-between items-center px-1">
-        <h3 id="category-section-title" class="text-xs font-bold text-text-secondary uppercase tracking-wider">Kategori Pengeluaran</h3>
-        <span id="category-count-badge" class="text-[11px] font-semibold text-brand-navy bg-brand-light border border-brand-border/60 px-2.5 py-0.5 rounded-full">0 Kategori</span>
+      <div class="flex items-center justify-between px-1">
+        <h3 id="category-section-title" class="text-xs font-bold text-primary">Kategori Pengeluaran</h3>
+        <span id="category-count-badge" class="rounded-full bg-blue-soft px-2.5 py-0.5 text-[9px] font-extrabold text-blue-main">0 Kategori</span>
       </div>
 
       <div id="categories-list" class="grid grid-cols-2 gap-3">
-        <p class="text-text-secondary text-sm text-center col-span-2 py-8">Memuat data...</p>
+        <p class="col-span-2 py-8 text-center text-sm text-muted-foreground">Memuat data...</p>
       </div>
     </div>
+
+    <!-- Tambah kategori -->
+    <button
+      type="button"
+      id="open-add-modal"
+      class="hidden flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-main/40 bg-blue-soft/30 py-3.5 text-blue-main shadow-xs transition-all hover:border-blue-main hover:bg-blue-soft active:scale-95"
+      aria-label="Tambah Kategori Baru"
+    >
+      <Plus class="h-4 w-4 stroke-[2.5]" />
+      <span class="text-xs font-bold">Tambah Kategori Baru</span>
+    </button>
   </div>
 
-  <!-- Extended Floating Action Button (FAB) Kanan Bawah -->
-  <button 
-    id="open-add-modal" 
-    style="bottom: calc(5rem + env(safe-area-inset-bottom));"
-    class="fixed right-6 z-40 flex items-center gap-2.5 px-5 py-3.5 bg-accent-yellow text-brand-navy rounded-full shadow-xl shadow-accent-yellow/30 hover:bg-accent-yellow-hover hover:scale-105 active:scale-95 transition-all font-bold text-sm border-2 border-white/20 group"
-    aria-label="Tambah Kategori Baru"
-  >
-    <div class="w-6 h-6 rounded-full bg-brand-navy text-accent-yellow flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
-      <Plus class="w-4 h-4 stroke-[3]" />
-    </div>
-    <span class="tracking-wide">Tambah Kategori</span>
-  </button>
+  <!-- Modal detail kategori -->
+  <dialog id="category-detail-modal" class="app-sheet" aria-labelledby="detail-modal-name">
+    <div class="sheet-panel">
+      <div class="relative overflow-hidden bg-card-blue-dark p-6 text-white">
+        <div class="pointer-events-none absolute -right-6 -bottom-8 h-28 w-28 rounded-full bg-white/10"></div>
 
-  <!-- Modal Box Form (Create / Edit) -->
-  <dialog id="category-modal" class="app-dialog" aria-labelledby="modal-title">
-    <div class="max-h-[90vh] overflow-y-auto rounded-2xl border border-brand-border bg-white shadow-xl">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-brand-border/60 sticky top-0 z-10 bg-white">
-        <h3 id="modal-title" class="text-base font-bold text-brand-navy">Tambah Kategori Baru</h3>
+        <div class="relative z-10 flex items-center justify-between">
+          <span id="detail-modal-type-badge" class="rounded-full bg-white/20 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
+            Kategori Pengeluaran
+          </span>
+          <button
+            type="button"
+            id="close-detail-modal"
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+            aria-label="Tutup detail kategori"
+          >
+            <X class="h-4 w-4 stroke-[2.5]" />
+          </button>
+        </div>
+
+        <div class="relative z-10 mt-5 flex items-center gap-3.5">
+          <div id="detail-modal-icon-wrapper" class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white">
+            <!-- Rendered via JS -->
+          </div>
+          <div class="min-w-0">
+            <h3 id="detail-modal-name" class="truncate text-base font-extrabold text-white">Nama Kategori</h3>
+            <p class="text-[10px] font-medium text-white/70">Kategori transaksi</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 border-t border-border p-5">
+        <button
+          type="button"
+          id="detail-edit-btn"
+          class="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-muted py-3 text-xs font-bold text-primary transition hover:bg-slate-200 active:scale-95"
+        >
+          Edit Kategori
+        </button>
+        <button
+          type="button"
+          id="detail-delete-btn"
+          class="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-rose-50 py-3 text-xs font-bold text-rose-600 transition hover:bg-rose-100 active:scale-95"
+        >
+          Hapus Kategori
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal form kategori -->
+  <dialog id="category-modal" class="app-sheet" aria-labelledby="modal-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h3 id="modal-title" class="text-base font-extrabold text-primary">Tambah Kategori Baru</h3>
         <button
           type="button"
           id="close-modal"
-          class="text-text-secondary hover:text-brand-navy transition"
+          class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
           aria-label="Tutup form kategori"
         >
-          <X class="w-5 h-5" />
+          <X class="h-4 w-4 stroke-[2.5]" />
         </button>
       </div>
 
-      <form id="category-form" class="p-6 space-y-4" novalidate>
+      <form id="category-form" class="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-5" novalidate>
         <input type="hidden" id="edit-id" value="" />
         <input type="hidden" id="icon" value="Utensils" />
-        <input type="hidden" id="color" value="text-brand-navy bg-amber-50" />
+        <input type="hidden" id="color" value="text-blue-700 bg-blue-50" />
 
-        <div data-field>
-          <label class="block text-xs font-semibold text-brand-navy mb-1" for="name">Nama Kategori</label>
+        <div data-field class="space-y-1.5">
+          <label class="block text-[11px] font-bold text-foreground" for="name">Nama Kategori</label>
           <input
             type="text"
             id="name"
@@ -167,21 +221,23 @@ const categoryIcons = [
             maxlength="30"
             placeholder="cth: Makanan, Gaji, Transport"
             data-autofocus
-            class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
           />
         </div>
 
-        <div data-field>
-          <label class="block text-xs font-semibold text-brand-navy mb-1" for="type">Tipe Transaksi</label>
-          <select id="type" class="w-full px-3 py-2 border border-brand-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-yellow text-sm bg-brand-light/50 font-medium">
+        <div data-field class="space-y-1.5">
+          <label class="block text-[11px] font-bold text-foreground" for="type">Tipe Transaksi</label>
+          <select
+            id="type"
+            class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main"
+          >
             <option value="expense">Pengeluaran (Expense)</option>
             <option value="income">Pemasukan (Income)</option>
           </select>
         </div>
 
-        <!-- Custom Icon Picker Grid -->
-        <div>
-          <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Icon</label>
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-bold text-foreground">Pilih Icon</label>
           <div id="icon-picker" class="no-scrollbar grid max-h-48 grid-cols-6 gap-2 overflow-y-auto pr-0.5">
             {categoryIcons.map(({ name, label, Icon }, index) => (
               <button
@@ -189,65 +245,40 @@ const categoryIcons = [
                 data-icon-val={name}
                 class={`icon-opt flex aspect-square items-center justify-center rounded-xl border-2 transition ${
                   index === 0
-                    ? 'border-accent-yellow bg-accent-yellow/10 text-brand-navy'
-                    : 'border-brand-border text-text-secondary hover:border-accent-yellow'
+                    ? 'border-blue-main bg-blue-soft text-primary'
+                    : 'border-border text-muted-foreground hover:border-blue-main'
                 }`}
                 aria-label={`Ikon ${label}`}
                 title={label}
               >
-                <Icon class="w-5 h-5" />
+                <Icon class="h-5 w-5" />
               </button>
             ))}
           </div>
         </div>
 
-        <!-- Custom Color Picker Grid -->
-        <div>
-          <label class="block text-xs font-semibold text-brand-navy mb-2">Pilih Warna Tema</label>
-          <div id="color-picker" class="flex gap-3 items-center">
-            <button type="button" data-color-val="text-brand-navy bg-amber-50" class="color-opt w-7 h-7 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-amber-500 transition" aria-label="Warna amber"></button>
-            <button type="button" data-color-val="text-emerald-700 bg-emerald-50" class="color-opt w-7 h-7 rounded-full bg-finance-green transition" aria-label="Warna hijau"></button>
-            <button type="button" data-color-val="text-violet-700 bg-violet-50" class="color-opt w-7 h-7 rounded-full bg-violet-500 transition" aria-label="Warna violet"></button>
-            <button type="button" data-color-val="text-blue-700 bg-blue-50" class="color-opt w-7 h-7 rounded-full bg-blue-500 transition" aria-label="Warna biru"></button>
-            <button type="button" data-color-val="text-rose-700 bg-rose-50" class="color-opt w-7 h-7 rounded-full bg-finance-red transition" aria-label="Warna merah"></button>
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-bold text-foreground">Pilih Warna Tema</label>
+          <div id="color-picker" class="flex items-center gap-3">
+            {categoryColors.map((color) => (
+              <button
+                type="button"
+                data-color-val={color.value}
+                class={`color-opt h-7 w-7 rounded-full ${color.swatch} transition ${
+                  color.active ? 'ring-2 ring-blue-main ring-offset-2' : ''
+                }`}
+                aria-label={`Warna ${color.label}`}
+                title={color.label}
+              ></button>
+            ))}
           </div>
         </div>
 
-        <div class="flex gap-2 pt-4 border-t border-brand-border/60">
-          <button type="button" id="cancel-modal" class="flex-1 bg-brand-light text-text-primary font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs">Batal</button>
-          <button type="submit" id="submit-btn" class="flex-1 bg-accent-yellow text-brand-navy font-bold py-2.5 rounded-xl hover:bg-accent-yellow-hover transition text-xs shadow-xs">Simpan Kategori</button>
+        <div class="flex gap-2 border-t border-border pt-4">
+          <button type="button" id="cancel-modal" class="flex-1 rounded-2xl bg-muted py-3 text-xs font-bold text-foreground transition hover:bg-slate-200 active:scale-95">Batal</button>
+          <button type="submit" id="submit-btn" class="flex-1 rounded-2xl bg-primary py-3 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95">Simpan Kategori</button>
         </div>
       </form>
-    </div>
-  </dialog>
-
-  <!-- Modal Detail & Aksi Kategori (Pop-up saat List Item Diklik) -->
-  <dialog id="category-detail-modal" class="app-dialog" aria-labelledby="detail-modal-name">
-    <div class="relative rounded-2xl border border-brand-border bg-white p-6 text-center shadow-xl">
-      <button
-        type="button"
-        id="close-detail-modal"
-        class="absolute top-4 right-4 text-text-secondary hover:text-brand-navy transition"
-        aria-label="Tutup detail kategori"
-      >
-        <X class="w-5 h-5" />
-      </button>
-
-      <div id="detail-modal-icon-wrapper" class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-xs border border-brand-border/50 mb-3"></div>
-
-      <h3 id="detail-modal-name" class="text-base font-bold text-brand-navy">Nama Kategori</h3>
-      <div class="mt-2">
-        <span id="detail-modal-type-badge" class="text-xs font-semibold px-3 py-1 rounded-full">Tipe</span>
-      </div>
-
-      <div class="grid grid-cols-2 gap-2.5 mt-6 pt-4 border-t border-brand-border/60">
-        <button type="button" id="detail-edit-btn" class="w-full bg-brand-light text-brand-navy font-semibold py-2.5 rounded-xl hover:bg-slate-200 transition text-xs flex items-center justify-center gap-1.5">
-          Edit Kategori
-        </button>
-        <button type="button" id="detail-delete-btn" class="w-full bg-rose-50 text-finance-red font-semibold py-2.5 rounded-xl hover:bg-rose-100 transition text-xs flex items-center justify-center gap-1.5">
-          Hapus Kategori
-        </button>
-      </div>
     </div>
   </dialog>
 

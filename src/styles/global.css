@@ -15,7 +15,7 @@
   --color-brand-navy: #0B132B;
 
   /* Accents & Signals */
-  --color-accent-yellow: #F59E0B;     /* Kuning yang lebih kontras untuk light mode (Amber-500) */
+  --color-accent-yellow: #F59E0B;     /* Legacy: dipertahankan agar markup lama tidak rusak */
   --color-accent-yellow-hover: #D97706;
 
   --color-finance-green: #10B981;     /* Income / Success (Emerald-500) */
@@ -24,6 +24,26 @@
   /* Neutral Texts */
   --color-text-primary: #0F172A;      /* Text utama yang tajam (Slate-900) */
   --color-text-secondary: #64748B;    /* Subtitle / muted text (Slate-500) */
+
+  /* ------------------------------------------------------------------ */
+  /* Design tokens ala sample: palet biru, kartu, dan permukaan netral   */
+  /* ------------------------------------------------------------------ */
+  --color-background: #F8FAFC;
+  --color-foreground: #0F172A;
+  --color-card: #FFFFFF;
+  --color-card-blue-dark: #0B132B;
+  --color-primary: #0B132B;
+  --color-primary-foreground: #FFFFFF;
+  --color-blue-main: #2563EB;
+  --color-blue-soft: #EAF1FF;
+  --color-border: #E2E8F0;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-blue: #2563EB;
+
+  /* Shadow lembut untuk kartu & bottom nav */
+  --shadow-soft: 0 10px 30px -12px rgb(15 23 42 / 0.14);
+  --shadow-sheet: 0 -18px 50px -18px rgb(15 23 42 / 0.28);
 }
 
 /* Base Body & Reset Styling */
@@ -97,12 +117,69 @@ dialog.app-dialog {
   background: transparent;
 }
 
+/* Bottom sheet: form & modal detail */
+dialog.app-sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: 28rem;
+  max-height: 92dvh;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  dialog.app-sheet {
+    inset: 0;
+    margin: auto;
+  }
+}
+
+dialog.app-sheet[open] .sheet-panel {
+  animation: sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Panel default untuk bottom sheet */
+.sheet-panel {
+  display: flex;
+  max-height: 92dvh;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 1.75rem 1.75rem 0 0;
+  background: var(--color-card);
+  box-shadow: var(--shadow-sheet);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (min-width: 640px) {
+  .sheet-panel {
+    border-radius: 1.75rem;
+    padding-bottom: 0;
+  }
+}
+
 html.overflow-hidden,
 body.overflow-hidden {
   overflow: hidden;
 }
 
-dialog.app-dialog::backdrop {
+dialog.app-dialog::backdrop,
+dialog.app-sheet::backdrop {
   background: rgb(11 19 43 / 0.45);
   backdrop-filter: blur(4px);
 }

@@ -7,7 +7,7 @@ import IconTemplates from '../components/ui/IconTemplates.astro';
 
 interface Props {
   title?: string;
-  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history';
+  activeTab?: 'dashboard' | 'accounts' | 'categories' | 'history' | 'settings';
   hideNav?: boolean;
   fitScreen?: boolean;
 }
@@ -21,7 +21,7 @@ const {
 ---
 
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-200 text-text-primary antialiased selection:bg-accent-yellow selection:text-white">
+<html lang="id" class="h-full bg-slate-200 text-foreground antialiased selection:bg-blue-main selection:text-white">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -43,15 +43,15 @@ const {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
-  <body class="min-h-full flex flex-col bg-brand-light text-text-primary font-sans relative overflow-x-hidden items-center justify-center">
+  <body class="min-h-full flex flex-col bg-background font-sans relative overflow-x-hidden items-center justify-center">
 
     <!-- Soft Ambient Background Glow (Light Vibe) -->
-    <div class="fixed top-[-10%] left-[-10%] w-[350px] h-[350px] bg-accent-yellow/10 rounded-full blur-[100px] pointer-events-none"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[350px] h-[350px] bg-finance-green/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="pointer-events-none fixed top-[-10%] left-[-10%] h-[350px] w-[350px] rounded-full bg-blue-soft/70 blur-[100px]"></div>
+    <div class="pointer-events-none fixed bottom-[-10%] right-[-10%] h-[350px] w-[350px] rounded-full bg-blue-soft/60 blur-[120px]"></div>
 
     <!-- Wrapper Utama Mobile-First (Light Glassmorphism Container) -->
     <div
-      class="w-full max-w-md h-dvh flex flex-col overflow-hidden bg-brand-light/90 backdrop-blur-xl border-x border-brand-border/60 relative shadow-2xl shadow-slate-300/50"
+      class="relative flex h-dvh w-full max-w-md flex-col overflow-hidden border-x border-border/60 bg-background/90 shadow-2xl shadow-slate-300/50 backdrop-blur-xl"
       style="padding-top: env(safe-area-inset-top);"
     >
       
@@ -59,7 +59,7 @@ const {
       <main
         class:list={[
           'flex-1 min-h-0 px-4 w-full overflow-y-auto overflow-x-hidden',
-          fitScreen ? 'pt-5' : 'pt-7',
+          fitScreen ? 'pt-5' : 'pt-16',
         ]}
         style={fitScreen
           ? 'padding-bottom: calc(1rem + env(safe-area-inset-bottom));'

@@ -13,6 +13,11 @@ import {
 import { emptyStateHtml } from '../lib/ui/empty-state';
 import { escapeHtml } from '../lib/ui/html';
 import {
+  bindCurrencyInput,
+  formatNumberInput,
+  parseNumberInput,
+} from '../lib/ui/currency-input';
+import {
   readAccountOrder,
   writeAccountOrder,
   sortByStoredOrder,
@@ -57,6 +62,8 @@ export function initAccountsPage(): void {
   let orderAtStart: string[] = [];
   let renderedAccountIds: string[] = [];
 
+  bindCurrencyInput(balanceInput);
+
   // ---------------------------------------------------------------
   // Urutan akun (sort mode)
   // ---------------------------------------------------------------
@@ -69,12 +76,9 @@ export function initAccountsPage(): void {
     sortIconDefault.style.display = active ? 'none' : 'flex';
     sortIconDone.style.display = active ? 'flex' : 'none';
 
-    sortToggleBtn.classList.toggle('bg-accent-yellow', active);
-    sortToggleBtn.classList.toggle('text-brand-navy', active);
-    sortToggleBtn.classList.toggle('border-accent-yellow', active);
-    sortToggleBtn.classList.toggle('bg-white/10', !active);
-    sortToggleBtn.classList.toggle('text-slate-100', !active);
-    sortToggleBtn.classList.toggle('border-white/10', !active);
+    sortToggleBtn.className = active
+      ? 'inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-primary shadow-xs transition active:scale-95'
+      : 'inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95';
   }
 
   function enterSortMode(): void {
@@ -139,7 +143,7 @@ export function initAccountsPage(): void {
     editIdInput.value = '';
     clearAllErrors(form);
     setSelectedIconInPicker('Wallet');
-    setSelectedColorInPicker('text-brand-navy bg-amber-50');
+    setSelectedColorInPicker('text-blue-700 bg-blue-50');
   }
 
   function openModal(isEdit = false) {
@@ -166,22 +170,22 @@ export function initAccountsPage(): void {
       iconInput.value = selectedVal;
 
       iconBtns.forEach((b) => {
-        b.classList.remove('border-accent-yellow', 'bg-accent-yellow/10');
-        b.classList.add('border-brand-border');
+        b.classList.remove('border-blue-main', 'bg-blue-soft', 'text-primary');
+        b.classList.add('border-border', 'text-muted-foreground');
       });
 
-      (event.currentTarget as HTMLElement).classList.remove('border-brand-border');
-      (event.currentTarget as HTMLElement).classList.add('border-accent-yellow', 'bg-accent-yellow/10');
+      (event.currentTarget as HTMLElement).classList.remove('border-border', 'text-muted-foreground');
+      (event.currentTarget as HTMLElement).classList.add('border-blue-main', 'bg-blue-soft', 'text-primary');
     });
   });
 
   colorBtns.forEach((btn) => {
     btn.addEventListener('click', (event) => {
-      const selectedVal = (event.currentTarget as HTMLElement).getAttribute('data-color-val') || 'text-brand-navy bg-amber-50';
+      const selectedVal = (event.currentTarget as HTMLElement).getAttribute('data-color-val') || 'text-blue-700 bg-blue-50';
       colorInput.value = selectedVal;
 
-      colorBtns.forEach((b) => b.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500'));
-      (event.currentTarget as HTMLElement).classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+      colorBtns.forEach((b) => b.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-main'));
+      (event.currentTarget as HTMLElement).classList.add('ring-2', 'ring-offset-2', 'ring-blue-main');
     });
   });
 
@@ -189,11 +193,11 @@ export function initAccountsPage(): void {
     iconInput.value = val;
     iconBtns.forEach((btn) => {
       if (btn.getAttribute('data-icon-val') === val) {
-        btn.classList.remove('border-brand-border');
-        btn.classList.add('border-accent-yellow', 'bg-accent-yellow/10');
+        btn.classList.remove('border-border', 'text-muted-foreground');
+        btn.classList.add('border-blue-main', 'bg-blue-soft', 'text-primary');
       } else {
-        btn.classList.remove('border-accent-yellow', 'bg-accent-yellow/10');
-        btn.classList.add('border-brand-border');
+        btn.classList.remove('border-blue-main', 'bg-blue-soft', 'text-primary');
+        btn.classList.add('border-border', 'text-muted-foreground');
       }
     });
   }
@@ -202,9 +206,9 @@ export function initAccountsPage(): void {
     colorInput.value = val;
     colorBtns.forEach((btn) => {
       if (btn.getAttribute('data-color-val') === val) {
-        btn.classList.add('ring-2', 'ring-offset-2', 'ring-amber-500');
+        btn.classList.add('ring-2', 'ring-offset-2', 'ring-blue-main');
       } else {
-        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-amber-500');
+        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-main');
       }
     });
   }
@@ -235,11 +239,14 @@ export function initAccountsPage(): void {
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const monthlyTransactions = transactions.filter((tx) => tx.date.startsWith(monthKey));
 
+    // Tombol dashed hanya tampil kalau sudah ada dompet.
+    openModalBtn.classList.toggle('hidden', accounts.length === 0);
+
     const monthlyActivityEl = document.getElementById('micro-monthly-activity');
-    if (monthlyActivityEl) monthlyActivityEl.textContent = `${monthlyTransactions.length} Tx`;
+    if (monthlyActivityEl) monthlyActivityEl.textContent = `${monthlyTransactions.length}`;
     
     const walletCountEl = document.getElementById('micro-wallet-count');
-    if (walletCountEl) walletCountEl.textContent = `${accounts.length} Akun`;
+    if (walletCountEl) walletCountEl.textContent = `${accounts.length}`;
 
     sortToggleBtn.style.display = accounts.length > 1 ? 'inline-flex' : 'none';
 
@@ -260,7 +267,7 @@ export function initAccountsPage(): void {
           <button
             type="button"
             data-empty-action="add-account"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-accent-yellow px-4 py-2 text-[11px] font-bold text-brand-navy shadow-xs transition hover:bg-accent-yellow-hover active:scale-95"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-[11px] font-bold text-white shadow-xs transition hover:opacity-90 active:scale-95"
           >
             Tambah Dompet
           </button>
@@ -297,7 +304,7 @@ export function initAccountsPage(): void {
         }
 
         const iconName = acc.icon || 'Wallet';
-        const colorClass = acc.color || 'text-brand-navy bg-amber-50';
+        const colorClass = acc.color || 'text-blue-700 bg-blue-50';
         const [textColor, bgColor] = colorClass.split(' ');
 
         // Total aktivitas akun ini pada bulan berjalan
@@ -310,7 +317,7 @@ export function initAccountsPage(): void {
             <div class="flex flex-col gap-1">
               <button
                 type="button"
-                class="sort-move-btn flex h-6 w-6 items-center justify-center rounded-lg border border-brand-border/70 bg-brand-light text-brand-navy transition hover:border-accent-yellow disabled:pointer-events-none disabled:opacity-30"
+                class="sort-move-btn flex h-6 w-6 items-center justify-center rounded-lg border border-border bg-background text-primary transition hover:border-blue-main disabled:pointer-events-none disabled:opacity-20"
                 data-id="${escapeHtml(acc.id)}"
                 data-move="up"
                 aria-label="Naikkan ${escapeHtml(acc.name)}"
@@ -320,7 +327,7 @@ export function initAccountsPage(): void {
               </button>
               <button
                 type="button"
-                class="sort-move-btn flex h-6 w-6 items-center justify-center rounded-lg border border-brand-border/70 bg-brand-light text-brand-navy transition hover:border-accent-yellow disabled:pointer-events-none disabled:opacity-30"
+                class="sort-move-btn flex h-6 w-6 items-center justify-center rounded-lg border border-border bg-background text-primary transition hover:border-blue-main disabled:pointer-events-none disabled:opacity-20"
                 data-id="${escapeHtml(acc.id)}"
                 data-move="down"
                 aria-label="Turunkan ${escapeHtml(acc.name)}"
@@ -333,27 +340,27 @@ export function initAccountsPage(): void {
           : '';
 
         return `
-          <div 
-            class="account-card flex justify-between items-center p-4 border ${sortMode ? 'border-accent-yellow/60 cursor-default' : 'border-brand-border/80 cursor-pointer hover:border-accent-yellow hover:shadow-md'} rounded-2xl bg-white shadow-xs transition"
+          <div
+            class="account-card flex items-center justify-between p-4 transition-colors ${sortMode ? 'cursor-default bg-background/60' : 'cursor-pointer hover:bg-muted/50'}"
             data-id="${escapeHtml(acc.id)}"
             data-name="${escapeHtml(acc.name)}"
-            data-balance="${currentBalance}" 
+            data-balance="${currentBalance}"
             data-icon="${escapeHtml(iconName)}"
             data-color="${escapeHtml(colorClass)}"
             data-activity="${activityCount}"
           >
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bgColor || 'bg-amber-50'} ${textColor || 'text-brand-navy'} shadow-xs border border-brand-border/50">
+            <div class="flex min-w-0 items-center gap-3.5">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${bgColor || 'bg-blue-50'} ${textColor || 'text-primary'}">
                 ${getLucideIconHtml(iconName)}
               </div>
-              <div class="min-w-0">
-                <p class="font-bold text-brand-navy text-sm truncate">${escapeHtml(acc.name)}</p>
-                <p class="text-xs text-text-secondary mt-0.5">${activityCount} aktivitas bulan ini</p>
+              <div class="flex min-w-0 flex-col">
+                <p class="truncate text-xs font-bold text-foreground">${escapeHtml(acc.name)}</p>
+                <p class="mt-0.5 text-[10px] font-medium text-muted-foreground">${activityCount} aktivitas bulan ini</p>
               </div>
             </div>
             <div class="flex shrink-0 items-center gap-2">
               <div class="text-right">
-                <p class="text-sm font-extrabold text-brand-navy">Rp ${currentBalance.toLocaleString('id-ID')}</p>
+                <p class="text-xs font-extrabold text-foreground tabular-nums">Rp ${currentBalance.toLocaleString('id-ID')}</p>
               </div>
               ${sortControls}
             </div>
@@ -379,12 +386,10 @@ export function initAccountsPage(): void {
         const name = el.getAttribute('data-name') || '';
         const balance = parseFloat(el.getAttribute('data-balance') || '0');
         const iconName = el.getAttribute('data-icon') || 'Wallet';
-        const colorClass = el.getAttribute('data-color') || 'text-brand-navy bg-amber-50';
+        const colorClass = el.getAttribute('data-color') || 'text-blue-700 bg-blue-50';
         const activity = el.getAttribute('data-activity') || '0';
 
-        const [textColor, bgColor] = colorClass.split(' ');
-
-        detailIconWrapper.className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-xs border border-brand-border/50 mb-3 ${bgColor} ${textColor}`;
+        detailIconWrapper.className = 'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white';
         detailIconWrapper.innerHTML = getLucideIconHtml(iconName);
         detailName.textContent = name;
         detailBalance.textContent = `Rp ${balance.toLocaleString('id-ID')}`;
@@ -394,7 +399,7 @@ export function initAccountsPage(): void {
           closeDialog(detailModal);
           editIdInput.value = id;
           nameInput.value = name;
-          balanceInput.value = balance.toString();
+          balanceInput.value = formatNumberInput(balance.toString());
           setSelectedIconInPicker(iconName);
           setSelectedColorInPicker(colorClass);
           clearAllErrors(form);
@@ -462,7 +467,7 @@ export function initAccountsPage(): void {
     const editId = editIdInput.value;
     const name = nameInput.value.trim();
     const balanceRaw = balanceInput.value.trim();
-    const targetBalance = Number(balanceRaw);
+    const targetBalance = parseNumberInput(balanceRaw);
     const icon = iconInput.value;
     const color = colorInput.value;
 

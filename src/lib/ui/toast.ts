@@ -16,18 +16,27 @@ const ICONS: Record<ToastVariant, string> = {
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
 };
 
-const VARIANT_STYLES: Record<ToastVariant, { border: string; icon: string }> = {
+const VARIANT_STYLES: Record<
+  ToastVariant,
+  { border: string; icon: string; surface: string; text: string }
+> = {
   success: {
-    border: 'border-finance-green/25',
-    icon: 'bg-finance-green/10 text-finance-green',
+    border: 'border-white/10',
+    icon: 'bg-white/15 text-white',
+    surface: 'bg-primary text-white',
+    text: 'text-white',
   },
   error: {
-    border: 'border-finance-red/25',
-    icon: 'bg-finance-red/10 text-finance-red',
+    border: 'border-red-400/30',
+    icon: 'bg-white/15 text-white',
+    surface: 'bg-finance-red text-white',
+    text: 'text-white',
   },
   info: {
-    border: 'border-accent-yellow/40',
-    icon: 'bg-accent-yellow/10 text-accent-yellow-hover',
+    border: 'border-white/10',
+    icon: 'bg-white/15 text-white',
+    surface: 'bg-primary text-white',
+    text: 'text-white',
   },
 };
 
@@ -54,7 +63,7 @@ export function showToast(
   const styles = VARIANT_STYLES[variant];
 
   const item = document.createElement('div');
-  item.className = `toast-item pointer-events-auto flex items-start gap-3 rounded-2xl border ${styles.border} bg-white p-3 shadow-xl`;
+  item.className = `toast-item pointer-events-auto flex items-start gap-3 rounded-2xl border ${styles.border} ${styles.surface} p-3 shadow-xl`;
   item.setAttribute('role', variant === 'error' ? 'alert' : 'status');
 
   const icon = document.createElement('span');
@@ -62,13 +71,13 @@ export function showToast(
   icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">${ICONS[variant]}</svg>`;
 
   const text = document.createElement('p');
-  text.className = 'min-w-0 flex-1 text-[12px] font-semibold leading-snug text-brand-navy';
+  text.className = `min-w-0 flex-1 text-[12px] font-semibold leading-snug ${styles.text}`;
   text.textContent = message;
 
   const close = document.createElement('button');
   close.type = 'button';
   close.className =
-    'shrink-0 rounded-md p-0.5 text-text-secondary transition hover:text-brand-navy active:scale-95';
+    'shrink-0 rounded-md p-0.5 text-white/60 transition hover:text-white active:scale-95';
   close.setAttribute('aria-label', 'Tutup notifikasi');
   close.innerHTML =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';

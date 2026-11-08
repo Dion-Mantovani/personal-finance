@@ -19,6 +19,11 @@ import {
 } from '../lib/ui/validation';
 import { escapeHtml } from '../lib/ui/html';
 import {
+  bindCurrencyInput,
+  formatNumberInput,
+  parseNumberInput,
+} from '../lib/ui/currency-input';
+import {
   buildQuickPatterns,
   getQuickDescription,
   getQuickPalette,
@@ -34,7 +39,7 @@ export function initTransactionsPage(): void {
   const toAccountInput = document.getElementById('tx-to-account') as HTMLInputElement;
   const categoryInput = document.getElementById('tx-category') as HTMLInputElement;
   const dateInput = document.getElementById('tx-date') as HTMLInputElement;
-  const noteInput = document.getElementById('tx-note') as HTMLInputElement;
+  const noteInput = document.getElementById('tx-note') as HTMLTextAreaElement;
   const actionsContainer = document.getElementById('form-actions-container')!;
   const warningContainer = document.getElementById('tx-warning')!;
 
@@ -50,6 +55,8 @@ export function initTransactionsPage(): void {
   const catBtn = document.getElementById('category-dropdown-btn')!;
   const catMenu = document.getElementById('category-dropdown-menu')!;
   const catLabel = document.getElementById('selected-category-label')!;
+  const categoryModal = document.getElementById('tx-category-modal') as HTMLDialogElement;
+  const closeCategoryModalBtn = document.getElementById('close-category-modal')!;
 
   const accountModal = document.getElementById('tx-account-modal') as HTMLDialogElement;
   const accountModalTitle = document.getElementById('tx-account-modal-title')!;
@@ -81,6 +88,7 @@ export function initTransactionsPage(): void {
   }
 
   dateInput.value = toLocalDateKey();
+  bindCurrencyInput(amountInput);
 
   function getLucideIconHtml(iconName: string) {
     const template = document.querySelector(`#icon-templates template[data-icon-name="${iconName}"]`) as HTMLTemplateElement;
@@ -109,12 +117,12 @@ export function initTransactionsPage(): void {
     accountLabelText.textContent = isTransfer ? 'Akun Transfer' : 'Akun';
 
     if (!source) {
-      accountSummaryText.className = 'truncate text-text-secondary';
+      accountSummaryText.className = 'truncate text-muted-foreground';
       accountSummaryText.textContent = isTransfer ? 'Pilih akun sumber...' : 'Pilih akun...';
       return;
     }
 
-    accountSummaryText.className = 'truncate font-bold text-brand-navy';
+    accountSummaryText.className = 'truncate font-bold text-foreground';
 
     if (isTransfer) {
       accountSummaryText.textContent = destination
@@ -142,23 +150,21 @@ export function initTransactionsPage(): void {
   // ---------------------------------------------------------------
 
   function accountRowHtml(acc: Account, selected: boolean): string {
-    const [textColor, bgColor] = (acc.color || 'text-brand-navy bg-amber-50').split(' ');
-
     return `
       <button
         type="button"
         data-id="${escapeHtml(acc.id)}"
-        class="account-pick-row flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left transition ${
+        class="account-pick-row flex w-full items-center gap-3.5 rounded-2xl border p-3.5 text-left transition ${
           selected
-            ? 'border-accent-yellow bg-accent-yellow/5'
-            : 'border-brand-border/70 bg-white hover:border-accent-yellow'
+            ? 'border-blue-main bg-blue-soft'
+            : 'border-border bg-card hover:bg-muted/50'
         }"
       >
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-brand-border/40 ${bgColor || 'bg-amber-50'} ${textColor || 'text-brand-navy'}">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-soft text-primary">
           ${getLucideIconHtml(acc.icon || 'Wallet')}
         </span>
-        <span class="min-w-0 flex-1 truncate text-sm font-bold text-brand-navy">${escapeHtml(acc.name)}</span>
-        ${selected ? '<span class="shrink-0 text-[10px] font-bold text-accent-yellow-hover">Dipilih</span>' : ''}
+        <span class="min-w-0 flex-1 truncate text-xs font-bold text-foreground">${escapeHtml(acc.name)}</span>
+        ${selected ? '<span class="shrink-0 text-[10px] font-bold text-blue-main">Dipilih</span>' : ''}
       </button>
     `;
   }
@@ -191,9 +197,9 @@ export function initTransactionsPage(): void {
   function renderAccountPicker(): void {
     if (allAccounts.length === 0) {
       sourceAccountList.innerHTML = `
-        <div class="rounded-xl border border-dashed border-brand-border bg-brand-light/60 px-4 py-5 text-center">
-          <p class="text-xs font-bold text-brand-navy">Belum ada akun</p>
-          <a href="/accounts" class="mt-1 inline-block text-[11px] font-bold text-accent-yellow-hover underline underline-offset-2">
+        <div class="rounded-2xl border border-dashed border-border bg-background/60 px-4 py-6 text-center">
+          <p class="text-xs font-bold text-primary">Belum ada akun</p>
+          <a href="/accounts" class="mt-1 inline-block text-[11px] font-bold text-blue-main underline underline-offset-2">
             Tambah akun dulu
           </a>
         </div>
@@ -238,7 +244,7 @@ export function initTransactionsPage(): void {
   }
 
   function openAccountPicker(mode: 'source' | 'transfer'): void {
-    catMenu.classList.add('hidden');
+    if (categoryModal.open) closeDialog(categoryModal);
 
     accountModalMode = mode;
     pickerSourceId = accountInput.value;
@@ -288,7 +294,7 @@ export function initTransactionsPage(): void {
   function setSelectedCategory(cat?: Category): void {
     if (!cat) {
       categoryInput.value = '';
-      catLabel.className = 'flex items-center gap-2 text-text-secondary';
+      catLabel.className = 'flex items-center gap-2 text-muted-foreground';
       catLabel.innerHTML = 'Pilih Kategori...';
       return;
     }
@@ -296,10 +302,9 @@ export function initTransactionsPage(): void {
     categoryInput.value = cat.id;
     clearFieldError(catBtn);
 
-    const [textColor, bgColor] = (cat.color || 'text-brand-navy bg-amber-50').split(' ');
-    catLabel.className = 'flex items-center gap-2 text-brand-navy font-bold';
+    catLabel.className = 'flex items-center gap-2 font-bold text-foreground';
     catLabel.innerHTML = `
-      <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">
+      <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-soft text-primary">
         ${getLucideIconHtml(cat.icon || 'Utensils')}
       </div>
       <span>${escapeHtml(cat.name)}</span>
@@ -312,9 +317,9 @@ export function initTransactionsPage(): void {
     if (options.length === 0) {
       const label = type === 'income' ? 'pemasukan' : 'pengeluaran';
       catMenu.innerHTML = `
-        <p class="px-3 py-3 text-[11px] leading-relaxed text-text-secondary">
+        <p class="px-3 py-4 text-[11px] leading-relaxed text-muted-foreground">
           Belum ada kategori ${label}.
-          <a href="/categories" class="font-bold text-accent-yellow-hover underline underline-offset-2">Buat kategori</a>
+          <a href="/categories" class="font-bold text-blue-main underline underline-offset-2">Buat kategori</a>
           terlebih dahulu.
         </p>
       `;
@@ -323,12 +328,11 @@ export function initTransactionsPage(): void {
 
     catMenu.innerHTML = options
       .map((cat) => {
-        const [textColor, bgColor] = (cat.color || 'text-brand-navy bg-amber-50').split(' ');
         return `
-          <button type="button" data-id="${escapeHtml(cat.id)}" class="cat-option w-full flex items-center gap-2 px-3 py-2 hover:bg-brand-light rounded-xl transition text-sm text-left">
-            <div class="w-6 h-6 rounded-lg flex items-center justify-center ${bgColor} ${textColor} border border-brand-border/40">${getLucideIconHtml(cat.icon || 'Utensils')}</div>
-            <span class="font-bold text-brand-navy">${escapeHtml(cat.name)}</span>
-            <span class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full ${cat.type === 'income' ? 'bg-finance-green/10 text-finance-green' : 'bg-rose-50 text-finance-red'}">${cat.type}</span>
+          <button type="button" data-id="${escapeHtml(cat.id)}" class="cat-option flex w-full items-center gap-3 rounded-2xl p-3.5 text-left transition-colors hover:bg-muted/50">
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-soft text-primary">${getLucideIconHtml(cat.icon || 'Utensils')}</div>
+            <span class="min-w-0 flex-1 truncate text-xs font-bold text-foreground">${escapeHtml(cat.name)}</span>
+            <span class="ml-auto rounded-md px-2 py-0.5 text-[10px] font-semibold ${cat.type === 'income' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-blue-soft text-blue-main'}">${cat.type === 'income' ? 'Masuk' : 'Keluar'}</span>
           </button>
         `;
       })
@@ -338,18 +342,19 @@ export function initTransactionsPage(): void {
       btn.addEventListener('click', (event) => {
         const id = (event.currentTarget as HTMLElement).getAttribute('data-id');
         setSelectedCategory(availableCategories.find((cat) => cat.id === id));
-        catMenu.classList.add('hidden');
+        closeDialog(categoryModal);
       });
     });
   }
 
-  document.addEventListener('click', (event) => {
-    if (!catBtn.contains(event.target as Node) && !catMenu.contains(event.target as Node)) {
-      catMenu.classList.add('hidden');
-    }
+  initDialog(categoryModal);
+
+  catBtn.addEventListener('click', () => {
+    renderCategoryOptions(typeInput.value as TransactionType);
+    openDialog(categoryModal, '.cat-option, #close-category-modal');
   });
 
-  catBtn.addEventListener('click', () => catMenu.classList.toggle('hidden'));
+  closeCategoryModalBtn.addEventListener('click', () => closeDialog(categoryModal));
 
   // ---------------------------------------------------------------
   // Saran kategori dari deskripsi
@@ -432,8 +437,8 @@ export function initTransactionsPage(): void {
     typeTabBtns.forEach((btn) => {
       const active = btn.getAttribute('data-type') === type;
       btn.className = active
-        ? 'type-tab-btn flex items-center justify-center gap-1 rounded-xl bg-brand-navy py-2 text-xs font-bold text-white shadow-xs transition-all'
-        : 'type-tab-btn flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-medium text-text-secondary transition-all hover:bg-brand-light hover:text-brand-navy';
+        ? 'type-tab-btn flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground shadow-soft transition-all active:scale-95'
+        : 'type-tab-btn flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold text-muted-foreground transition-all hover:text-foreground active:scale-95';
     });
   }
 
@@ -459,7 +464,7 @@ export function initTransactionsPage(): void {
       name: 'Transfer',
       type: 'transfer',
       icon: 'ArrowLeftRight',
-      color: 'text-brand-navy bg-amber-50',
+      color: 'text-blue-700 bg-blue-50',
     });
     return newId || '';
   }
@@ -487,27 +492,27 @@ export function initTransactionsPage(): void {
 
     autofillList.innerHTML = patterns
       .map((pattern, index) => {
-        const { textColor, bgColor, iconName } = getQuickPalette(pattern, categoriesById);
+        const { iconName } = getQuickPalette(pattern, categoriesById);
         const description = getQuickDescription(pattern, accountsById, categoriesById);
         const prefix =
           pattern.type === 'income' ? '+ ' : pattern.type === 'expense' ? '- ' : '';
         const amountColor =
           pattern.type === 'income'
-            ? 'text-finance-green'
+            ? 'text-emerald-600'
             : pattern.type === 'expense'
-              ? 'text-finance-red'
-              : 'text-brand-navy';
+              ? 'text-blue-main'
+              : 'text-primary';
 
         return `
           <button
             type="button"
             data-index="${index}"
-            class="autofill-card flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-brand-border/70 bg-white px-2.5 text-left transition hover:border-accent-yellow active:scale-95"
+            class="autofill-card flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 text-left transition hover:border-blue-main hover:bg-blue-soft/50 active:scale-95"
           >
-            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-brand-border/40 ${bgColor} ${textColor}">
+            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-blue-soft text-blue-main">
               ${getLucideIconHtml(iconName)}
             </span>
-            <span class="max-w-[96px] truncate text-[10px] font-bold text-brand-navy">${escapeHtml(description)}</span>
+            <span class="max-w-[110px] truncate text-[10px] font-bold text-foreground">${escapeHtml(description)}</span>
             <span class="text-[10px] font-extrabold tabular-nums ${amountColor}">${prefix}${escapeHtml(formatIDR(pattern.amount))}</span>
           </button>
         `;
@@ -544,7 +549,7 @@ export function initTransactionsPage(): void {
       setSelectedCategory(categoriesById.get(pattern.categoryId));
     }
 
-    amountInput.value = String(pattern.amount);
+    amountInput.value = formatNumberInput(String(pattern.amount));
     noteInput.value = pattern.note;
     clearAllErrors(form);
     amountInput.focus({ preventScroll: true });
@@ -557,8 +562,8 @@ export function initTransactionsPage(): void {
   function renderFormActions(isEdit: boolean, editId?: string): void {
     if (isEdit) {
       actionsContainer.innerHTML = `
-        <button type="button" id="delete-tx-btn" class="flex-1 rounded-xl bg-rose-50 py-3 text-xs font-semibold text-finance-red transition hover:bg-rose-100 active:scale-95">Hapus</button>
-        <button type="submit" id="submit-btn" class="flex-1 rounded-xl bg-brand-navy py-3 text-xs font-bold text-white shadow-xs transition hover:bg-brand-navy/90 active:scale-95">Perbarui</button>
+        <button type="button" id="delete-tx-btn" class="flex-1 rounded-2xl border border-red-200 bg-rose-50 py-3.5 text-xs font-bold text-rose-600 transition hover:bg-red-50 active:scale-95">Hapus</button>
+        <button type="submit" id="submit-btn" class="flex-1 rounded-2xl bg-primary py-3.5 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95">Perbarui</button>
       `;
 
       document.getElementById('delete-tx-btn')?.addEventListener('click', async () => {
@@ -586,8 +591,8 @@ export function initTransactionsPage(): void {
     }
 
     actionsContainer.innerHTML = `
-      <button type="submit" data-action="save-add" id="save-add-btn" class="flex-1 rounded-xl bg-brand-light py-3 text-[11px] font-semibold text-text-primary transition hover:bg-slate-200 active:scale-95">Simpan &amp; Tambah Lagi</button>
-      <button type="submit" data-action="save" id="save-btn" class="flex-1 rounded-xl bg-brand-navy py-3 text-xs font-bold text-white shadow-xs transition hover:bg-brand-navy/90 active:scale-95">Simpan Transaksi</button>
+      <button type="submit" data-action="save-add" id="save-add-btn" class="flex-1 rounded-2xl border border-border bg-card py-3.5 text-xs font-bold text-muted-foreground transition hover:bg-muted active:scale-95">Simpan &amp; Tambah</button>
+      <button type="submit" data-action="save" id="save-btn" class="flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-primary py-3.5 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95">Simpan Transaksi</button>
     `;
   }
 
@@ -597,7 +602,7 @@ export function initTransactionsPage(): void {
     if (accounts.length === 0) {
       warnings.push(`
         Belum ada dompet. Tambahkan akun dulu di
-        <a href="/accounts" class="font-bold text-accent-yellow-hover underline underline-offset-2">halaman Dompet</a>
+        <a href="/accounts" class="font-bold text-blue-main underline underline-offset-2">halaman Dompet</a>
         sebelum mencatat transaksi.
       `);
     }
@@ -605,7 +610,7 @@ export function initTransactionsPage(): void {
     if (categories.length === 0) {
       warnings.push(`
         Belum ada kategori. Buat kategori di
-        <a href="/categories" class="font-bold text-accent-yellow-hover underline underline-offset-2">halaman Kategori</a>
+        <a href="/categories" class="font-bold text-blue-main underline underline-offset-2">halaman Kategori</a>
         agar transaksi masuk/keluar bisa disimpan.
       `);
     }
@@ -620,7 +625,7 @@ export function initTransactionsPage(): void {
     warningContainer.innerHTML = warnings
       .map(
         (message) => `
-          <div class="rounded-2xl border border-accent-yellow/30 bg-accent-yellow/5 p-3.5 text-[11px] leading-relaxed text-brand-navy">
+          <div class="rounded-2xl border border-blue-main/25 bg-blue-soft/50 p-3.5 text-[11px] leading-relaxed text-primary">
             ${message}
           </div>
         `
@@ -668,7 +673,7 @@ export function initTransactionsPage(): void {
 
         handleTypeChange(txToEdit.type, false);
 
-        amountInput.value = txToEdit.amount.toString();
+        amountInput.value = formatNumberInput(txToEdit.amount.toString());
         dateInput.value = txToEdit.date;
         noteInput.value = txToEdit.note || '';
 
@@ -691,6 +696,16 @@ export function initTransactionsPage(): void {
     renderFormActions(false);
     renderAutoFillSection();
 
+    if (urlParams.get('type') === 'transfer') {
+      setActiveTypeTab('transfer');
+      handleTypeChange('transfer', false);
+      renderAutoFillSection();
+      if (accounts.length > 0) {
+        window.setTimeout(() => openAccountPicker('transfer'), 80);
+      }
+      return;
+    }
+
     if (accounts.length > 0) {
       window.setTimeout(() => openAccountPicker('source'), 80);
     }
@@ -700,7 +715,7 @@ export function initTransactionsPage(): void {
     const errors: FieldError[] = [];
 
     const amountRaw = amountInput.value.trim();
-    const amount = Number(amountRaw);
+    const amount = parseNumberInput(amountRaw);
 
     if (!amountRaw || !Number.isFinite(amount) || amount <= 0) {
       errors.push({ field: amountInput, message: 'Nominal harus lebih dari 0.' });
@@ -742,7 +757,7 @@ export function initTransactionsPage(): void {
       noteSuggestionTimer = null;
     }
 
-    catMenu.classList.add('hidden');
+    if (categoryModal.open) closeDialog(categoryModal);
     amountInput.focus({ preventScroll: true });
   }
 
@@ -756,7 +771,7 @@ export function initTransactionsPage(): void {
     const action = submitter?.dataset.action === 'save-add' ? 'save-add' : 'save';
     const editId = editIdInput.value;
     const type = typeInput.value as TransactionType;
-    const amount = Number(amountInput.value);
+    const amount = parseNumberInput(amountInput.value);
     const accountId = accountInput.value;
     const toAccountId = toAccountInput.value;
     const date = dateInput.value;
