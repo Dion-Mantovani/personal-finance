@@ -12,6 +12,11 @@ import {
 } from '../lib/ui/validation';
 import { emptyStateHtml } from '../lib/ui/empty-state';
 import { escapeHtml } from '../lib/ui/html';
+import {
+  readOrderForType,
+  sortCategoriesByStoredOrder,
+  writeOrderForType,
+} from '../lib/ui/category-order';
 
 export function initCategoriesPage(): void {
   let currentTab: TransactionType = 'expense';
@@ -37,6 +42,12 @@ export function initCategoriesPage(): void {
   const tabIncomeBtn = document.getElementById('tab-income')!;
   const categorySectionTitle = document.getElementById('category-section-title')!;
   const categoryCountBadge = document.getElementById('category-count-badge')!;
+  const sortToggleBtn = document.getElementById('sort-toggle') as HTMLButtonElement;
+
+  let sortMode = false;
+  let workingOrder: string[] = [];
+  let orderAtStart: string[] = [];
+  let renderedCategoryIds: string[] = [];
 
   const detailIconWrapper = document.getElementById('detail-modal-icon-wrapper')!;
   const detailName = document.getElementById('detail-modal-name')!;
@@ -79,10 +90,67 @@ export function initCategoriesPage(): void {
   // Tabs
   // ---------------------------------------------------------------
 
+  function updateSortUi(): void {
+    sortToggleBtn.textContent = sortMode ? 'Selesai' : 'Urutkan';
+    sortToggleBtn.className = sortMode
+      ? 'rounded-full bg-primary px-2.5 py-1 text-[9px] font-bold text-primary-foreground shadow-xs transition active:scale-95'
+      : 'rounded-full border border-border bg-card px-2.5 py-1 text-[9px] font-bold text-muted-foreground transition-all hover:bg-muted active:scale-95';
+    sortToggleBtn.classList.toggle('hidden', !sortMode && renderedCategoryIds.length < 2);
+  }
+
+  function startSortMode(): void {
+    if (sortMode) return;
+    sortMode = true;
+    workingOrder = [...renderedCategoryIds];
+    orderAtStart = [...renderedCategoryIds];
+    renderCategories();
+  }
+
+  function saveSortMode(): boolean {
+    if (!sortMode) return false;
+
+    const changed =
+      workingOrder.length !== orderAtStart.length ||
+      workingOrder.some((id, index) => id !== orderAtStart[index]);
+
+    if (changed) writeOrderForType(currentTab, workingOrder);
+
+    sortMode = false;
+    workingOrder = [];
+    orderAtStart = [];
+    return changed;
+  }
+
+  function finishSortMode(): void {
+    const changed = saveSortMode();
+    renderCategories();
+    if (changed) toast.success('Urutan kategori disimpan.');
+  }
+
+  function moveCategory(id: string, direction: -1 | 1): void {
+    if (!sortMode) return;
+
+    const index = workingOrder.indexOf(id);
+    const target = index + direction;
+    if (index === -1 || target < 0 || target >= workingOrder.length) return;
+
+    [workingOrder[index], workingOrder[target]] = [
+      workingOrder[target],
+      workingOrder[index],
+    ];
+    renderCategories();
+  }
+
+  sortToggleBtn.addEventListener('click', () => {
+    if (sortMode) finishSortMode();
+    else startSortMode();
+  });
+
   tabExpenseBtn.addEventListener('click', () => switchTab('expense'));
   tabIncomeBtn.addEventListener('click', () => switchTab('income'));
 
   function switchTab(tab: TransactionType) {
+    const changed = saveSortMode();
     currentTab = tab;
     typeInput.value = tab;
 
@@ -97,6 +165,7 @@ export function initCategoriesPage(): void {
     }
 
     renderCategories();
+    if (changed) toast.success('Urutan kategori disimpan.');
   }
 
   // ---------------------------------------------------------------
@@ -174,12 +243,31 @@ export function initCategoriesPage(): void {
       (cat) => cat.name.toLowerCase() !== 'koreksi saldo' && cat.type === currentTab
     );
 
-    categoryCountBadge.textContent = `${filteredCategories.length} Kategori`;
+    const storedOrder = readOrderForType(currentTab);
+    let orderedCategories = sortCategoriesByStoredOrder(
+      filteredCategories,
+      sortMode ? workingOrder : storedOrder
+    );
+
+    if (sortMode && orderedCategories.length < 2) {
+      sortMode = false;
+      workingOrder = [];
+      orderAtStart = [];
+      orderedCategories = sortCategoriesByStoredOrder(filteredCategories, storedOrder);
+    }
+
+    renderedCategoryIds = orderedCategories.map((cat) => cat.id);
+    if (sortMode) workingOrder = [...renderedCategoryIds];
+
+    categoryCountBadge.textContent = `${orderedCategories.length} Kategori`;
 
     // Tombol dashed hanya tampil kalau tab aktif sudah punya kategori.
-    openModalBtn.classList.toggle('hidden', filteredCategories.length === 0);
+    openModalBtn.classList.toggle('hidden', orderedCategories.length === 0);
+    updateSortUi();
 
-    if (filteredCategories.length === 0) {
+    listContainer.className = sortMode ? 'space-y-2' : 'grid grid-cols-2 gap-3';
+
+    if (orderedCategories.length === 0) {
       const label = currentTab === 'income' ? 'pemasukan' : 'pengeluaran';
       listContainer.innerHTML = emptyStateHtml({
         iconHtml: getLucideIconHtml('Utensils'),
@@ -194,34 +282,92 @@ export function initCategoriesPage(): void {
             Tambah Kategori
           </button>
         `,
-        className: 'col-span-2',
+        className: sortMode ? '' : 'col-span-2',
       });
       return;
     }
 
-    listContainer.innerHTML = filteredCategories.map((cat) => {
-      const iconName = cat.icon || 'Utensils';
-      const colorClass = cat.color || 'text-blue-700 bg-blue-50';
-      const [textColor, bgColor] = colorClass.split(' ');
+    if (sortMode) {
+      listContainer.innerHTML = orderedCategories
+        .map((cat, index) => {
+          const iconName = cat.icon || 'Utensils';
+          const colorClass = cat.color || 'text-blue-700 bg-blue-50';
+          const [textColor, bgColor] = colorClass.split(' ');
 
-      return `
-        <div
-          class="category-card flex items-center gap-3 rounded-[22px] border border-border bg-card p-4 text-left shadow-soft transition-colors hover:bg-muted/40 active:scale-[0.99] cursor-pointer"
-          data-id="${escapeHtml(cat.id)}"
-          data-name="${escapeHtml(cat.name)}"
-          data-type="${escapeHtml(cat.type)}"
-          data-icon="${escapeHtml(iconName)}"
-          data-color="${escapeHtml(colorClass)}"
-        >
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${bgColor || 'bg-blue-50'} ${textColor || 'text-primary'}">
-            ${getLucideIconHtml(iconName)}
+          return `
+            <div
+              class="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-xs"
+              data-id="${escapeHtml(cat.id)}"
+            >
+              <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${bgColor || 'bg-blue-50'} ${textColor || 'text-primary'}">
+                  ${getLucideIconHtml(iconName)}
+                </div>
+                <span class="min-w-0 truncate text-xs font-bold text-foreground">${escapeHtml(cat.name)}</span>
+              </div>
+              <div class="flex shrink-0 flex-col gap-1">
+                <button
+                  type="button"
+                  class="sort-category-btn flex h-6 w-6 items-center justify-center rounded-lg border border-border bg-background text-primary transition hover:border-blue-main disabled:pointer-events-none disabled:opacity-20"
+                  data-id="${escapeHtml(cat.id)}"
+                  data-direction="up"
+                  aria-label="Naikkan ${escapeHtml(cat.name)}"
+                  ${index === 0 ? 'disabled' : ''}
+                >
+                  ${getLucideIconHtml('ChevronUp')}
+                </button>
+                <button
+                  type="button"
+                  class="sort-category-btn flex h-6 w-6 items-center justify-center rounded-lg border border-border bg-background text-primary transition hover:border-blue-main disabled:pointer-events-none disabled:opacity-20"
+                  data-id="${escapeHtml(cat.id)}"
+                  data-direction="down"
+                  aria-label="Turunkan ${escapeHtml(cat.name)}"
+                  ${index === orderedCategories.length - 1 ? 'disabled' : ''}
+                >
+                  ${getLucideIconHtml('ChevronDown')}
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      listContainer.querySelectorAll<HTMLButtonElement>('.sort-category-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          moveCategory(
+            btn.dataset.id || '',
+            btn.dataset.direction === 'up' ? -1 : 1
+          );
+        });
+      });
+      return;
+    }
+
+    listContainer.innerHTML = orderedCategories
+      .map((cat) => {
+        const iconName = cat.icon || 'Utensils';
+        const colorClass = cat.color || 'text-blue-700 bg-blue-50';
+        const [textColor, bgColor] = colorClass.split(' ');
+
+        return `
+          <div
+            class="category-card flex items-center gap-3 rounded-[22px] border border-border bg-card p-4 text-left shadow-soft transition-colors hover:bg-muted/40 active:scale-[0.99] cursor-pointer"
+            data-id="${escapeHtml(cat.id)}"
+            data-name="${escapeHtml(cat.name)}"
+            data-type="${escapeHtml(cat.type)}"
+            data-icon="${escapeHtml(iconName)}"
+            data-color="${escapeHtml(colorClass)}"
+          >
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${bgColor || 'bg-blue-50'} ${textColor || 'text-primary'}">
+              ${getLucideIconHtml(iconName)}
+            </div>
+            <span class="min-w-0 truncate text-sm font-semibold text-foreground">${escapeHtml(cat.name)}</span>
           </div>
-          <span class="min-w-0 truncate text-sm font-semibold text-foreground">${escapeHtml(cat.name)}</span>
-        </div>
-      `;
-    }).join('');
+        `;
+      })
+      .join('');
 
-    document.querySelectorAll<HTMLElement>('.category-card').forEach((card) => {
+    listContainer.querySelectorAll<HTMLElement>('.category-card').forEach((card) => {
       card.addEventListener('click', (event) => {
         const el = event.currentTarget as HTMLElement;
         const id = el.getAttribute('data-id') || '';

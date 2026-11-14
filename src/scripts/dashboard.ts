@@ -16,6 +16,7 @@ import {
   FALLBACK_QUICK_LIMIT,
   getSavedQuickShortcuts,
   MAX_QUICK_SHORTCUTS,
+  moveQuickShortcut,
   removeQuickShortcut,
   type SavedQuickShortcut,
 } from '../lib/ui/quick-shortcuts';
@@ -25,6 +26,11 @@ import {
   getQuickPalette,
   type QuickPattern,
 } from '../lib/ui/quick-patterns';
+import {
+  formatRupiah,
+  getAmountsHidden,
+  setAmountsHidden,
+} from '../lib/ui/amount-visibility';
 
 interface QuickItem {
   id: string;
@@ -57,6 +63,8 @@ export function initDashboardPage(): void {
   const monthIncomeEl = document.getElementById('dash-month-income')!;
   const monthExpenseEl = document.getElementById('dash-month-expense')!;
   const weeklyExpenseEl = document.getElementById('weekly-expense-total')!;
+  const weeklyChartCard = document.getElementById('weekly-chart-card')!;
+  const weeklyTooltip = document.getElementById('weekly-tooltip')!;
   const quickList = document.getElementById('quick-list')!;
   const quickStatus = document.getElementById('quick-status')!;
   const quickStatusText = document.getElementById('quick-status-text')!;
@@ -80,6 +88,13 @@ export function initDashboardPage(): void {
   const manageCloseBtn = document.getElementById('quick-manage-close') as HTMLButtonElement;
   const manageAddBtn = document.getElementById('quick-manage-add') as HTMLButtonElement;
 
+  const menuScroll = document.getElementById('quick-menu-scroll')!;
+  const menuSortDialog = document.getElementById('menu-sort-dialog') as HTMLDialogElement;
+  const menuSortList = document.getElementById('menu-sort-list')!;
+  const openMenuSortBtn = document.getElementById('open-menu-sort') as HTMLButtonElement;
+  const closeMenuSortBtn = document.getElementById('close-menu-sort') as HTMLButtonElement;
+  const saveMenuSortBtn = document.getElementById('save-menu-sort') as HTMLButtonElement;
+
   let accounts: Account[] = [];
   let categories: Category[] = [];
   let transactions: Transaction[] = [];
@@ -87,16 +102,108 @@ export function initDashboardPage(): void {
   let categoriesById = new Map<string, Category>();
   let lastCreatedId: string | null = null;
   let statusTimer: number | null = null;
-  let amountsHidden = false;
+  let menuWorkingOrder: string[] = [];
 
   bindCurrencyInput(amountInput);
 
-  const formatIDR = (num: number) =>
-    new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0,
-    }).format(num);
+  const MENU_ORDER_KEY = 'pf:dashboard-menu-order';
+
+  function readMenuOrder(): string[] {
+    try {
+      const raw = localStorage.getItem(MENU_ORDER_KEY);
+      if (!raw) return [];
+      const parsed: unknown = JSON.parse(raw);
+      return Array.isArray(parsed)
+        ? parsed.filter((id): id is string => typeof id === 'string')
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function writeMenuOrder(order: string[]): void {
+    try {
+      localStorage.setItem(MENU_ORDER_KEY, JSON.stringify(order));
+    } catch {
+      // localStorage bisa diblokir; abaikan.
+    }
+  }
+
+  function getMenuLinks(): HTMLElement[] {
+    return Array.from(menuScroll.querySelectorAll<HTMLElement>('[data-menu-id]'));
+  }
+
+  function applyMenuOrder(order: string[]): void {
+    const links = getMenuLinks();
+    const byId = new Map(
+      links.map((link) => [link.dataset.menuId || '', link] as const)
+    );
+
+    order.forEach((id) => {
+      const link = byId.get(id);
+      if (!link) return;
+      menuScroll.appendChild(link);
+      byId.delete(id);
+    });
+
+    byId.forEach((link) => menuScroll.appendChild(link));
+  }
+
+  function renderMenuSortList(): void {
+    const links = getMenuLinks();
+    const byId = new Map(
+      links.map((link) => [link.dataset.menuId || '', link] as const)
+    );
+
+    menuSortList.innerHTML = menuWorkingOrder
+      .map((id, index) => {
+        const link = byId.get(id);
+        if (!link) return '';
+
+        const label = link.dataset.menuLabel || id;
+        const iconHtml = link.querySelector('.menu-icon')?.outerHTML ?? '';
+
+        return `
+          <div class="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-3.5" data-sort-id="${escapeHtml(id)}">
+            <div class="flex min-w-0 items-center gap-3">
+              ${iconHtml}
+              <span class="min-w-0 truncate text-xs font-bold text-foreground">${escapeHtml(label)}</span>
+            </div>
+            <div class="flex shrink-0 flex-col gap-1">
+              <button
+                type="button"
+                class="menu-sort-move flex h-6 w-6 items-center justify-center rounded-lg border border-border bg-background text-primary transition hover:border-blue-main disabled:pointer-events-none disabled:opacity-20"
+                data-direction="up"
+                data-id="${escapeHtml(id)}"
+                aria-label="Naikkan ${escapeHtml(label)}"
+                ${index === 0 ? 'disabled' : ''}
+              >
+                ${getLucideIconHtml('ChevronUp')}
+              </button>
+              <button
+                type="button"
+                class="menu-sort-move flex h-6 w-6 items-center justify-center rounded-lg border border-border bg-background text-primary transition hover:border-blue-main disabled:pointer-events-none disabled:opacity-20"
+                data-direction="down"
+                data-id="${escapeHtml(id)}"
+                aria-label="Turunkan ${escapeHtml(label)}"
+                ${index === menuWorkingOrder.length - 1 ? 'disabled' : ''}
+              >
+                ${getLucideIconHtml('ChevronDown')}
+              </button>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  function openMenuSort(): void {
+    menuWorkingOrder = getMenuLinks()
+      .map((link) => link.dataset.menuId || '')
+      .filter(Boolean);
+    renderMenuSortList();
+    openDialog(menuSortDialog, '#close-menu-sort');
+  }
 
   function toLocalDateKey(date = new Date()): string {
     const year = date.getFullYear();
@@ -132,24 +239,26 @@ export function initDashboardPage(): void {
 
   function setAmount(el: HTMLElement, value: number) {
     el.dataset.amount = String(value);
-    el.textContent = amountsHidden ? '••••••' : formatIDR(value);
+    el.textContent = formatRupiah(value);
   }
 
   function applyAmountVisibility() {
     document.querySelectorAll<HTMLElement>('[data-amount]').forEach((el) => {
       const value = Number(el.dataset.amount || '0');
-      el.textContent = amountsHidden ? '••••••' : formatIDR(value);
+      const prefix = el.dataset.amountPrefix ?? '';
+      el.textContent = formatRupiah(value, { prefix });
     });
 
-    eyeOpenIcon.classList.toggle('hidden', amountsHidden);
-    eyeClosedIcon.classList.toggle('hidden', !amountsHidden);
+    const hidden = getAmountsHidden();
+    eyeOpenIcon.classList.toggle('hidden', hidden);
+    eyeClosedIcon.classList.toggle('hidden', !hidden);
     toggleAmountsBtn.setAttribute(
       'aria-label',
-      amountsHidden ? 'Tampilkan nominal' : 'Sembunyikan nominal'
+      hidden ? 'Tampilkan nominal' : 'Sembunyikan nominal'
     );
     toggleAmountsBtn.setAttribute(
       'title',
-      amountsHidden ? 'Tampilkan nominal' : 'Sembunyikan nominal'
+      hidden ? 'Tampilkan nominal' : 'Sembunyikan nominal'
     );
   }
 
@@ -172,28 +281,124 @@ export function initDashboardPage(): void {
     }).format(now);
   }
 
-  function highlightCurrentDay() {
-    const todayIndex = (new Date().getDay() + 6) % 7;
-    const tallestIndex = 1;
+  function hideWeeklyTooltip(): void {
+    weeklyTooltip.classList.add('hidden');
+    weeklyTooltip.textContent = '';
+    delete weeklyTooltip.dataset.bar;
+  }
+
+  function showWeeklyTooltip(bar: HTMLElement): void {
+    const dateKey = bar.dataset.date || '';
+    const amount = Number(bar.dataset.amount || '0');
+    const date = dateKey ? new Date(`${dateKey}T00:00:00`) : new Date();
+    const dateLabel = new Intl.DateTimeFormat('id-ID', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(date);
+
+    weeklyTooltip.innerHTML = `
+      <p class="text-[9px] font-semibold text-white/70">${escapeHtml(dateLabel)}</p>
+      <p class="mt-0.5 text-[11px] font-extrabold ${amount > 0 ? 'text-blue-200' : 'text-white/80'}">
+        ${amount > 0 ? escapeHtml(formatRupiah(amount)) : 'Tidak ada pengeluaran'}
+      </p>
+    `;
+    weeklyTooltip.classList.remove('hidden');
+
+    const cardRect = weeklyChartCard.getBoundingClientRect();
+    const barRect = bar.getBoundingClientRect();
+    const width = weeklyTooltip.offsetWidth;
+    const height = weeklyTooltip.offsetHeight;
+    let left = barRect.left - cardRect.left + barRect.width / 2;
+    left = Math.max(width / 2 + 8, Math.min(cardRect.width - width / 2 - 8, left));
+    const top = Math.max(8, barRect.top - cardRect.top - height - 8);
+
+    weeklyTooltip.style.left = `${left}px`;
+    weeklyTooltip.style.top = `${top}px`;
+  }
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target as HTMLElement).closest('.week-bar')) {
+      hideWeeklyTooltip();
+    }
+  });
+
+  window.addEventListener('resize', hideWeeklyTooltip);
+
+  function renderWeeklyChart() {
+    hideWeeklyTooltip();
+
+    const dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+    const now = new Date();
+    const todayIndex = (now.getDay() + 6) % 7;
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - todayIndex);
+
+    const dailyExpense = dayNames.map((_, index) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + index);
+      const dateKey = toLocalDateKey(date);
+      return transactions
+        .filter((tx) => tx.type === 'expense' && tx.date === dateKey)
+        .reduce((sum, tx) => sum + tx.amount, 0);
+    });
+
+    const maxExpense = Math.max(1, ...dailyExpense);
     const bars = Array.from(document.querySelectorAll<HTMLElement>('.week-bar'));
     const labels = Array.from(document.querySelectorAll<HTMLElement>('.week-label'));
 
     bars.forEach((bar, index) => {
-      bar.classList.remove('bg-primary', 'bg-blue-main', 'bg-blue-soft');
-      bar.classList.add('bg-blue-soft');
+      const value = dailyExpense[index] ?? 0;
+      const height = Math.max(4, Math.round((value / maxExpense) * 96));
+      const barDate = new Date(monday);
+      barDate.setDate(monday.getDate() + index);
 
+      bar.style.height = `${height}px`;
+      bar.title = `${dayNames[index]}: ${formatRupiah(value)}`;
+      bar.dataset.date = toLocalDateKey(barDate);
+      bar.dataset.amount = String(value);
+      bar.setAttribute('role', 'button');
+      bar.setAttribute('tabindex', '0');
+      bar.setAttribute('aria-label', `${dayNames[index]}: ${formatRupiah(value)}`);
+      bar.classList.add('cursor-pointer');
+
+      bar.onclick = (event) => {
+        event.stopPropagation();
+        if (
+          weeklyTooltip.dataset.bar === String(index) &&
+          !weeklyTooltip.classList.contains('hidden')
+        ) {
+          hideWeeklyTooltip();
+          return;
+        }
+
+        weeklyTooltip.dataset.bar = String(index);
+        showWeeklyTooltip(bar);
+      };
+
+      bar.onkeydown = (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          bar.click();
+        }
+      };
+
+      bar.classList.remove('bg-primary', 'bg-blue-main', 'bg-blue-soft');
       if (index === todayIndex) {
-        bar.classList.replace('bg-blue-soft', 'bg-blue-main');
-      } else if (index === tallestIndex) {
-        bar.classList.replace('bg-blue-soft', 'bg-primary');
+        bar.classList.add('bg-blue-main');
+      } else if (value === maxExpense && value > 0) {
+        bar.classList.add('bg-primary');
+      } else {
+        bar.classList.add('bg-blue-soft');
       }
     });
 
     labels.forEach((label, index) => {
+      label.textContent = dayNames[index];
       label.classList.remove('text-primary', 'text-blue-main', 'text-muted-foreground');
       if (index === todayIndex) {
         label.classList.add('text-blue-main');
-      } else if (index === tallestIndex) {
+      } else if ((dailyExpense[index] ?? 0) === maxExpense && (dailyExpense[index] ?? 0) > 0) {
         label.classList.add('text-primary');
       } else {
         label.classList.add('text-muted-foreground');
@@ -363,7 +568,7 @@ export function initDashboardPage(): void {
         'group flex shrink-0 items-center gap-2.5 rounded-2xl border border-border bg-card/90 px-3.5 py-2.5 text-left shadow-xs transition-all hover:border-blue-main hover:bg-blue-soft active:scale-95';
       button.setAttribute(
         'aria-label',
-        `Catat cepat ${item.name}, ${formatIDR(item.amount)}`
+        `Catat cepat ${item.name}, ${formatRupiah(item.amount)}`
       );
       button.innerHTML = `
         <div class="flex h-6.5 w-6.5 items-center justify-center rounded-xl bg-blue-soft text-blue-main transition-colors group-hover:bg-blue-main group-hover:text-white">
@@ -371,7 +576,11 @@ export function initDashboardPage(): void {
         </div>
         <div class="flex min-w-0 flex-col">
           <span class="max-w-[150px] truncate text-[11px] font-bold text-foreground">${escapeHtml(item.name)}</span>
-          <span class="text-[10px] font-extrabold tabular-nums ${amountColor}">${amountPrefix}${escapeHtml(formatIDR(item.amount))}</span>
+          <span
+            class="text-[10px] font-extrabold tabular-nums ${amountColor}"
+            data-amount="${item.amount}"
+            data-amount-prefix="${amountPrefix}"
+          >${escapeHtml(formatRupiah(item.amount, { prefix: amountPrefix }))}</span>
         </div>
       `;
       button.addEventListener('click', () => {
@@ -414,6 +623,8 @@ export function initDashboardPage(): void {
 
         const iconName =
           category?.icon || (tx.type === 'transfer' ? 'ArrowLeftRight' : 'Wallet');
+        const colorClass = category?.color || 'text-blue-700 bg-blue-50';
+        const [textColor, bgColor] = colorClass.split(' ');
 
         const categoryName =
           category?.name || (tx.type === 'transfer' ? 'Transfer' : 'Tanpa Kategori');
@@ -441,7 +652,7 @@ export function initDashboardPage(): void {
         return `
           <a href="/transactions?id=${tx.id}" class="flex items-center justify-between p-4 transition-colors hover:bg-muted/50">
             <div class="flex min-w-0 items-center gap-3.5">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-soft text-primary">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${bgColor || 'bg-blue-50'} ${textColor || 'text-primary'}">
                 ${getLucideIconHtml(iconName)}
               </div>
               <div class="flex min-w-0 flex-col">
@@ -450,7 +661,11 @@ export function initDashboardPage(): void {
               </div>
             </div>
             <div class="flex shrink-0 items-center gap-1 pl-2">
-              <span class="text-xs font-extrabold tabular-nums ${amountColor}">${amountPrefix}${escapeHtml(formatIDR(tx.amount))}</span>
+              <span
+                class="text-xs font-extrabold tabular-nums ${amountColor}"
+                data-amount="${tx.amount}"
+                data-amount-prefix="${amountPrefix}"
+              >${escapeHtml(formatRupiah(tx.amount, { prefix: amountPrefix }))}</span>
             </div>
           </a>
         `;
@@ -510,6 +725,7 @@ export function initDashboardPage(): void {
     renderSummary();
     renderQuickActions();
     renderRecentTransactions();
+    renderWeeklyChart();
     if (manageDialog.open) renderManageList();
   }
 
@@ -587,7 +803,7 @@ export function initDashboardPage(): void {
 
     manageList.innerHTML = saved
       .map(
-        (item) => `
+        (item, index) => `
           <div class="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background p-3.5">
             <div class="flex min-w-0 flex-col">
               <span class="truncate text-xs font-bold text-foreground">${escapeHtml(item.name)}</span>
@@ -599,17 +815,45 @@ export function initDashboardPage(): void {
                 }">
                   ${item.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
                 </span>
-                <span class="text-[10px] font-bold text-foreground/80">${escapeHtml(formatIDR(item.amount))}</span>
+                <span
+                  class="text-[10px] font-bold text-foreground/80 tabular-nums"
+                  data-amount="${item.amount}"
+                  data-amount-prefix=""
+                >${escapeHtml(formatRupiah(item.amount))}</span>
               </div>
             </div>
-            <button
-              type="button"
-              data-remove-quick="${escapeHtml(item.id)}"
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 transition-colors hover:bg-rose-500 hover:text-white"
-              aria-label="Hapus shortcut ${escapeHtml(item.name)}"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
+            <div class="flex shrink-0 items-center gap-1.5">
+              <div class="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  data-move-quick="${escapeHtml(item.id)}"
+                  data-direction="up"
+                  class="flex h-6 w-6 items-center justify-center rounded-lg border border-border bg-card text-primary transition hover:border-blue-main disabled:pointer-events-none disabled:opacity-20"
+                  aria-label="Naikkan shortcut ${escapeHtml(item.name)}"
+                  ${index === 0 ? 'disabled' : ''}
+                >
+                  ${getLucideIconHtml('ChevronUp')}
+                </button>
+                <button
+                  type="button"
+                  data-move-quick="${escapeHtml(item.id)}"
+                  data-direction="down"
+                  class="flex h-6 w-6 items-center justify-center rounded-lg border border-border bg-card text-primary transition hover:border-blue-main disabled:pointer-events-none disabled:opacity-20"
+                  aria-label="Turunkan shortcut ${escapeHtml(item.name)}"
+                  ${index === saved.length - 1 ? 'disabled' : ''}
+                >
+                  ${getLucideIconHtml('ChevronDown')}
+                </button>
+              </div>
+              <button
+                type="button"
+                data-remove-quick="${escapeHtml(item.id)}"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 transition-colors hover:bg-rose-500 hover:text-white"
+                aria-label="Hapus shortcut ${escapeHtml(item.name)}"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
           </div>
         `
       )
@@ -624,6 +868,34 @@ export function initDashboardPage(): void {
 
   initDialog(customDialog);
   initDialog(manageDialog);
+  initDialog(menuSortDialog);
+
+  openMenuSortBtn.addEventListener('click', openMenuSort);
+  closeMenuSortBtn.addEventListener('click', () => closeDialog(menuSortDialog));
+
+  menuSortList.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('.menu-sort-move');
+    if (!button) return;
+
+    const id = button.dataset.id || '';
+    const direction = button.dataset.direction === 'up' ? -1 : 1;
+    const index = menuWorkingOrder.indexOf(id);
+    const target = index + direction;
+    if (index === -1 || target < 0 || target >= menuWorkingOrder.length) return;
+
+    [menuWorkingOrder[index], menuWorkingOrder[target]] = [
+      menuWorkingOrder[target],
+      menuWorkingOrder[index],
+    ];
+    renderMenuSortList();
+  });
+
+  saveMenuSortBtn.addEventListener('click', () => {
+    applyMenuOrder(menuWorkingOrder);
+    writeMenuOrder(menuWorkingOrder);
+    closeDialog(menuSortDialog);
+    toast.success('Urutan menu disimpan.');
+  });
 
   openCustomBtn.addEventListener('click', openCustomForm);
   customCloseBtn.addEventListener('click', () => closeDialog(customDialog));
@@ -636,6 +908,18 @@ export function initDashboardPage(): void {
   });
 
   manageList.addEventListener('click', (event) => {
+    const moveTarget = (event.target as HTMLElement).closest<HTMLElement>(
+      '[data-move-quick]'
+    );
+    if (moveTarget) {
+      const id = moveTarget.dataset.moveQuick;
+      if (!id) return;
+      moveQuickShortcut(id, moveTarget.dataset.direction === 'up' ? -1 : 1);
+      renderManageList();
+      void loadDashboard();
+      return;
+    }
+
     const target = (event.target as HTMLElement).closest<HTMLElement>('[data-remove-quick]');
     if (!target) return;
 
@@ -727,8 +1011,9 @@ export function initDashboardPage(): void {
   // ------------------------------------------------------------------
 
   toggleAmountsBtn.addEventListener('click', () => {
-    amountsHidden = !amountsHidden;
+    setAmountsHidden(!getAmountsHidden());
     applyAmountVisibility();
+    renderWeeklyChart();
   });
 
   detailToggle.addEventListener('click', () => {
@@ -763,6 +1048,7 @@ export function initDashboardPage(): void {
     }
   });
 
-  highlightCurrentDay();
+  applyMenuOrder(readMenuOrder());
+  applyAmountVisibility();
   void loadDashboard();
 }

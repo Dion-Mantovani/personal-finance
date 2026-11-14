@@ -29,6 +29,12 @@ import {
   getQuickPalette,
   type QuickPattern,
 } from '../lib/ui/quick-patterns';
+import { readAccountOrder, sortByStoredOrder } from '../lib/ui/account-order';
+import {
+  readOrderForType,
+  sortCategoriesByStoredOrder,
+} from '../lib/ui/category-order';
+import { formatRupiah as formatAmountDisplay } from '../lib/ui/amount-visibility';
 
 export function initTransactionsPage(): void {
   const form = document.getElementById('tx-form') as HTMLFormElement;
@@ -46,6 +52,9 @@ export function initTransactionsPage(): void {
   const accountLabelText = document.getElementById('account-label-text')!;
   const accountSummaryBtn = document.getElementById('account-summary-btn') as HTMLButtonElement;
   const accountSummaryText = document.getElementById('account-summary-text')!;
+  const destinationAccountField = document.getElementById('destination-account-field')!;
+  const toAccountSummaryBtn = document.getElementById('to-account-summary-btn') as HTMLButtonElement;
+  const toAccountSummaryText = document.getElementById('to-account-summary-text')!;
   const categoryContainer = document.getElementById('category-container')!;
   const pageTitle = document.getElementById('tx-page-title')!;
 
@@ -62,12 +71,7 @@ export function initTransactionsPage(): void {
   const accountModalTitle = document.getElementById('tx-account-modal-title')!;
   const closeAccountModalBtn = document.getElementById('close-account-modal')!;
   const accountModalCancelBtn = document.getElementById('account-modal-cancel')!;
-  const accountModalConfirmBtn = document.getElementById('account-modal-confirm') as HTMLButtonElement;
-  const sourceAccountHeading = document.getElementById('source-account-heading')!;
   const sourceAccountList = document.getElementById('source-account-list')!;
-  const destinationAccountSection = document.getElementById('destination-account-section')!;
-  const destinationAccountList = document.getElementById('destination-account-list')!;
-  const accountModalHint = document.getElementById('account-modal-hint')!;
 
   let submitting = false;
   let availableCategories: Category[] = [];
@@ -76,7 +80,7 @@ export function initTransactionsPage(): void {
   let categoriesById = new Map<string, Category>();
   let historyCache: Transaction[] = [];
   let noteSuggestionTimer: number | null = null;
-  let accountModalMode: 'source' | 'transfer' = 'source';
+  let accountModalMode: 'source' | 'destination' = 'source';
   let pickerSourceId = '';
   let pickerToId = '';
 
@@ -97,14 +101,6 @@ export function initTransactionsPage(): void {
     return defaultTemplate ? defaultTemplate.innerHTML : '';
   }
 
-  function formatIDR(value: number): string {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
-
   // ---------------------------------------------------------------
   // Ringkasan akun
   // ---------------------------------------------------------------
@@ -114,22 +110,23 @@ export function initTransactionsPage(): void {
     const destination = accountsById.get(toAccountInput.value);
     const isTransfer = typeInput.value === 'transfer';
 
-    accountLabelText.textContent = isTransfer ? 'Akun Transfer' : 'Akun';
+    accountLabelText.textContent = isTransfer ? 'Akun Asal' : 'Akun';
+    destinationAccountField.classList.toggle('hidden', !isTransfer);
 
     if (!source) {
       accountSummaryText.className = 'truncate text-muted-foreground';
-      accountSummaryText.textContent = isTransfer ? 'Pilih akun sumber...' : 'Pilih akun...';
-      return;
+      accountSummaryText.textContent = isTransfer ? 'Pilih akun asal...' : 'Pilih akun...';
+    } else {
+      accountSummaryText.className = 'truncate font-bold text-foreground';
+      accountSummaryText.textContent = source.name;
     }
 
-    accountSummaryText.className = 'truncate font-bold text-foreground';
-
-    if (isTransfer) {
-      accountSummaryText.textContent = destination
-        ? `${source.name} → ${destination.name}`
-        : `${source.name} → pilih tujuan`;
+    if (!destination) {
+      toAccountSummaryText.className = 'truncate text-muted-foreground';
+      toAccountSummaryText.textContent = 'Pilih akun tujuan...';
     } else {
-      accountSummaryText.textContent = source.name;
+      toAccountSummaryText.className = 'truncate font-bold text-foreground';
+      toAccountSummaryText.textContent = destination.name;
     }
   }
 
@@ -141,7 +138,7 @@ export function initTransactionsPage(): void {
 
   function setSelectedToAccount(acc?: Account): void {
     toAccountInput.value = acc?.id ?? '';
-    clearFieldError(accountSummaryBtn);
+    clearFieldError(toAccountSummaryBtn);
     updateAccountSummary();
   }
 
@@ -169,31 +166,6 @@ export function initTransactionsPage(): void {
     `;
   }
 
-  function updateAccountConfirmState(): void {
-    if (accountModalMode !== 'transfer') {
-      accountModalConfirmBtn.classList.add('hidden');
-      accountModalHint.classList.add('hidden');
-      return;
-    }
-
-    accountModalConfirmBtn.classList.remove('hidden');
-
-    const same = Boolean(pickerSourceId && pickerToId && pickerSourceId === pickerToId);
-    const valid = Boolean(pickerSourceId && pickerToId && !same);
-
-    accountModalConfirmBtn.disabled = !valid;
-    accountModalConfirmBtn.classList.toggle('opacity-50', !valid);
-    accountModalConfirmBtn.classList.toggle('pointer-events-none', !valid);
-
-    if (same) {
-      accountModalHint.textContent = 'Akun sumber dan tujuan tidak boleh sama.';
-      accountModalHint.classList.remove('hidden');
-    } else {
-      accountModalHint.textContent = '';
-      accountModalHint.classList.add('hidden');
-    }
-  }
-
   function renderAccountPicker(): void {
     if (allAccounts.length === 0) {
       sourceAccountList.innerHTML = `
@@ -204,87 +176,93 @@ export function initTransactionsPage(): void {
           </a>
         </div>
       `;
-      destinationAccountList.innerHTML = '';
-      updateAccountConfirmState();
       return;
     }
 
-    sourceAccountList.innerHTML = allAccounts
-      .map((acc) => accountRowHtml(acc, acc.id === pickerSourceId))
+    const pickerAccounts =
+      accountModalMode === 'destination'
+        ? allAccounts.filter((acc) => acc.id !== accountInput.value)
+        : allAccounts;
+
+    if (pickerAccounts.length === 0) {
+      sourceAccountList.innerHTML = `
+        <div class="rounded-2xl border border-dashed border-border bg-background/60 px-4 py-6 text-center">
+          <p class="text-xs font-bold text-primary">Tidak ada akun lain</p>
+          <p class="mt-1 text-[10px] font-medium text-muted-foreground">Tambahkan dompet lain untuk transfer.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const selectedId = accountModalMode === 'source' ? pickerSourceId : pickerToId;
+    sourceAccountList.innerHTML = pickerAccounts
+      .map((acc) => accountRowHtml(acc, acc.id === selectedId))
       .join('');
 
     sourceAccountList.querySelectorAll<HTMLButtonElement>('.account-pick-row').forEach((btn) => {
       btn.addEventListener('click', () => {
-        pickerSourceId = btn.dataset.id || '';
+        const id = btn.dataset.id || '';
+        const account = accountsById.get(id);
 
         if (accountModalMode === 'source') {
-          setSelectedAccount(accountsById.get(pickerSourceId));
-          closeDialog(accountModal);
-          window.setTimeout(() => amountInput.focus({ preventScroll: true }), 80);
+          setSelectedAccount(account);
+          pickerSourceId = id;
+
+          if (typeInput.value === 'transfer') {
+            if (toAccountInput.value === id) setSelectedToAccount(undefined);
+            closeDialog(accountModal);
+            window.setTimeout(() => openAccountPicker('destination'), 120);
+          } else {
+            closeDialog(accountModal);
+            window.setTimeout(() => amountInput.focus({ preventScroll: true }), 80);
+          }
           return;
         }
 
-        if (pickerToId === pickerSourceId) pickerToId = '';
-        renderAccountPicker();
+        setSelectedToAccount(account);
+        pickerToId = id;
+        closeDialog(accountModal);
+        window.setTimeout(() => amountInput.focus({ preventScroll: true }), 80);
       });
     });
-
-    destinationAccountList.innerHTML = allAccounts
-      .map((acc) => accountRowHtml(acc, acc.id === pickerToId))
-      .join('');
-
-    destinationAccountList.querySelectorAll<HTMLButtonElement>('.account-pick-row').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        pickerToId = btn.dataset.id || '';
-        renderAccountPicker();
-      });
-    });
-
-    updateAccountConfirmState();
   }
 
-  function openAccountPicker(mode: 'source' | 'transfer'): void {
+  function openAccountPicker(mode: 'source' | 'destination'): void {
     if (categoryModal.open) closeDialog(categoryModal);
 
     accountModalMode = mode;
     pickerSourceId = accountInput.value;
     pickerToId = toAccountInput.value;
 
-    if (mode === 'source') {
-      accountModalTitle.textContent = 'Pilih Akun';
-      sourceAccountHeading.textContent = 'Akun Sumber';
-      destinationAccountSection.classList.add('hidden');
-      accountModalConfirmBtn.classList.add('hidden');
-    } else {
-      accountModalTitle.textContent = 'Pilih Akun Transfer';
-      sourceAccountHeading.textContent = 'Dari Akun';
-      destinationAccountSection.classList.remove('hidden');
-      accountModalConfirmBtn.classList.remove('hidden');
-    }
+    accountModalTitle.textContent =
+      mode === 'source'
+        ? typeInput.value === 'transfer'
+          ? 'Pilih Akun Asal'
+          : 'Pilih Akun'
+        : 'Pilih Akun Tujuan';
 
     renderAccountPicker();
     openDialog(accountModal, '.account-pick-row, #account-modal-cancel');
   }
 
   initDialog(accountModal, () => {
-    accountSummaryBtn.focus({ preventScroll: true });
+    const focusBtn = accountModalMode === 'destination' ? toAccountSummaryBtn : accountSummaryBtn;
+    focusBtn.focus({ preventScroll: true });
   });
 
   closeAccountModalBtn.addEventListener('click', () => closeDialog(accountModal));
   accountModalCancelBtn.addEventListener('click', () => closeDialog(accountModal));
 
-  accountModalConfirmBtn.addEventListener('click', () => {
-    if (accountModalMode !== 'transfer') return;
-    if (!pickerSourceId || !pickerToId || pickerSourceId === pickerToId) return;
-
-    setSelectedAccount(accountsById.get(pickerSourceId));
-    setSelectedToAccount(accountsById.get(pickerToId));
-    closeDialog(accountModal);
-    window.setTimeout(() => amountInput.focus({ preventScroll: true }), 80);
+  accountSummaryBtn.addEventListener('click', () => {
+    openAccountPicker('source');
   });
 
-  accountSummaryBtn.addEventListener('click', () => {
-    openAccountPicker(typeInput.value === 'transfer' ? 'transfer' : 'source');
+  toAccountSummaryBtn.addEventListener('click', () => {
+    if (typeInput.value === 'transfer' && !accountInput.value) {
+      openAccountPicker('source');
+      return;
+    }
+    openAccountPicker('destination');
   });
 
   // ---------------------------------------------------------------
@@ -312,7 +290,10 @@ export function initTransactionsPage(): void {
   }
 
   function renderCategoryOptions(type: TransactionType): void {
-    const options = availableCategories.filter((cat) => cat.type === type);
+    const options = sortCategoriesByStoredOrder(
+      availableCategories.filter((cat) => cat.type === type),
+      readOrderForType(type)
+    );
 
     if (options.length === 0) {
       const label = type === 'income' ? 'pemasukan' : 'pengeluaran';
@@ -404,6 +385,21 @@ export function initTransactionsPage(): void {
     }
   });
 
+  noteInput.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
+
+    event.preventDefault();
+    if (submitting) return;
+
+    const submitButton =
+      document.getElementById('save-btn') ??
+      document.getElementById('submit-btn');
+
+    if (submitButton instanceof HTMLButtonElement) {
+      form.requestSubmit(submitButton);
+    }
+  });
+
   // ---------------------------------------------------------------
   // Tipe transaksi & akun
   // ---------------------------------------------------------------
@@ -417,7 +413,8 @@ export function initTransactionsPage(): void {
       updateAccountSummary();
 
       if (openPicker && (!accountInput.value || !toAccountInput.value)) {
-        window.setTimeout(() => openAccountPicker('transfer'), 0);
+        const mode = !accountInput.value ? 'source' : 'destination';
+        window.setTimeout(() => openAccountPicker(mode), 0);
       }
       return;
     }
@@ -513,7 +510,7 @@ export function initTransactionsPage(): void {
               ${getLucideIconHtml(iconName)}
             </span>
             <span class="max-w-[110px] truncate text-[10px] font-bold text-foreground">${escapeHtml(description)}</span>
-            <span class="text-[10px] font-extrabold tabular-nums ${amountColor}">${prefix}${escapeHtml(formatIDR(pattern.amount))}</span>
+            <span class="text-[10px] font-extrabold tabular-nums ${amountColor}">${escapeHtml(formatAmountDisplay(pattern.amount, { prefix }))}</span>
           </button>
         `;
       })
@@ -644,7 +641,7 @@ export function initTransactionsPage(): void {
       getAllTransactions(),
     ]);
 
-    allAccounts = accounts;
+    allAccounts = sortByStoredOrder(accounts, readAccountOrder());
     accountsById = new Map(accounts.map((acc) => [acc.id, acc]));
     historyCache = transactions;
 
@@ -696,14 +693,19 @@ export function initTransactionsPage(): void {
     renderFormActions(false);
     renderAutoFillSection();
 
-    if (urlParams.get('type') === 'transfer') {
-      setActiveTypeTab('transfer');
-      handleTypeChange('transfer', false);
+    const initialType = urlParams.get('type');
+    if (initialType === 'income' || initialType === 'expense' || initialType === 'transfer') {
+      setActiveTypeTab(initialType);
+      handleTypeChange(initialType, false);
       renderAutoFillSection();
-      if (accounts.length > 0) {
-        window.setTimeout(() => openAccountPicker('transfer'), 80);
+
+      if (initialType === 'transfer') {
+        if (accounts.length > 0) {
+          const mode = accountInput.value ? 'destination' : 'source';
+          window.setTimeout(() => openAccountPicker(mode), 80);
+        }
+        return;
       }
-      return;
     }
 
     if (accounts.length > 0) {
@@ -735,9 +737,9 @@ export function initTransactionsPage(): void {
       errors.push({ field: accountSummaryBtn, message: 'Pilih akun terlebih dahulu.' });
     } else if (type === 'transfer') {
       if (!toAccountInput.value) {
-        errors.push({ field: accountSummaryBtn, message: 'Pilih akun tujuan transfer.' });
+        errors.push({ field: toAccountSummaryBtn, message: 'Pilih akun tujuan transfer.' });
       } else if (toAccountInput.value === accountInput.value) {
-        errors.push({ field: accountSummaryBtn, message: 'Akun asal dan tujuan tidak boleh sama.' });
+        errors.push({ field: toAccountSummaryBtn, message: 'Akun asal dan tujuan tidak boleh sama.' });
       }
     } else if (!categoryInput.value) {
       errors.push({ field: catBtn, message: 'Pilih kategori terlebih dahulu.' });

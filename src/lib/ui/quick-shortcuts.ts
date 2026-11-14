@@ -92,3 +92,23 @@ export function removeQuickShortcut(id: string): SavedQuickShortcut[] {
   persist(next);
   return next;
 }
+
+export function moveQuickShortcut(
+  id: string,
+  direction: -1 | 1
+): SavedQuickShortcut[] {
+  const shortcuts = getSavedQuickShortcuts();
+  const index = shortcuts.findIndex((item) => item.id === id);
+  const target = index + direction;
+
+  if (index === -1 || target < 0 || target >= shortcuts.length) {
+    return shortcuts;
+  }
+
+  [shortcuts[index], shortcuts[target]] = [
+    shortcuts[target],
+    shortcuts[index],
+  ];
+  persist(shortcuts);
+  return shortcuts;
+}

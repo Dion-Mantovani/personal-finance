@@ -17,6 +17,7 @@ import {
   formatNumberInput,
   parseNumberInput,
 } from '../lib/ui/currency-input';
+import { formatRupiah as formatAmountDisplay } from '../lib/ui/amount-visibility';
 
 interface HistoryFilters {
   search: string;
@@ -92,8 +93,10 @@ export function initHistoryPage(): void {
   const searchClearBtn = document.getElementById('search-clear-btn') as HTMLButtonElement;
 
   const filterForm = document.getElementById('filter-form') as HTMLFormElement;
-  const filterAccount = document.getElementById('filter-account') as HTMLSelectElement;
-  const filterCategory = document.getElementById('filter-category') as HTMLSelectElement;
+  const filterAccount = document.getElementById('filter-account') as HTMLInputElement;
+  const filterCategory = document.getElementById('filter-category') as HTMLInputElement;
+  const filterAccountPills = document.getElementById('filter-account-pills')!;
+  const filterCategoryPills = document.getElementById('filter-category-pills')!;
   const filterStartDate = document.getElementById('filter-start-date') as HTMLInputElement;
   const filterEndDate = document.getElementById('filter-end-date') as HTMLInputElement;
   const filterMin = document.getElementById('filter-min') as HTMLInputElement;
@@ -117,6 +120,10 @@ export function initHistoryPage(): void {
 
   function getMonthKey(date = currentDate): string {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  function toLocalDateKey(date = new Date()): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
   function updateMonthDisplay() {
@@ -324,8 +331,8 @@ export function initHistoryPage(): void {
     }
 
     if (filters.min !== null || filters.max !== null) {
-      const minLabel = filters.min !== null ? `Rp ${filters.min.toLocaleString('id-ID')}` : 'Rp 0';
-      const maxLabel = filters.max !== null ? `Rp ${filters.max.toLocaleString('id-ID')}` : 'tanpa batas';
+      const minLabel = filters.min !== null ? formatAmountDisplay(filters.min) : formatAmountDisplay(0);
+      const maxLabel = filters.max !== null ? formatAmountDisplay(filters.max) : 'tanpa batas';
       parts.push(`${minLabel} – ${maxLabel}`);
     }
 
@@ -387,11 +394,6 @@ export function initHistoryPage(): void {
     setSummaryOpen(!summaryOpen);
   });
 
-  function formatRupiah(value: number): string {
-    const sign = value < 0 ? '-' : '';
-    return `${sign}Rp ${Math.abs(value).toLocaleString('id-ID')}`;
-  }
-
   function renderSummary(transactions: Transaction[]): void {
     const totalIncome = transactions
       .filter((tx) => tx.type === 'income')
@@ -401,9 +403,9 @@ export function initHistoryPage(): void {
       .reduce((sum, tx) => sum + tx.amount, 0);
     const balance = totalIncome - totalExpense;
 
-    summaryIncome.textContent = formatRupiah(totalIncome);
-    summaryExpense.textContent = formatRupiah(totalExpense);
-    summaryBalance.textContent = formatRupiah(balance);
+    summaryIncome.textContent = formatAmountDisplay(totalIncome);
+    summaryExpense.textContent = formatAmountDisplay(totalExpense);
+    summaryBalance.textContent = formatAmountDisplay(balance, { signed: true });
 
     summaryBalance.classList.toggle('text-blue-200', balance >= 0);
     summaryBalance.classList.toggle('text-rose-300', balance < 0);
@@ -485,7 +487,7 @@ export function initHistoryPage(): void {
 
   rangePickerBtn.addEventListener('click', async () => {
     await populateFilterOptions();
-    openDialog(filterModal, '#filter-account');
+    openDialog(filterModal, '#filter-account-pills .filter-pill');
   });
 
   clearRangeBtn.addEventListener('click', () => {
@@ -502,6 +504,45 @@ export function initHistoryPage(): void {
 
   initDialog(filterModal, () => clearAllErrors(filterForm));
 
+  function renderFilterPills(
+    container: HTMLElement,
+    items: Array<{ id: string; label: string }>,
+    selectedId: string,
+    onSelect: (id: string) => void
+  ): void {
+    container.innerHTML = items
+      .map((item) => {
+        const active = item.id === selectedId;
+        return `
+          <button
+            type="button"
+            data-value="${escapeHtml(item.id)}"
+            class="filter-pill w-fit shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-all active:scale-95 ${
+              active
+                ? 'border-blue-main bg-blue-main text-white shadow-xs'
+                : 'border-border bg-card text-muted-foreground hover:bg-muted'
+            }"
+          >${escapeHtml(item.label)}</button>
+        `;
+      })
+      .join('');
+
+    container.querySelectorAll<HTMLButtonElement>('.filter-pill').forEach((button) => {
+      button.addEventListener('click', () => {
+        const value = button.dataset.value ?? '';
+        container.querySelectorAll<HTMLButtonElement>('.filter-pill').forEach((item) => {
+          const active = item === button;
+          item.className = `filter-pill w-fit shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-all active:scale-95 ${
+            active
+              ? 'border-blue-main bg-blue-main text-white shadow-xs'
+              : 'border-border bg-card text-muted-foreground hover:bg-muted'
+          }`;
+        });
+        onSelect(value);
+      });
+    });
+  }
+
   async function populateFilterOptions(): Promise<void> {
     const [accounts, categories] = await Promise.all([
       getAllAccounts(),
@@ -511,33 +552,41 @@ export function initHistoryPage(): void {
     latestAccounts = accounts;
     latestCategories = categories;
 
-    filterAccount.innerHTML =
-      '<option value="">Semua akun</option>' +
-      accounts
-        .map((acc) => `<option value="${escapeHtml(acc.id)}">${escapeHtml(acc.name)}</option>`)
-        .join('');
+    const accountItems = [
+      { id: '', label: 'Semua akun' },
+      ...accounts.map((acc) => ({ id: acc.id, label: acc.name })),
+    ];
 
-    filterCategory.innerHTML =
-      '<option value="">Semua kategori</option>' +
-      categories
+    const categoryItems = [
+      { id: '', label: 'Semua kategori' },
+      ...categories
         .filter((cat) => cat.name.toLowerCase() !== 'koreksi saldo')
         .map((cat) => {
-          const typeLabel = cat.type === 'income' ? 'Masuk' : cat.type === 'transfer' ? 'Transfer' : 'Keluar';
-          return `<option value="${escapeHtml(cat.id)}">${escapeHtml(cat.name)} (${typeLabel})</option>`;
-        })
-        .join('');
+          const typeLabel =
+            cat.type === 'income' ? 'Masuk' : cat.type === 'transfer' ? 'Transfer' : 'Keluar';
+          return { id: cat.id, label: `${cat.name} (${typeLabel})` };
+        }),
+    ];
 
     filterAccount.value = filters.accountId;
     filterCategory.value = filters.categoryId;
+
+    renderFilterPills(filterAccountPills, accountItems, filters.accountId, (id) => {
+      filterAccount.value = id;
+    });
+    renderFilterPills(filterCategoryPills, categoryItems, filters.categoryId, (id) => {
+      filterCategory.value = id;
+    });
+
     filterStartDate.value = filters.startDate;
-    filterEndDate.value = filters.endDate;
+    filterEndDate.value = filters.endDate || toLocalDateKey();
     filterMin.value = filters.min !== null ? formatNumberInput(String(filters.min)) : '';
     filterMax.value = filters.max !== null ? formatNumberInput(String(filters.max)) : '';
   }
 
   filterBtn.addEventListener('click', async () => {
     await populateFilterOptions();
-    openDialog(filterModal, '#filter-account');
+    openDialog(filterModal, '#filter-account-pills .filter-pill');
   });
 
   closeFilterModalBtn.addEventListener('click', () => closeDialog(filterModal));
@@ -942,6 +991,8 @@ export function initHistoryPage(): void {
         const toAcc = tx.toAccountId ? accountMap.get(tx.toAccountId) : null;
 
         const iconName = cat?.icon || (tx.type === 'transfer' ? 'ArrowLeftRight' : 'Wallet');
+        const colorClass = cat?.color || 'text-blue-700 bg-blue-50';
+        const [textColor, bgColor] = colorClass.split(' ');
 
         let accountAndCategory = '';
         const categoryName = cat?.name || (tx.type === 'transfer' ? 'Transfer' : 'Kategori Dihapus');
@@ -975,7 +1026,7 @@ export function initHistoryPage(): void {
             class="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-muted/50"
           >
             <div class="flex min-w-0 items-center gap-3.5">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-soft text-primary">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${bgColor || 'bg-blue-50'} ${textColor || 'text-primary'}">
                 ${getLucideIconHtml(iconName)}
               </div>
               <div class="flex min-w-0 flex-col">
@@ -985,7 +1036,7 @@ export function initHistoryPage(): void {
             </div>
             <div class="flex shrink-0 items-center gap-1 pl-2">
               <span class="text-xs font-extrabold tabular-nums ${amountColorClass}">
-                ${amountPrefix}Rp ${tx.amount.toLocaleString('id-ID')}
+                ${escapeHtml(formatAmountDisplay(tx.amount, { prefix: amountPrefix }))}
               </span>
             </div>
           </a>
@@ -999,8 +1050,10 @@ export function initHistoryPage(): void {
       }, 0);
       const groupNetLabel =
         groupNet === 0
-          ? 'Rp 0'
-          : `${groupNet > 0 ? '+Rp' : '-Rp'} ${Math.abs(groupNet).toLocaleString('id-ID')}`;
+          ? formatAmountDisplay(0)
+          : groupNet > 0
+            ? formatAmountDisplay(groupNet, { prefix: '+ ' })
+            : formatAmountDisplay(groupNet, { signed: true });
 
       htmlContent += `
         <div class="space-y-2.5">

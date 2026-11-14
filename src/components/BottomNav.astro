@@ -1,10 +1,14 @@
 ---
 import {
+  ArrowDownLeft,
+  ArrowLeftRight,
+  ArrowUpRight,
   Home,
   Wallet,
   History,
   Settings,
   Plus,
+  X,
 } from '@lucide/astro';
 
 interface Props {
@@ -14,10 +18,6 @@ interface Props {
 const { activeTab = 'dashboard' } = Astro.props;
 
 const pathname = Astro.url.pathname;
-
-// Tombol + selalu membuka form tambah transaksi.
-const fabHref = '/transactions';
-const fabLabel = 'Tambah Transaksi';
 
 const navItems = [
   { id: 'dashboard', label: 'Home', href: '/', icon: Home },
@@ -61,13 +61,16 @@ const rightItems = navItems.slice(2);
     })}
 
     <div class="relative -top-5 flex justify-center">
-      <a
-        href={fabHref}
+      <button
+        type="button"
+        id="open-add-menu"
         class="flex h-12 w-12 items-center justify-center rounded-full border-4 border-background bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 active:scale-95"
-        aria-label={fabLabel}
+        aria-label="Tambah Transaksi"
+        aria-haspopup="dialog"
+        aria-controls="add-menu-dialog"
       >
         <Plus class="h-6 w-6 stroke-[2.5]" />
-      </a>
+      </button>
     </div>
 
     {rightItems.map((item) => {
@@ -90,3 +93,78 @@ const rightItems = navItems.slice(2);
     })}
   </nav>
 </div>
+
+<!-- Submenu tambah transaksi -->
+<dialog id="add-menu-dialog" class="app-sheet" aria-labelledby="add-menu-title">
+  <div class="sheet-panel">
+    <div class="flex items-center justify-between border-b border-border px-5 py-4">
+      <h2 id="add-menu-title" class="text-base font-extrabold text-primary">Tambah Transaksi</h2>
+      <button
+        type="button"
+        id="close-add-menu"
+        class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
+        aria-label="Tutup menu tambah transaksi"
+      >
+        <X class="h-4 w-4 stroke-[2.5]" />
+      </button>
+    </div>
+
+    <div class="space-y-2 p-5">
+      <a
+        href="/transactions?type=expense"
+        class="flex items-center gap-3.5 rounded-2xl border border-border bg-card p-3.5 transition-colors hover:bg-rose-50 active:scale-[0.99]"
+      >
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-600">
+          <ArrowDownLeft class="h-5 w-5 stroke-2" />
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block text-xs font-bold text-foreground">Pengeluaran</span>
+          <span class="block text-[10px] font-medium text-muted-foreground">Catat uang keluar</span>
+        </span>
+      </a>
+
+      <a
+        href="/transactions?type=income"
+        class="flex items-center gap-3.5 rounded-2xl border border-border bg-card p-3.5 transition-colors hover:bg-emerald-50 active:scale-[0.99]"
+      >
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+          <ArrowUpRight class="h-5 w-5 stroke-2" />
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block text-xs font-bold text-foreground">Pemasukan</span>
+          <span class="block text-[10px] font-medium text-muted-foreground">Catat uang masuk</span>
+        </span>
+      </a>
+
+      <a
+        href="/transactions?type=transfer"
+        class="flex items-center gap-3.5 rounded-2xl border border-border bg-card p-3.5 transition-colors hover:bg-blue-soft active:scale-[0.99]"
+      >
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-soft text-blue-main">
+          <ArrowLeftRight class="h-5 w-5 stroke-2" />
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block text-xs font-bold text-foreground">Transfer</span>
+          <span class="block text-[10px] font-medium text-muted-foreground">Pindahkan saldo antar akun</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { closeDialog, initDialog, openDialog } from '../lib/ui/dialog';
+
+  const addMenuDialog = document.getElementById('add-menu-dialog') as HTMLDialogElement | null;
+  const openAddMenuBtn = document.getElementById('open-add-menu') as HTMLButtonElement | null;
+  const closeAddMenuBtn = document.getElementById('close-add-menu') as HTMLButtonElement | null;
+
+  if (addMenuDialog && openAddMenuBtn && closeAddMenuBtn) {
+    initDialog(addMenuDialog);
+    openAddMenuBtn.addEventListener('click', () => {
+      openDialog(addMenuDialog, 'a[href*="type=expense"]');
+    });
+    closeAddMenuBtn.addEventListener('click', () => closeDialog(addMenuDialog));
+  }
+</script>
+

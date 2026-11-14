@@ -19,7 +19,7 @@ import {
 <Layout title="Riwayat Transaksi" activeTab="history">
   <div class="relative pb-8">
     <!-- Sticky header + kontrol -->
-    <div class="fixed top-0 z-40 -mx-4 -mt-0 space-y-3 border-b border-border/80 bg-background/95 px-4 pt-2.5 pb-3 w-screen backdrop-blur-md">
+    <div class="fixed top-0 z-40 -mx-4 mt-0 space-y-3 border-b border-border/80 bg-background/95 px-4 pt-2.5 pb-3 w-screen backdrop-blur-md">
       <div class="flex items-center justify-between">
         <a
           href="/"
@@ -219,17 +219,21 @@ import {
 
       <form id="filter-form" class="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-5" novalidate>
         <div data-field class="space-y-1.5">
-          <label for="filter-account" class="block text-[11px] font-bold text-foreground">Akun</label>
-          <select id="filter-account" data-autofocus class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main">
-            <option value="">Semua akun</option>
-          </select>
+          <label class="block text-[11px] font-bold text-foreground">Akun</label>
+          <input type="hidden" id="filter-account" value="" />
+          <div
+            id="filter-account-pills"
+            class="no-scrollbar flex max-h-[6.5rem] flex-wrap items-start gap-2 overflow-y-auto pb-1"
+          ></div>
         </div>
 
         <div data-field class="space-y-1.5">
-          <label for="filter-category" class="block text-[11px] font-bold text-foreground">Kategori</label>
-          <select id="filter-category" class="w-full rounded-2xl border border-border bg-background px-4 py-3 text-xs font-semibold text-foreground outline-none focus:border-blue-main">
-            <option value="">Semua kategori</option>
-          </select>
+          <label class="block text-[11px] font-bold text-foreground">Kategori</label>
+          <input type="hidden" id="filter-category" value="" />
+          <div
+            id="filter-category-pills"
+            class="no-scrollbar flex max-h-[6.5rem] flex-wrap items-start gap-2 overflow-y-auto pb-1"
+          ></div>
         </div>
 
         <div class="space-y-1.5">

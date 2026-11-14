@@ -17,6 +17,7 @@ import {
   formatNumberInput,
   parseNumberInput,
 } from '../lib/ui/currency-input';
+import { formatRupiah } from '../lib/ui/amount-visibility';
 import {
   readAccountOrder,
   writeAccountOrder,
@@ -275,7 +276,7 @@ export function initAccountsPage(): void {
       });
 
       const totalBalEl = document.getElementById('total-combined-balance');
-      if (totalBalEl) totalBalEl.textContent = 'Rp 0';
+      if (totalBalEl) totalBalEl.textContent = formatRupiah(0);
       const topWalletEl = document.getElementById('micro-top-wallet');
       if (topWalletEl) topWalletEl.textContent = '-';
       return;
@@ -360,7 +361,7 @@ export function initAccountsPage(): void {
             </div>
             <div class="flex shrink-0 items-center gap-2">
               <div class="text-right">
-                <p class="text-xs font-extrabold text-foreground tabular-nums">Rp ${currentBalance.toLocaleString('id-ID')}</p>
+                <p class="text-xs font-extrabold text-foreground tabular-nums">${escapeHtml(formatRupiah(currentBalance))}</p>
               </div>
               ${sortControls}
             </div>
@@ -370,7 +371,7 @@ export function initAccountsPage(): void {
     );
 
     const totalBalEl = document.getElementById('total-combined-balance');
-    if (totalBalEl) totalBalEl.textContent = `Rp ${totalBalanceAll.toLocaleString('id-ID')}`;
+    if (totalBalEl) totalBalEl.textContent = formatRupiah(totalBalanceAll);
 
     const topWalletEl = document.getElementById('micro-top-wallet');
     if (topWalletEl) topWalletEl.textContent = topWalletName;
@@ -392,7 +393,7 @@ export function initAccountsPage(): void {
         detailIconWrapper.className = 'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white';
         detailIconWrapper.innerHTML = getLucideIconHtml(iconName);
         detailName.textContent = name;
-        detailBalance.textContent = `Rp ${balance.toLocaleString('id-ID')}`;
+        detailBalance.textContent = formatRupiah(balance);
         detailActivity.textContent = `Aktivitas: ${activity} transaksi`;
 
         detailEditBtn.onclick = () => {

@@ -2,25 +2,40 @@
 import Layout from '../layouts/Layout.astro';
 import {
   ArrowDownLeft,
-  ArrowLeftRight,
   ArrowUpRight,
+  ChartLine,
   Check,
   ChevronDown,
+  CreditCard,
   Eye,
   EyeOff,
   Flame,
   FolderKanban,
-  History,
+  PieChart,
   Plus,
+  ReceiptText,
+  Repeat,
   Search,
   SlidersHorizontal,
   Sparkles,
+  Target,
   TrendingDown,
   TrendingUp,
   Wallet,
   X,
   Zap,
 } from '@lucide/astro';
+
+const quickMenus = [
+  { id: 'dompet', label: 'Dompet', href: '/accounts', Icon: Wallet },
+  { id: 'kategori', label: 'Kategori', href: '/categories', Icon: FolderKanban },
+  { id: 'budget', label: 'Budget', href: '/budget', Icon: PieChart },
+  { id: 'analitik', label: 'Analitik', href: '/analitik', Icon: ChartLine },
+  { id: 'target', label: 'Target', href: '/target', Icon: Target },
+  { id: 'tagihan', label: 'Tagihan', href: '/tagihan', Icon: ReceiptText },
+  { id: 'langganan', label: 'Langganan', href: '/langganan', Icon: Repeat },
+  { id: 'hutang', label: 'Hutang', href: '/hutang', Icon: CreditCard },
+];
 ---
 
 <Layout title="Dashboard" activeTab="dashboard">
@@ -147,36 +162,45 @@ import {
       </div>
     </section>
 
-    <!-- 3. Shortcut Grid -->
-    <nav class="grid grid-cols-4 gap-2" aria-label="Aksi cepat">
-      <a href="/accounts" class="group flex flex-col items-center gap-2">
-        <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
-          <Wallet class="h-4.5 w-4.5 stroke-2" />
-        </span>
-        <span class="text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">Dompet</span>
-      </a>
+    <!-- 3. Quick Menu -->
+    <section class="space-y-2">
+      <div class="flex items-center justify-between px-1">
+        <h3 class="text-xs font-bold text-primary">Menu</h3>
+        <button
+          type="button"
+          id="open-menu-sort"
+          class="flex items-center gap-1 text-[10px] font-bold text-blue-main transition-colors hover:text-primary active:scale-95"
+        >
+          <SlidersHorizontal class="h-3 w-3 stroke-[2.5]" />
+          <span>Atur</span>
+        </button>
+      </div>
 
-      <a href="/categories" class="group flex flex-col items-center gap-2">
-        <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
-          <FolderKanban class="h-4.5 w-4.5 stroke-2" />
-        </span>
-        <span class="text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">Kategori</span>
-      </a>
-
-      <a href="/history" class="group flex flex-col items-center gap-2">
-        <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
-          <History class="h-4.5 w-4.5 stroke-2" />
-        </span>
-        <span class="text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">Riwayat</span>
-      </a>
-
-      <a href="/transactions" class="group flex flex-col items-center gap-2">
-        <span class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
-          <ArrowLeftRight class="h-4.5 w-4.5 stroke-2" />
-        </span>
-        <span class="text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">Transaksi</span>
-      </a>
-    </nav>
+      <div
+        id="quick-menu-scroll"
+        class="no-scrollbar flex items-start gap-3 overflow-x-auto px-1 pb-1"
+        aria-label="Menu cepat"
+      >
+        {quickMenus.map((menu) => {
+          const Icon = menu.Icon;
+          return (
+            <a
+              href={menu.href}
+              data-menu-id={menu.id}
+              data-menu-label={menu.label}
+              class="group flex w-[4.35rem] shrink-0 flex-col items-center gap-2"
+            >
+              <span class="menu-icon flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground shadow-xs transition-all group-hover:border-blue-main/40 group-hover:bg-blue-soft group-hover:text-blue-main active:scale-95">
+                <Icon class="h-4.5 w-4.5 stroke-2" />
+              </span>
+              <span class="menu-label truncate text-[10px] font-semibold text-muted-foreground transition-colors group-hover:text-primary">
+                {menu.label}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
 
     <!-- 4. Catat Cepat -->
     <section id="quick-section" class="space-y-3">
@@ -231,7 +255,7 @@ import {
         </a>
       </div>
 
-      <div class="space-y-4 rounded-[28px] border border-border bg-card p-5 shadow-soft">
+      <div id="weekly-chart-card" class="relative space-y-4 rounded-[28px] border border-border bg-card p-5 shadow-soft">
         <div class="flex items-center justify-between border-b border-border pb-3">
           <span class="text-xs font-bold text-muted-foreground">Bulan Ini</span>
           <div class="flex items-center gap-1.5 rounded-full bg-blue-soft px-3 py-1">
@@ -243,7 +267,7 @@ import {
         <div
           class="flex h-32 w-full items-end justify-between gap-2 px-1 pt-4"
           role="img"
-          aria-label="Grafik pengeluaran mingguan (placeholder visual)"
+          aria-label="Grafik pengeluaran mingguan"
         >
           <div class="flex w-full flex-col items-center gap-1.5">
             <div class="week-bar h-12 w-full rounded-full bg-blue-soft transition-all"></div>
@@ -274,6 +298,13 @@ import {
             <span class="week-label text-[10px] font-bold text-muted-foreground">Min</span>
           </div>
         </div>
+
+        <div
+          id="weekly-tooltip"
+          class="pointer-events-none absolute z-20 hidden min-w-[132px] -translate-x-1/2 rounded-xl bg-primary px-3 py-2 text-center text-white shadow-xl"
+          role="status"
+          aria-live="polite"
+        ></div>
       </div>
     </section>
 
@@ -435,6 +466,36 @@ import {
         >
           <Plus class="h-4 w-4 stroke-[2.5]" />
           <span>Tambah Shortcut Baru</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal Atur Menu -->
+  <dialog id="menu-sort-dialog" class="app-sheet" aria-labelledby="menu-sort-title">
+    <div class="sheet-panel">
+      <div class="flex items-center justify-between border-b border-border px-5 py-4">
+        <h3 id="menu-sort-title" class="text-base font-extrabold text-primary">Atur Menu</h3>
+        <button
+          type="button"
+          id="close-menu-sort"
+          class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted"
+          aria-label="Tutup atur menu"
+        >
+          <X class="h-4 w-4 stroke-[2.5]" />
+        </button>
+      </div>
+
+      <div id="menu-sort-list" class="no-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto p-5"></div>
+
+      <div class="border-t border-border p-5">
+        <button
+          type="button"
+          id="save-menu-sort"
+          class="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-xs font-bold text-primary-foreground shadow-soft transition hover:opacity-90 active:scale-95"
+        >
+          <Check class="h-4 w-4 stroke-[2.5]" />
+          <span>Simpan Urutan</span>
         </button>
       </div>
     </div>
